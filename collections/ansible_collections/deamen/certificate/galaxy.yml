@@ -5,7 +5,7 @@
 
 namespace: "deamen"
 name: "certificate"
-version: 1.0.0
+version: 1.1.0
 readme: README.md
 authors:
   - github.com/deamen
@@ -17,8 +17,8 @@ tags: ["linux", "tools"]
 dependencies: {}
 
 repository: https://github.com/deamen/ansible_collections
-documentation: http://docs.example.com
-homepage: https://github.com/deamen
+documentation: https://github.com/deamen/ansible_collections/blob/master/collections/ansible_collections/deamen/certificate/README.md
+homepage: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/certificate
 issues: https://github.com/deamen/ansible_collections/issues
 
 # A list of file glob-like patterns used to filter any files or directories that should not be included in the build

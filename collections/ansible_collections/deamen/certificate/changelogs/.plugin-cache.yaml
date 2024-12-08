@@ -6,15 +6,16 @@ plugins:
   callback: {}
   cliconf: {}
   connection: {}
-  filter:
-    hello_world:
-      description: A custom filter plugin for Ansible.
-      name: hello_world
-      version_added: 1.0.0
+  filter: {}
   httpapi: {}
   inventory: {}
   lookup: {}
   module:
+    deploy_certificate:
+      description: Deploy certificates and keys to specified locations
+      name: deploy_certificate
+      namespace: ''
+      version_added: 1.1.0
     deploy_private_ca:
       description: Deploy a private CA certificate to a Linux server
       name: deploy_private_ca
@@ -25,4 +26,4 @@ plugins:
   strategy: {}
   test: {}
   vars: {}
-version: 1.0.0
+version: 1.1.0

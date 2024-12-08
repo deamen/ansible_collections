@@ -11,3 +11,19 @@ releases:
         name: hello_world
         namespace: null
     release_date: '2024-12-08'
+  1.1.0:
+    changes:
+      release_summary: 'This release adds deploy_certificates module to the collection.
+
+        It is favoured over the deploy_certificate role.
+
+        The role will be deprecated in the next release.
+
+        '
+    fragments:
+    - 1.1.0.yml
+    modules:
+    - description: Deploy certificates and keys to specified locations
+      name: deploy_certificate
+      namespace: ''
+    release_date: '2024-12-08'
