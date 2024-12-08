@@ -1,0 +1,28 @@
+objects:
+  role: {}
+plugins:
+  become: {}
+  cache: {}
+  callback: {}
+  cliconf: {}
+  connection: {}
+  filter:
+    hello_world:
+      description: A custom filter plugin for Ansible.
+      name: hello_world
+      version_added: 1.0.0
+  httpapi: {}
+  inventory: {}
+  lookup: {}
+  module:
+    deploy_private_ca:
+      description: Deploy a private CA certificate to a Linux server
+      name: deploy_private_ca
+      namespace: ''
+      version_added: 1.0.0
+  netconf: {}
+  shell: {}
+  strategy: {}
+  test: {}
+  vars: {}
+version: 1.0.0

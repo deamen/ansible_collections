@@ -1,0 +1,2 @@
+plugins/modules/deploy_private_ca.py compile-2.7!skip
+plugins/modules/deploy_private_ca.py import-2.7!skip

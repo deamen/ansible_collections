@@ -1,0 +1,13 @@
+ancestor: null
+releases:
+  1.0.0:
+    modules:
+    - description: Deploy a private CA certificate to a Linux server
+      name: deploy_private_ca
+      namespace: ''
+    plugins:
+      filter:
+      - description: A custom filter plugin for Ansible.
+        name: hello_world
+        namespace: null
+    release_date: '2024-12-08'

@@ -1,0 +1,22 @@
+---
+# tasks file for deploy_certificate
+- name: Set version specific variables
+  ansible.builtin.include_tasks: tasks/set_vars.yml
+
+- name: Deploy host certificate
+  ansible.builtin.copy:
+    dest: "{{ cert_dir }}/{{ cert_file }}"
+    content: |
+      {{ cert_file_content }}
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Deploy host key
+  ansible.builtin.copy:
+    dest: "{{ key_dir }}/{{ key_file }}"
+    content: |
+      {{ key_file_content }}
+    owner: root
+    group: root
+    mode: "0600"

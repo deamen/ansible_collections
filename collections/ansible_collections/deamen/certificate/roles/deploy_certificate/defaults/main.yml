@@ -1,0 +1,10 @@
+---
+# defaults file for deploy_certificate
+cert_dir: ""
+key_dir: ""
+
+cert_file: ""
+key_file: ""
+
+cert_file_content: ""
+key_file_content: ""
