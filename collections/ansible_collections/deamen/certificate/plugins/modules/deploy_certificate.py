@@ -68,7 +68,7 @@ options:
     type: str
     required: True
 author:
-  - Song Tang (github.com/deamen)
+  - Song Tang (@deamen)
 """
 
 EXAMPLES = """
