@@ -1,0 +1,15 @@
+name: Sanity Test Certificate Collection Workflow
+
+on:
+  push:
+    paths:
+      - 'collections/ansible_collections/deamen/certificate/**'
+  pull_request:
+    paths:
+      - 'collections/ansible_collections/deamen/certificate/**'
+  workflow_dispatch:
+jobs:
+  test-certificate-collection:
+    uses: ./.github/workflows/ansible_sanity_test_base_workflow.yml
+    with:
+      collection_name: 'certificate'

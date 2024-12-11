@@ -1,0 +1,33 @@
+name: Ansible Sanity Test Base Workflow
+
+on:
+  workflow_call:
+    inputs:
+      collection_name:
+        required: true
+        type: string
+        description: "The name of the collection to test"
+
+jobs:
+  ansible-test-sanity:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Install ansible-test
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install ansible-core
+
+      - name: Run ansible-test sanity
+        working-directory: collections/ansible_collections/deamen/${{ inputs.collection_name }}
+        run: |
+          ansible-test sanity --docker
+
