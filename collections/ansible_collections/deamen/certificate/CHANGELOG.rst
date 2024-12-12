@@ -4,6 +4,19 @@ Deamen Certificate Collection Release Notes
 
 .. contents:: Topics
 
+v1.2.0
+======
+
+Major Changes
+-------------
+
+- Refactor module deamen.certificate.deploy_certificate as action plugin
+
+Deprecated Features
+-------------------
+
+- Role: deamen.certificate.deploy_certificate
+
 v1.1.0
 ======
 

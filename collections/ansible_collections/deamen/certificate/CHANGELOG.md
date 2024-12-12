@@ -2,6 +2,9 @@
 
 **Topics**
 
+- <a href="#v1-2-0">v1\.2\.0</a>
+    - <a href="#major-changes">Major Changes</a>
+    - <a href="#deprecated-features">Deprecated Features</a>
 - <a href="#v1-1-0">v1\.1\.0</a>
     - <a href="#release-summary">Release Summary</a>
     - <a href="#new-modules">New Modules</a>
@@ -9,6 +12,19 @@
     - <a href="#new-plugins">New Plugins</a>
         - <a href="#filter">Filter</a>
     - <a href="#new-modules-1">New Modules</a>
+
+<a id="v1-2-0"></a>
+## v1\.2\.0
+
+<a id="major-changes"></a>
+### Major Changes
+
+* Refactor module deamen\.certificate\.deploy\_certificate as action plugin
+
+<a id="deprecated-features"></a>
+### Deprecated Features
+
+* Role\: deamen\.certificate\.deploy\_certificate
 
 <a id="v1-1-0"></a>
 ## v1\.1\.0

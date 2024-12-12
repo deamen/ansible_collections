@@ -27,3 +27,12 @@ releases:
       name: deploy_certificate
       namespace: ''
     release_date: '2024-12-08'
+  1.2.0:
+    changes:
+      deprecated_features:
+      - 'Role: deamen.certificate.deploy_certificate'
+      major_changes:
+      - Refactor module deamen.certificate.deploy_certificate as action plugin
+    fragments:
+    - release_1.1.1.yml
+    release_date: '2024-12-12'
