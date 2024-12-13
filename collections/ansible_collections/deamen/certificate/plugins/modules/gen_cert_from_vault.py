@@ -51,6 +51,12 @@ options:
       - The Vault server's address. Passed as the URL to the Vault API.
     required: false
     type: str
+  on_target:
+    description:
+      - Whether to run the task on the target host.
+    required: false
+    type: bool
+    default: false
 author:
   - Song Tang (@deamen)
 notes:
