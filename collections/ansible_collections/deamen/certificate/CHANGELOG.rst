@@ -4,6 +4,19 @@ Deamen Certificate Collection Release Notes
 
 .. contents:: Topics
 
+v1.3.0
+======
+
+Release Summary
+---------------
+
+Add gen_certificate_from_vault module
+
+Major Changes
+-------------
+
+- Add gen_certificate_from_vault module, runs on localhost by default
+
 v1.2.0
 ======
 

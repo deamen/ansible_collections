@@ -10,6 +10,7 @@ description:
   - Generates a certificate using the HashiCorp Vault PKI backend.
   - Wraps the C(community.hashi_vault.vault_pki_generate_certificate) module for easier usage.
   - Delegates the task to localhost by default and sets authentication mode to C(token).
+version_added: "1.3.0"
 options:
   common_name:
     description:
