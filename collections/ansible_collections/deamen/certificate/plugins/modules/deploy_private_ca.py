@@ -49,22 +49,6 @@ EXAMPLES = """
 from ansible.module_utils.basic import AnsibleModule
 import os
 import platform
-import subprocess
-
-
-def run_command(command):
-    """Run a shell command and return the output."""
-    try:
-        result = subprocess.run(
-            command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-        return (
-            result.returncode,
-            result.stdout.decode("utf-8").strip(),
-            result.stderr.decode("utf-8").strip(),
-        )
-    except subprocess.CalledProcessError as e:
-        return e.returncode, e.stdout.decode("utf-8").strip(), e.stderr.decode("utf-8").strip()
 
 
 def main():
@@ -84,25 +68,30 @@ def main():
 
     # Check if the OS is supported
     supported_distros = ["AlmaLinux", "CentOS", "RedHat", "Rocky", "Fedora"]
-    distro = platform.linux_distribution(full_distribution_name=False)[0]
+    distro = platform.system_alias(*platform.uname()[:3]).split()[
+        0
+    ]  # A more robust approach to get the distribution name
 
     if distro not in supported_distros:
         module.fail_json(
             msg=f"Unsupported distribution: {distro}. This module supports: {', '.join(supported_distros)}."
         )
 
-    try:
-        # Ensure the CA trust directory exists
-        os.makedirs(ca_trust_path, exist_ok=True)
+    # Check if the CA trust directory exists
+    if not os.path.isdir(ca_trust_path):
+        module.fail_json(
+            msg=f"CA trust directory '{ca_trust_path}' does not exist. Please ensure the directory is present."
+        )
 
+    try:
         # Write the certificate content to the destination file
         with open(dest_file, "w") as f:
             f.write(private_ca)
 
         # Run update-ca-trust
-        returncode, stdout, stderr = run_command(update_command)
-        if returncode != 0:
-            module.fail_json(msg=f"Failed to run '{update_command}'. Error: {stderr}")
+        rc, out, err = module.run_command(update_command)
+        if rc != 0:
+            module.fail_json(msg=f"Failed to run '{update_command}'. Error: {err}")
 
         # Return success
         module.exit_json(
