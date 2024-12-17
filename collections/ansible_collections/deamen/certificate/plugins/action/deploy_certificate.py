@@ -71,16 +71,17 @@ class ActionModule(ActionBase):
         Main execution method for deploying the certificate and its key.
         """
         params = self._task.args
+        is_ca = params.get("is_ca", False)
 
         # Validate and extract required parameters
         name = params.get("name")
-        if not name or not name.endswith(".crt"):
+        if not name or (not name.endswith(".crt") and not is_ca):
             return {"failed": True, "msg": "The 'name' parameter must be a valid .crt filename."}
 
         cert_content = params.get("cert_content")
         key_content = params.get("key_content")
-        if not cert_content or not key_content:
-            return {"failed": True, "msg": "Both 'cert_content' and 'key_content' are required."}
+        if not cert_content or (not key_content and not is_ca):
+            return {"failed": True, "msg": "Both 'cert_content' and 'key_content' are required unless 'is_ca' is True."}
 
         # Extract optional parameters or use defaults
         cert_dir = params.get("cert_dir", self.DEFAULT_CERT_DIR)
@@ -100,6 +101,7 @@ class ActionModule(ActionBase):
         self._task.args = self.sanitize_params(params)
 
         # Deploy the certificate file
+        cert_result = {"changed": False}
         copy_cert_action = CopyAction(
             self._task,
             self._connection,
@@ -112,18 +114,20 @@ class ActionModule(ActionBase):
             copy_cert_action, cert_path, cert_content, cert_owner, cert_group, cert_mode, tmp, task_vars
         )
 
-        # Deploy the key file
-        copy_key_action = CopyAction(
-            self._task,
-            self._connection,
-            self._play_context,
-            self._loader,
-            self._templar,
-            self._shared_loader_obj,
-        )
-        key_result = self.deploy_file(
-            copy_key_action, key_path, key_content, key_owner, key_group, key_mode, tmp, task_vars
-        )
+        key_result = {"changed": False}
+        if not is_ca:
+            # Deploy the key file
+            copy_key_action = CopyAction(
+                self._task,
+                self._connection,
+                self._play_context,
+                self._loader,
+                self._templar,
+                self._shared_loader_obj,
+            )
+            key_result = self.deploy_file(
+                copy_key_action, key_path, key_content, key_owner, key_group, key_mode, tmp, task_vars
+            )
 
         # Combine results
         return {
