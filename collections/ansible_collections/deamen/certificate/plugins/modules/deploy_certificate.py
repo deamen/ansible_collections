@@ -67,6 +67,11 @@ options:
       - This is sensitive information and will not appear in logs.
     type: str
     required: True
+  is_ca:
+    description:
+      - Whether the certificate is a Certificate Authority (CA) certificate.
+    type: bool
+    default: False
 author:
   - Song Tang (@deamen)
 """
