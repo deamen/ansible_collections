@@ -25,6 +25,10 @@ options:
     description: The directory where the CA certificate will be stored.
     default: /etc/pki/ca-trust/source/anchors/
     type: str
+  update_ca_command:
+    description: The command to update the system trust store.
+    default: update-ca-trust
+    type: str
 author: Song Tang (@deamen)
 """
 
@@ -41,13 +45,15 @@ EXAMPLES = """
 
 def main():
     # Define module arguments
-    module_args = {}
+    module_args = {
+        "update_ca_command": {"type": "str", "required": False, "default": "update-ca-trust"}
+    }
 
     # Initialize the Ansible module
     module = AnsibleModule(argument_spec=module_args, supports_check_mode=False)
 
     # Command to update the system trust store
-    update_command = "update-ca-trust"
+    update_command = module.params["update_ca_command"]
 
     # Run the command and capture results
     rc, _, err = module.run_command(update_command)
