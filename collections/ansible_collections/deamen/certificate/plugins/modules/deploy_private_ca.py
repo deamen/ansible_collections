@@ -3,8 +3,6 @@
 # Copyright: (c) 2024 Song Tang github.com/deamen
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from ansible.module_utils.basic import AnsibleModule
-
 DOCUMENTATION = """
 ---
 module: deploy_private_ca
@@ -42,11 +40,20 @@ EXAMPLES = """
     filename: my-custom-ca.crt
 """
 
+from ansible.module_utils.basic import AnsibleModule
+
 
 def main():
     # Define module arguments
     module_args = {
-        "update_ca_command": {"type": "str", "required": False, "default": "update-ca-trust"}
+        "private_ca": {"type": "str", "required": True},
+        "filename": {"type": "str", "required": False, "default": "custom-ca.crt"},
+        "ca_trust_dir": {
+            "type": "str",
+            "required": False,
+            "default": "/etc/pki/ca-trust/source/anchors/",
+        },
+        "update_ca_command": {"type": "str", "required": False, "default": "update-ca-trust"},
     }
 
     # Initialize the Ansible module
@@ -56,7 +63,7 @@ def main():
     update_command = module.params["update_ca_command"]
 
     # Run the command and capture results
-    rc, _, err = module.run_command(update_command)
+    rc, stdout, err = module.run_command(update_command)
 
     # Handle errors if the command fails
     if rc != 0:
