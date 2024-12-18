@@ -21,6 +21,10 @@ options:
     description: The filename for the CA certificate.
     default: custom-ca.crt
     type: str
+  ca_trust_dir:
+    description: The directory where the CA certificate will be stored.
+    default: /etc/pki/ca-trust/source/anchors/
+    type: str
 author: Song Tang (@deamen)
 """
 
@@ -34,6 +38,7 @@ EXAMPLES = """
     filename: my-custom-ca.crt
 """
 
+
 def main():
     # Define module arguments
     module_args = {}
@@ -45,17 +50,19 @@ def main():
     update_command = "update-ca-trust"
 
     # Run the command and capture results
-    rc, out, err = module.run_command(update_command)
+    rc, _, err = module.run_command(update_command)
 
     # Handle errors if the command fails
     if rc != 0:
         module.fail_json(msg=f"Failed to run '{update_command}'. Error: {err}")
 
     # Exit successfully if the command runs without issues
+
     module.exit_json(
         changed=True,
         msg="Private CA deployed successfully and trust store updated.",
     )
+
 
 if __name__ == "__main__":
     main()
