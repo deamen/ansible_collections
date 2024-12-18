@@ -7,20 +7,17 @@ class ActionModule(ActionBase):
     Action plugin for deploy_private_ca that reuses the deploy_certificate plugin.
     """
 
-    def run(self, tmp=None, task_vars=None):
+    def run(self, task_vars=None):
         # Extract parameters passed to the task
         private_ca = self._task.args.get("private_ca")
         filename = self._task.args.get("filename", "custom-ca.crt")
-
-        # Debug output for filename
-        self._display.v(f"Filename: {filename}")
+        ca_trust_dir = self._task.args.get("ca_trust_dir", "/etc/pki/ca-trust/source/anchors/")
 
         # Validate required parameters
         if not private_ca:
             return {"failed": True, "msg": "'private_ca' parameter is required."}
 
         # Define parameters for the deploy_certificate plugin
-        ca_trust_dir = "/etc/pki/ca-trust/source/anchors/"
         deploy_certificate_args = {
             "name": filename,
             "cert_content": private_ca,
@@ -43,18 +40,22 @@ class ActionModule(ActionBase):
             self._templar,
             self._shared_loader_obj,
         )
-        result = deploy_certificate_action.run(
-            tmp=tmp, task_vars={**task_vars, **deploy_certificate_args}
-        )
+        result = deploy_certificate_action.run(task_vars=task_vars)
 
-        # Execute the update-ca-trust command using a module
+        # Execute the module to run update-ca-trust command
         module_result = self._execute_module(
             module_name=self._task.action,
             module_args={},
             task_vars=task_vars,
         )
 
-        # Merge the results from deploy_certificate and update-ca-trust
+        # Merge the results from deploy_certificate and module
         result.update(module_result)
+
+        # Only if cert_result changed, set changed to True
+        if result.get("cert_result", {}).get("changed"):
+            result["changed"] = True
+        else:
+            result["changed"] = False
 
         return result
