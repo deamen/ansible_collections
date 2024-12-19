@@ -130,8 +130,12 @@ class ActionModule(ActionBase):
             )
 
         # Combine results
-        return {
+        result = {
             "changed": cert_result.get("changed", False) or key_result.get("changed", False),
             "cert_result": cert_result,
-            "key_result": key_result,
         }
+
+        if not is_ca:
+            result["key_result"] = key_result
+
+        return result
