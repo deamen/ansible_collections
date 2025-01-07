@@ -1,0 +1,19 @@
+name: pre-commit-lite
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  pre-commit-lite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run pre-commit lite
+        uses: pre-commit-ci/lite-action@v1.1.0
