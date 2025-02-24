@@ -6,7 +6,7 @@ repos:
     - id: check-yaml
     - id: check-added-large-files
     - id: detect-private-key
-      exclude: collections/ansible_collections/deamen/certificate/plugins/modules/deploy_certificate.py:wq
+      exclude: collections/ansible_collections/deamen/certificate/plugins/modules/deploy_certificate.py
     - id: end-of-file-fixer
     - id: forbid-submodules
     - id: check-executables-have-shebangs
