@@ -13,18 +13,18 @@ repos:
     - id: check-merge-conflict
 
 - repo: https://github.com/deamen/pre-commit-hooks
-  rev: 37b54b228e41c1f7c78224b40e47747bde5862ab  # or use a specific tag like v1.0.0
+  rev: 5747a07221a4d9f80ff78728f1ba02e432b2da68  # or use a specific tag like v1.0.0
   hooks:
     - id: check-binary-files
     - id: dos2unix
 
 - repo: https://github.com/gitleaks/gitleaks
-  rev: v8.18.4
+  rev: v8.24.0
   hooks:
     - id: gitleaks
 
 - repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 24.8.0
+  rev: 25.1.0
   hooks:
     - id: black
       # It is recommended to specify the latest version of Python
