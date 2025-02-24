@@ -33,7 +33,5 @@ repos:
       # https://pre-commit.com/#top_level-default_language_version
       language_version: python3.12
 
-#- repo: https://github.com/ansible/ansible-lint
-#  rev: v24.9.0
-#  hooks:
-#    - id: ansible-lint
+ci:
+  skip: ['check-binary-files']
