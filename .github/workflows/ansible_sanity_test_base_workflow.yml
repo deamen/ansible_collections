@@ -30,4 +30,3 @@ jobs:
         working-directory: collections/ansible_collections/deamen/${{ inputs.collection_name }}
         run: |
           ansible-test sanity --docker
-
