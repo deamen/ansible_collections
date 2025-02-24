@@ -81,7 +81,10 @@ class ActionModule(ActionBase):
         cert_content = params.get("cert_content")
         key_content = params.get("key_content")
         if not cert_content or (not key_content and not is_ca):
-            return {"failed": True, "msg": "Both 'cert_content' and 'key_content' are required unless 'is_ca' is True."}
+            return {
+                "failed": True,
+                "msg": "Both 'cert_content' and 'key_content' are required unless 'is_ca' is True.",
+            }
 
         # Extract optional parameters or use defaults
         cert_dir = params.get("cert_dir", self.DEFAULT_CERT_DIR)
@@ -111,7 +114,14 @@ class ActionModule(ActionBase):
             self._shared_loader_obj,
         )
         cert_result = self.deploy_file(
-            copy_cert_action, cert_path, cert_content, cert_owner, cert_group, cert_mode, tmp, task_vars
+            copy_cert_action,
+            cert_path,
+            cert_content,
+            cert_owner,
+            cert_group,
+            cert_mode,
+            tmp,
+            task_vars,
         )
 
         key_result = {"changed": False}
@@ -126,7 +136,14 @@ class ActionModule(ActionBase):
                 self._shared_loader_obj,
             )
             key_result = self.deploy_file(
-                copy_key_action, key_path, key_content, key_owner, key_group, key_mode, tmp, task_vars
+                copy_key_action,
+                key_path,
+                key_content,
+                key_owner,
+                key_group,
+                key_mode,
+                tmp,
+                task_vars,
             )
 
         # Combine results
