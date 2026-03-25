@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 # Copyright: (c) 2024 Song Tang <github.com/deamen>
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+
+# (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 DOCUMENTATION = """
 ---
 module: deploy_cert_from_vault
 short_description: Generate and deploy a certificate using HashiCorp Vault
 description:
-  - Generates a certificate using the HashiCorp Vault PKI backend and deploys it to specified locations.
-  - Calls the C(gen_cert_from_vault) action plugin to generate the certificate.
-  - Calls the C(deploy_certificate) action plugin to deploy the certificate.
+  - Generates a certificate using the HashiCorp Vault PKI backend and
+    deploys it to specified locations.
+  - Calls the C(gen_cert_from_vault) action plugin to generate the
+    certificate.
+  - Calls the C(deploy_certificate) action plugin to deploy the
+    certificate.
 version_added: "1.4.0"
 options:
   common_name:
@@ -24,7 +28,8 @@ options:
     type: str
   role_name:
     description:
-      - The role name in the PKI backend that defines permissions and policies.
+      - The role name in the PKI backend that defines permissions and
+        policies.
     required: true
     type: str
   token:
@@ -34,7 +39,8 @@ options:
     type: str
   alt_names:
     description:
-      - A comma-separated list of Subject Alternative Names (SANs) for the certificate.
+      - A comma-separated list of Subject Alternative Names (SANs) for
+        the certificate.
     required: false
     type: str
   ip_sans:
@@ -44,7 +50,8 @@ options:
     type: str
   ttl:
     description:
-      - The time-to-live (TTL) duration for the certificate. Overrides role-defined TTL if specified.
+      - The time-to-live (TTL) duration for the certificate. Overrides
+        role-defined TTL if specified.
     required: false
     type: str
   vault_addr:
@@ -61,7 +68,8 @@ options:
   name:
     description:
       - Name of the certificate file (e.g., 'example.crt').
-      - The key file name is derived from this by replacing '.crt' with '.key'.
+      - The key file name is derived from this by replacing '.crt' with
+        '.key'.
     type: str
     required: false
   cert_dir:
@@ -91,7 +99,8 @@ options:
     default: "root"
   cert_group:
     description:
-      - Group name or ID to set as the group owner of the certificate file.
+      - Group name or ID to set as the group owner of the certificate
+        file.
     type: str
     default: "root"
   key_owner:
@@ -106,7 +115,8 @@ options:
     default: "root"
   is_ca:
     description:
-      - Whether the certificate is a Certificate Authority (CA) certificate.
+      - Whether the certificate is a Certificate Authority (CA)
+        certificate.
     type: bool
     default: False
 author:

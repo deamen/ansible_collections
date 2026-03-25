@@ -1,14 +1,17 @@
 #!/usr/bin/python
 
 # Copyright: (c) 2024 Song Tang github.com/deamen
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+
+# (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
 
 DOCUMENTATION = """
 ---
 module: deploy_private_ca
 short_description: Deploy a private CA certificate to a Linux server
 description:
-  - Writes the content of a private CA certificate to the system's trust store directory.
+  - Writes the content of a private CA certificate to the system's
+    trust store directory.
   - Updates the system trust store using the `update-ca-trust` command.
 options:
   private_ca:
@@ -21,7 +24,7 @@ options:
     type: str
   ca_trust_dir:
     description: The directory where the CA certificate will be stored.
-    default: /etc/pki/ca-trust/source/anchors/
+    default: "/etc/pki/ca-trust/source/anchors/"
     type: str
   update_ca_command:
     description: The command to update the system trust store.
@@ -39,7 +42,6 @@ EXAMPLES = """
       -----END CERTIFICATE-----
     filename: my-custom-ca.crt
 """
-
 from ansible.module_utils.basic import AnsibleModule
 
 
@@ -47,7 +49,11 @@ def main():
     # Define module arguments
     module_args = {
         "private_ca": {"type": "str", "required": True},
-        "filename": {"type": "str", "required": False, "default": "custom-ca.crt"},
+        "filename": {
+            "type": "str",
+            "required": False,
+            "default": "custom-ca.crt",
+        },
         "ca_trust_dir": {
             "type": "str",
             "required": False,
@@ -61,7 +67,9 @@ def main():
     }
 
     # Initialize the Ansible module
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=False)
+    module = AnsibleModule(
+        argument_spec=module_args, supports_check_mode=False
+    )
 
     # Command to update the system trust store
     update_command = module.params["update_ca_command"]

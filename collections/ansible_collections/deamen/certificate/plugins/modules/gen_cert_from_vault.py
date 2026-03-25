@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright: (c) 2024 Song Tang <github.com/deamen>
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+
+# (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 DOCUMENTATION = """
 ---
@@ -8,8 +9,11 @@ module: gen_cert_from_vault
 short_description: Generate a certificate using HashiCorp Vault PKI backend
 description:
   - Generates a certificate using the HashiCorp Vault PKI backend.
-  - Wraps the C(community.hashi_vault.vault_pki_generate_certificate) module for easier usage.
-  - Delegates the task to localhost by default and sets authentication mode to C(token).
+  - Wraps the
+    C(community.hashi_vault.vault_pki_generate_certificate) module for
+    easier usage.
+  - Delegates the task to localhost by default and sets authentication
+    mode to C(token).
 version_added: "1.3.0"
 options:
   common_name:
@@ -24,7 +28,8 @@ options:
     type: str
   role_name:
     description:
-      - The role name in the PKI backend that defines permissions and policies.
+      - The role name in the PKI backend that defines permissions and
+        policies.
     required: true
     type: str
   token:
@@ -34,7 +39,8 @@ options:
     type: str
   alt_names:
     description:
-      - A comma-separated list of Subject Alternative Names (SANs) for the certificate.
+      - A comma-separated list of Subject Alternative Names (SANs) for
+        the certificate.
     required: false
     type: str
   ip_sans:
@@ -44,7 +50,8 @@ options:
     type: str
   ttl:
     description:
-      - The time-to-live (TTL) duration for the certificate. Overrides role-defined TTL if specified.
+      - The time-to-live (TTL) duration for the certificate. Overrides
+        role-defined TTL if specified.
     required: false
     type: str
   vault_addr:

@@ -5,7 +5,8 @@ from ansible.plugins.action.copy import ActionModule as CopyAction
 class ActionModule(ActionBase):
     """
     Deploy a certificate and its key using the 'copy' action plugin.
-    This action module sanitizes parameters and utilizes the 'copy' plugin
+
+    This action module sanitizes parameters and uses the 'copy' plugin
     to deploy certificate and key files with the specified properties.
     """
 
@@ -42,9 +43,14 @@ class ActionModule(ActionBase):
 
     def sanitize_params(self, params):
         """
-        Filters the task parameters to only include those supported by the 'copy' module.
+        Filters the task parameters to only include those supported by
+        the 'copy' module.
         """
-        return {k: v for k, v in params.items() if k in self.SUPPORTED_PARAMS}
+        return {
+            k: v
+            for k, v in params.items()
+            if k in self.SUPPORTED_PARAMS
+        }
 
     def prepare_copy_args(self, dest, content, owner, group, mode):
         """
@@ -59,8 +65,16 @@ class ActionModule(ActionBase):
         }
 
     def deploy_file(
-        self, copy_action, dest, content, owner, group, mode, tmp, task_vars
-    ):
+        self,
+        copy_action,
+        dest,
+        content,
+        owner,
+        group,
+        mode,
+        tmp,
+        task_vars,
+        ):
         """
         Deploys a file using the 'copy' action.
         """
@@ -88,7 +102,10 @@ class ActionModule(ActionBase):
         if not cert_content or (not key_content and not is_ca):
             return {
                 "failed": True,
-                "msg": "Both 'cert_content' and 'key_content' are required unless 'is_ca' is True.",
+                "msg": (
+                    "Both 'cert_content' and 'key_content' are required "
+                    "unless 'is_ca' is True."
+                ),
             }
 
         # Extract optional parameters or use defaults
@@ -153,8 +170,10 @@ class ActionModule(ActionBase):
 
         # Combine results
         result = {
-            "changed": cert_result.get("changed", False)
-            or key_result.get("changed", False),
+            "changed": (
+                cert_result.get("changed", False)
+                or key_result.get("changed", False)
+            ),
             "cert_result": cert_result,
         }
 

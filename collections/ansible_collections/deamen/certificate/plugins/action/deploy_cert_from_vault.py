@@ -1,12 +1,18 @@
 from ansible.plugins.action import ActionBase
 from ansible.errors import AnsibleError
-from .gen_cert_from_vault import ActionModule as GenCertFromVaultAction
-from .deploy_certificate import ActionModule as DeployCertificateAction
+from . import gen_cert_from_vault as _gen_cert_from_vault
+from . import deploy_certificate as _deploy_certificate
+
+GenCertFromVaultAction = _gen_cert_from_vault.ActionModule
+DeployCertificateAction = _deploy_certificate.ActionModule
 
 
 class ActionModule(ActionBase):
     """
-    Action plugin to generate a certificate using HashiCorp Vault and deploy it.
+    Action plugin to generate a certificate using HashiCorp Vault.
+
+    This plugin generates a certificate from Vault and deploys it to the
+    target location using the `deploy_certificate` action plugin.
     """
 
     def run(self, tmp=None, task_vars=None):
@@ -28,10 +34,23 @@ class ActionModule(ActionBase):
         }
 
         # Validate required parameters for generating certificate
-        required_params = ["common_name", "engine_mount_point", "role_name", "token"]
-        missing_params = [p for p in required_params if p not in gen_cert_params or not gen_cert_params[p]]
+        required_params = [
+            "common_name",
+            "engine_mount_point",
+            "role_name",
+            "token",
+        ]
+        missing_params = [
+            p
+            for p in required_params
+            if not gen_cert_params.get(p)
+        ]
         if missing_params:
-            raise AnsibleError(f"Missing required parameters for generating certificate: {', '.join(missing_params)}")
+            msg = (
+                "Missing required parameters for generating certificate: "
+                + ", ".join(missing_params)
+            )
+            raise AnsibleError(msg)
 
         # Call gen_cert_from_vault action plugin to generate the certificate
         gen_cert_action = GenCertFromVaultAction(
@@ -42,6 +61,8 @@ class ActionModule(ActionBase):
             self._templar,
             self._shared_loader_obj,
         )
+        # Ensure the generated parameters are used by the called action
+        gen_cert_action._task.args = gen_cert_params
         gen_cert_result = gen_cert_action.run(task_vars=task_vars)
 
         if gen_cert_result.get("failed"):
@@ -51,11 +72,16 @@ class ActionModule(ActionBase):
         cert_content = gen_cert_result.get("certificate")
         key_content = gen_cert_result.get("private_key")
         if not cert_content or not key_content:
-            return {"failed": True, "msg": "Failed to generate certificate or key from Vault."}
+            return {
+                "failed": True,
+                "msg": "Failed to generate certificate or key from Vault.",
+            }
 
         # Prepare parameters for deploying the certificate
         deploy_cert_params = {
-            "name": params.get("name", f"{gen_cert_params['common_name']}.crt"),
+            "name": params.get(
+                "name", f"{gen_cert_params['common_name']}.crt"
+            ),
             "cert_content": cert_content,
             "key_content": key_content,
             "cert_dir": params.get("cert_dir"),
@@ -78,6 +104,8 @@ class ActionModule(ActionBase):
             self._templar,
             self._shared_loader_obj,
         )
+        # Ensure the deploy action receives the prepared parameters
+        deploy_cert_action._task.args = deploy_cert_params
         deploy_cert_result = deploy_cert_action.run(task_vars=task_vars)
 
         return deploy_cert_result

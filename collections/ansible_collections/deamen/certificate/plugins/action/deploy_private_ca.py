@@ -4,7 +4,8 @@ from .deploy_certificate import ActionModule as DeployCertificateAction
 
 class ActionModule(ActionBase):
     """
-    Action plugin for deploy_private_ca that reuses the deploy_certificate plugin.
+    Action plugin for deploy_private_ca that reuses the
+    deploy_certificate plugin.
     """
 
     def run(self, task_vars=None):
@@ -12,13 +13,20 @@ class ActionModule(ActionBase):
         private_ca = self._task.args.get("private_ca")
         filename = self._task.args.get("filename", "custom-ca.crt")
         ca_trust_dir = self._task.args.get(
-            "ca_trust_dir", "/etc/pki/ca-trust/source/anchors/"
+            "ca_trust_dir",
+            "/etc/pki/ca-trust/source/anchors/",
         )
-        update_ca_command = self._task.args.get("update_ca_command", "update-ca-trust")
+        update_ca_command = self._task.args.get(
+            "update_ca_command",
+            "update-ca-trust",
+        )
 
         # Validate required parameters
         if not private_ca:
-            return {"failed": True, "msg": "'private_ca' parameter is required."}
+            return {
+                "failed": True,
+                "msg": "'private_ca' parameter is required.",
+            }
 
         # Define parameters for the deploy_certificate plugin
         deploy_certificate_args = {
@@ -51,7 +59,9 @@ class ActionModule(ActionBase):
         module_result = self._execute_module(
             module_name=self._task.action,
             module_args={
-                k: v for k, v in new_module_args.items() if k == "update_ca_command"
+                k: v
+                for k, v in new_module_args.items()
+                if k == "update_ca_command"
             },
             task_vars=task_vars,
         )
