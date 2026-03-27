@@ -1,4 +1,4 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ### REQUIRED
 # The namespace of the collection. This can be a company/brand/organization or product namespace under which all
 # content lives. May only contain alphanumeric lowercase characters and underscores. Namespaces cannot start with
@@ -9,7 +9,7 @@ namespace: "deamen"
 name: "podman"
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 1.0.0
+version: "1.0.0"
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -23,12 +23,15 @@ authors:
 ### OPTIONAL but strongly recommended
 # A short summary description of the collection
 # Use quotes to safely include colons in the text
-description: "Ansible collection to manage and set up Podman: install packages, configure registries, manage containers/images, and integrate with systemd (rootless and rootful)."
+description: >
+  Ansible collection to manage and set up Podman: install packages, configure
+  registries, manage containers/images, and integrate with systemd (rootless
+  and rootful).
 
 # Either a single license or a list of licenses for content inside of a collection. Ansible Galaxy currently only
 # accepts L(SPDX,https://spdx.org/licenses/) licenses. This key is mutually exclusive with 'license_file'
 license:
-- GPL-2.0-or-later
+  - GPL-2.0-or-later
 
 # The path to the license file for the collection. This path is relative to the root of the collection. This key is
 # mutually exclusive with 'license'

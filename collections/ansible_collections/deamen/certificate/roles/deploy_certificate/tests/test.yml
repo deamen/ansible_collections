@@ -1,5 +1,5 @@
----
-- hosts: localhost
+- name: Test deploy_certificate role
+  hosts: localhost
   remote_user: root
   roles:
-    - deploy_certificate
+    - role: ..

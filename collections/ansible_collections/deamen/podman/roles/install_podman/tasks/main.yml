@@ -28,9 +28,18 @@
     shell: "{{ podman_user.shell | default('/bin/bash') }}"
     home: "{{ podman_user.home | default('/home/' + podman_user.name) }}"
     state: present
-    create_home: yes
+    create_home: true
+
+- name: Enable linger for podman user so containers keep running after logout
+  ansible.builtin.command:
+    cmd: "loginctl show-user {{ podman_user.name }} --property=Linger --value"
+  register: linger_check
+  failed_when: false
+  changed_when: false
 
 - name: Enable linger for podman user so containers keep running after logout
   ansible.builtin.command:
     cmd: "loginctl enable-linger {{ podman_user.name }}"
-  when: not 'molecule' in group_names
+  when: linger_check.stdout != 'yes' and not 'molecule' in group_names
+  register: linger_enable
+  changed_when: linger_check.stdout != 'yes' and linger_enable.rc == 0

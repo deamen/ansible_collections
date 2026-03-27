@@ -61,7 +61,7 @@ EXAMPLES = """
 - name: Check what changes would be made without applying them
   deamen.podman.manage_subuid_subgid:
     username: podman
-  check_mode: yes
+    check_mode: true
 """
 
 RETURN = """
