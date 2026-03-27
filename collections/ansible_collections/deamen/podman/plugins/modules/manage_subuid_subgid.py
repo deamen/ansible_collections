@@ -151,7 +151,7 @@ def user_has_entry(filepath, username):
                         except (ValueError, IndexError):
                             continue
     except IOError as e:
-        raise Exception(f"Failed to read {filepath}: {str(e)}")
+        raise RuntimeError(f"Failed to read {filepath}: {str(e)}")
 
     return (False, None)
 
