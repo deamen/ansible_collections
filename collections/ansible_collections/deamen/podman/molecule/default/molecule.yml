@@ -15,6 +15,11 @@ driver:
     ansible_connection_options:
       ansible_connection: podman
 
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
 provisioner:
   name: ansible
   inventory:
