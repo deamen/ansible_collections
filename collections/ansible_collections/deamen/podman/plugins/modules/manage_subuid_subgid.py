@@ -4,6 +4,7 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 DOCUMENTATION = """
@@ -108,13 +109,13 @@ def get_next_range(filepath, range_size):
         return (100000, 100000 + range_size - 1)
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             for line in f:
                 line = line.strip()
-                if not line or line.startswith('#'):
+                if not line or line.startswith("#"):
                     continue
 
-                parts = line.split(':')
+                parts = line.split(":")
                 if len(parts) != 3:
                     continue
 
@@ -153,11 +154,11 @@ def user_has_entry(filepath, username):
         return (False, None)
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             for line in f:
                 line = line.strip()
                 if line.startswith(username + ":"):
-                    parts = line.split(':')
+                    parts = line.split(":")
                     if len(parts) == 3:
                         try:
                             start = int(parts[1])
@@ -192,10 +193,10 @@ def add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_s
 
     if has_subuid and has_subgid:
         return {
-            'changed': False,
-            'msg': f"User {username} already has subordinate UID and GID ranges configured",
-            'subuid_range': subuid_info,
-            'subgid_range': subgid_info
+            "changed": False,
+            "msg": f"User {username} already has subordinate UID and GID ranges configured",
+            "subuid_range": subuid_info,
+            "subgid_range": subgid_info,
         }
 
     # Calculate next available ranges
@@ -210,7 +211,7 @@ def add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_s
             # In check mode, just report what would be done
             changed = True
         else:
-            cmd = ['usermod', f'--add-subuids={subuid_start}-{subuid_end}', username]
+            cmd = ["usermod", f"--add-subuids={subuid_start}-{subuid_end}", username]
             rc, stdout, stderr = module.run_command(cmd, check_rc=False)
             if rc != 0:
                 module.fail_json(
@@ -218,12 +219,12 @@ def add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_s
                     rc=rc,
                     stdout=stdout,
                     stderr=stderr,
-                    cmd=' '.join(cmd)
+                    cmd=" ".join(cmd),
                 )
             changed = True
     else:
-        subuid_start = subuid_info['start']
-        subuid_end = subuid_info['end']
+        subuid_start = subuid_info["start"]
+        subuid_end = subuid_info["end"]
 
     # Add subgid range if not present
     if not has_subgid:
@@ -231,7 +232,7 @@ def add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_s
             # In check mode, just report what would be done
             changed = True
         else:
-            cmd = ['usermod', f'--add-subgids={subgid_start}-{subgid_end}', username]
+            cmd = ["usermod", f"--add-subgids={subgid_start}-{subgid_end}", username]
             rc, stdout, stderr = module.run_command(cmd, check_rc=False)
             if rc != 0:
                 module.fail_json(
@@ -239,32 +240,34 @@ def add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_s
                     rc=rc,
                     stdout=stdout,
                     stderr=stderr,
-                    cmd=' '.join(cmd)
+                    cmd=" ".join(cmd),
                 )
             changed = True
     else:
-        subgid_start = subgid_info['start']
-        subgid_end = subgid_info['end']
+        subgid_start = subgid_info["start"]
+        subgid_end = subgid_info["end"]
 
     result = {
-        'changed': changed,
-        'subuid_range': {'start': subuid_start, 'end': subuid_end},
-        'subgid_range': {'start': subgid_start, 'end': subgid_end}
+        "changed": changed,
+        "subuid_range": {"start": subuid_start, "end": subuid_end},
+        "subgid_range": {"start": subgid_start, "end": subgid_end},
     }
 
     if changed:
         if module.check_mode:
-            result['msg'] = (
+            result["msg"] = (
                 f"Would add subordinate UID and GID ranges for user {username}: "
                 f"{subuid_start}-{subuid_end}, {subgid_start}-{subgid_end}"
             )
         else:
-            result['msg'] = (
+            result["msg"] = (
                 f"Subordinate UID and GID ranges added for user {username}: "
                 f"{subuid_start}-{subuid_end}, {subgid_start}-{subgid_end}"
             )
     else:
-        result['msg'] = f"User {username} already has subordinate UID and GID ranges configured"
+        result["msg"] = (
+            f"User {username} already has subordinate UID and GID ranges configured"
+        )
 
     return result
 
@@ -272,31 +275,30 @@ def add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_s
 def main():
     """Main module execution."""
     module_args = {
-        'username': {'type': 'str', 'required': True},
-        'subuid_file': {'type': 'str', 'default': '/etc/subuid'},
-        'subgid_file': {'type': 'str', 'default': '/etc/subgid'},
-        'range_size': {'type': 'int', 'default': 65536},
+        "username": {"type": "str", "required": True},
+        "subuid_file": {"type": "str", "default": "/etc/subuid"},
+        "subgid_file": {"type": "str", "default": "/etc/subgid"},
+        "range_size": {"type": "int", "default": 65536},
     }
 
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
+    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
 
-    username = module.params['username']
-    subuid_file = module.params['subuid_file']
-    subgid_file = module.params['subgid_file']
-    range_size = module.params['range_size']
+    username = module.params["username"]
+    subuid_file = module.params["subuid_file"]
+    subgid_file = module.params["subgid_file"]
+    range_size = module.params["range_size"]
 
     # Validate range size
     if range_size <= 0:
         module.fail_json(msg="range_size must be a positive integer")
 
     # Execute the main logic
-    result = add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_size)
+    result = add_subuid_subgid_ranges(
+        module, username, subuid_file, subgid_file, range_size
+    )
 
     module.exit_json(**result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

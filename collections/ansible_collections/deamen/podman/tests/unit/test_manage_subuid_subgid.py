@@ -4,7 +4,9 @@ import sys
 import os
 
 # Add the module path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'plugins', 'modules'))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(__file__), "..", "..", "plugins", "modules")
+)
 
 from manage_subuid_subgid import get_next_range, user_has_entry
 
@@ -77,12 +79,14 @@ class TestUserHasEntry:
     def test_user_found(self, tmp_path):
         """Test when user is found in the file."""
         filepath = tmp_path / "subuid"
-        filepath.write_text("user1:100000:65536\ntestuser:165536:65536\nuser2:231072:100000\n")
+        filepath.write_text(
+            "user1:100000:65536\ntestuser:165536:65536\nuser2:231072:100000\n"
+        )
         has_entry, info = user_has_entry(str(filepath), "testuser")
         assert has_entry is True
         assert info is not None
-        assert info['start'] == 165536
-        assert info['end'] == 231071
+        assert info["start"] == 165536
+        assert info["end"] == 231071
 
     def test_user_at_beginning(self, tmp_path):
         """Test when user entry is at the beginning."""
@@ -90,8 +94,8 @@ class TestUserHasEntry:
         filepath.write_text("testuser:100000:65536\nuser1:165536:65536\n")
         has_entry, info = user_has_entry(str(filepath), "testuser")
         assert has_entry is True
-        assert info['start'] == 100000
-        assert info['end'] == 165535
+        assert info["start"] == 100000
+        assert info["end"] == 165535
 
     def test_partial_username_match(self, tmp_path):
         """Test that partial username matches are not detected."""

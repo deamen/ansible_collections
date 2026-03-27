@@ -30,7 +30,9 @@ class ActionModule(ActionBase):
         missing_params = [p for p in required_params if p not in params]
 
         if missing_params:
-            raise AnsibleError(f"Missing required parameters: {', '.join(missing_params)}")
+            raise AnsibleError(
+                f"Missing required parameters: {', '.join(missing_params)}"
+            )
 
     def prepare_module_args(self, params):
         """

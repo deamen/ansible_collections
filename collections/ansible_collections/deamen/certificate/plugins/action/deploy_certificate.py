@@ -58,7 +58,9 @@ class ActionModule(ActionBase):
             "mode": mode,
         }
 
-    def deploy_file(self, copy_action, dest, content, owner, group, mode, tmp, task_vars):
+    def deploy_file(
+        self, copy_action, dest, content, owner, group, mode, tmp, task_vars
+    ):
         """
         Deploys a file using the 'copy' action.
         """
@@ -76,7 +78,10 @@ class ActionModule(ActionBase):
         # Validate and extract required parameters
         name = params.get("name")
         if not name or (not name.endswith(".crt") and not is_ca):
-            return {"failed": True, "msg": "The 'name' parameter must be a valid .crt filename."}
+            return {
+                "failed": True,
+                "msg": "The 'name' parameter must be a valid .crt filename.",
+            }
 
         cert_content = params.get("cert_content")
         key_content = params.get("key_content")
@@ -148,7 +153,8 @@ class ActionModule(ActionBase):
 
         # Combine results
         result = {
-            "changed": cert_result.get("changed", False) or key_result.get("changed", False),
+            "changed": cert_result.get("changed", False)
+            or key_result.get("changed", False),
             "cert_result": cert_result,
         }
 

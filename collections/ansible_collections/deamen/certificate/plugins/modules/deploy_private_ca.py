@@ -53,7 +53,11 @@ def main():
             "required": False,
             "default": "/etc/pki/ca-trust/source/anchors/",
         },
-        "update_ca_command": {"type": "str", "required": False, "default": "update-ca-trust"},
+        "update_ca_command": {
+            "type": "str",
+            "required": False,
+            "default": "update-ca-trust",
+        },
     }
 
     # Initialize the Ansible module

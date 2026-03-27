@@ -11,7 +11,9 @@ class ActionModule(ActionBase):
         # Extract parameters passed to the task
         private_ca = self._task.args.get("private_ca")
         filename = self._task.args.get("filename", "custom-ca.crt")
-        ca_trust_dir = self._task.args.get("ca_trust_dir", "/etc/pki/ca-trust/source/anchors/")
+        ca_trust_dir = self._task.args.get(
+            "ca_trust_dir", "/etc/pki/ca-trust/source/anchors/"
+        )
         update_ca_command = self._task.args.get("update_ca_command", "update-ca-trust")
 
         # Validate required parameters
@@ -48,7 +50,9 @@ class ActionModule(ActionBase):
         # Execute the module to run update-ca-trust command
         module_result = self._execute_module(
             module_name=self._task.action,
-            module_args={k: v for k, v in new_module_args.items() if k == "update_ca_command"},
+            module_args={
+                k: v for k, v in new_module_args.items() if k == "update_ca_command"
+            },
             task_vars=task_vars,
         )
 
