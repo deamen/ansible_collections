@@ -30,14 +30,14 @@
     state: present
     create_home: true
 
-- name: Enable linger for podman user so containers keep running after logout
+- name: Check linger status for podman user
   ansible.builtin.command:
     cmd: "loginctl show-user {{ podman_user.name }} --property=Linger --value"
   register: linger_check
   failed_when: false
   changed_when: false
 
-- name: Enable linger for podman user so containers keep running after logout
+- name: Enable linger for podman user
   ansible.builtin.command:
     cmd: "loginctl enable-linger {{ podman_user.name }}"
   when: linger_check.stdout != 'yes' and not 'molecule' in group_names
