@@ -1,0 +1,139 @@
+# This will allow user to customize the devcontainer and keep it local to the user.
+devcontainer.json
+
+*.retry
+.vscode
+# Ignore the local .ansible directory that may exist
+.ansible
+
+**/test.*
+**/*.txt
+!requirements.txt
+*.swp
+
+# Ansible test related
+collections/**/tests/output/**/*.json
+collections/**/tests/output/**/*.stats
+
+# Ignore binary files
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+*.pyc
+*.pyo
+*.class
+*.jar
+*.war
+*.ear
+
+# Ignore compiled dynamic libraries
+*.dll
+*.so
+*.dylib
+
+# Ignore compiled object files
+*.o
+*.obj
+
+# Ignore compiled Python files
+*.pyc
+*.pyo
+
+# Ignore compiled Java class files
+*.class
+
+# Ignore JAR files (Java archives)
+*.jar
+
+# Ignore WAR files (Java Web Application Archives)
+*.war
+
+# Ignore EAR files (Enterprise Application Archives)
+*.ear
+
+# Ignore CMake binary directories
+/CMakeFiles
+/CMakeCache.txt
+/CMakeScripts
+/Testing
+/Makefile
+/install_manifest.txt
+
+# Ignore build directories
+/build/
+*/build/
+*/bin/
+!vsphere_template_builder/
+!vsphere_template_builder/bin/
+!vsphere_template_builder/bin/create_floppy_image.py
+*/obj/
+*/out/
+*/dist/
+*.log
+
+# Ignore IDE-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.ncb
+*.opt
+*.plg
+*.vspx
+*.vssscc
+*.vspscc
+*.bak
+*.orig
+*.log
+
+# Ignore Mac OS X specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Ignore Linux specific files
+*~
+
+# Ignore common archive files
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.tbz
+*.tar.xz
+*.txz
+*.rar
+*.7z
+*.gz
+*.bz2
+*.xz
+*.iso
+*.img
+
+# Ignore binary format certificate files
+# pkey is used by IAD not standard,
+# it means protected key.
+*.der
+*.crt
+*.p12
+*.pfx
+*.pkey
+*.csr
+*.cer
+*.p7b
+*.p7c
+
+
+# Ignore any ssh folders that get created by the ansible user service roles:
+.ssh
+**/.ssh
+
+# Ignore any temporary directories that users may have:
+**/tmp
+tmp
+
+.gitconfig.host_for_container
