@@ -105,7 +105,7 @@ def get_next_range(filepath, range_size):
                 try:
                     start = int(parts[1])
                     count = int(parts[2])
-                    end = start + count -1
+                    end = start + count - 1
                     if end > max_end:
                         max_end = end
                 except (ValueError, IndexError):
