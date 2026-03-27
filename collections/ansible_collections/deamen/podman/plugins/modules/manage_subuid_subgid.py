@@ -111,8 +111,8 @@ def get_next_range(filepath, range_size):
                 except (ValueError, IndexError):
                     continue
     except IOError as e:
-        # If we can't read the file, return a safe default
-        return (100000, 100000 + range_size - 1)
+        # If we can't read the file, fail the module
+        raise RuntimeError(f"Failed to read {filepath}: {str(e)}")
 
     next_start = max_end if max_end == 0 else max_end + 1
     # Ensure we start from at least 100000 for subordinate IDs
@@ -150,8 +150,8 @@ def user_has_entry(filepath, username):
                             return (True, {"start": start, "end": end})
                         except (ValueError, IndexError):
                             continue
-    except IOError:
-        return (False, None)
+    except IOError as e:
+        raise Exception(f"Failed to read {filepath}: {str(e)}")
 
     return (False, None)
 

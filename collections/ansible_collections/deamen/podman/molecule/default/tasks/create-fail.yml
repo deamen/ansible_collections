@@ -5,7 +5,7 @@
       {% raw %}
       podman logs
       {% endraw %}
-      {{ item.stdout_lines[0] }}
+      {{ item.container.Id }}
   # podman inspect --format='{{.HostConfig.LogConfig.Path}}'
   changed_when: false
   register: logfile_cmd
