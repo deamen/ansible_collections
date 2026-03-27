@@ -1,3 +1,0 @@
-# Legacy ignore patterns removed because they contain unsupported '!skip' markers
-# If you need to ignore specific rules for modern ansible-lint, configure
-# them in .ansible-lint or pass --skip-rule on the CLI.
