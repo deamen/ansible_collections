@@ -1,0 +1,23 @@
+---
+platforms:
+  - name: podman
+    image: quay.io/deamen/fedora-molecule:latest
+    systemd: true
+    command: /usr/sbin/init
+    groups:
+      - podman
+      - molecule
+
+driver:
+  options:
+    managed: false
+    login_cmd_template: "podman exec -ti {instance} bash"
+    ansible_connection_options:
+      ansible_connection: podman
+
+provisioner:
+  name: ansible
+  inventory:
+    group_vars:
+      all:
+        molecule: true

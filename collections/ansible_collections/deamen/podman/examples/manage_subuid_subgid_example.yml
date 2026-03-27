@@ -1,0 +1,52 @@
+---
+# Example playbook demonstrating the use of the manage_subuid_subgid module
+
+- name: Configure subordinate UID/GID ranges for podman users
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Add subuid and subgid ranges for user podman
+      deamen.podman.manage_subuid_subgid:
+        username: podman
+      register: result
+
+    - name: Display the result
+      ansible.builtin.debug:
+        var: result
+
+    - name: Add ranges for another user with custom size
+      deamen.podman.manage_subuid_subgid:
+        username: containeruser
+        range_size: 100000
+      register: result2
+
+    - name: Display the second result
+      ansible.builtin.debug:
+        var: result2
+
+    - name: Verify idempotency - run again for same user
+      deamen.podman.manage_subuid_subgid:
+        username: podman
+      register: result3
+
+    - name: Assert no changes on second run
+      ansible.builtin.assert:
+        that:
+          - not result3.changed
+        success_msg: "Module is idempotent - no changes made on second run"
+        fail_msg: "Module is not idempotent - changes were made on second run"
+
+    - name: Test check mode - preview what would be done for a new user
+      deamen.podman.manage_subuid_subgid:
+        username: newuser
+      check_mode: yes
+      register: check_result
+
+    - name: Display check mode results
+      ansible.builtin.debug:
+        msg: |
+          Check mode results:
+          Changed: {{ check_result.changed }}
+          Message: {{ check_result.msg }}
+          Would assign subuid: {{ check_result.subuid_range.start }}-{{ check_result.subuid_range.end }}
+          Would assign subgid: {{ check_result.subgid_range.start }}-{{ check_result.subgid_range.end }}
