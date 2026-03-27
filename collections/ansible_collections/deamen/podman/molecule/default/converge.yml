@@ -1,0 +1,33 @@
+---
+- name: Fail if any group is missing
+  hosts: localhost
+  tasks:
+    - name: Print some info
+      ansible.builtin.debug:
+        msg: "{{ groups }}"
+
+    - name: Assert molecule group existence
+      ansible.builtin.assert:
+        that: "'molecule' in groups"
+        fail_msg: |
+          molecule group was not found inside inventory groups: {{ groups }}
+
+- name: Test deamen.podman.install_podman role
+  hosts: podman
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Testing deamen.podman.install_podman role
+      ansible.builtin.include_role:
+        name: deamen.podman.install_podman
+
+- name: Test deamen.podman.install_podman role with emulate_docker
+  hosts: podman
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Testing deamen.podman.install_podman role with emulate_docker
+      ansible.builtin.include_role:
+        name: deamen.podman.install_podman
+      vars:
+        emulate_docker: true

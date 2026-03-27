@@ -1,0 +1,15 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for install_podman
+podman_default_pkgs: [podman]
+podman_docker_pkgs:
+  - podman-docker
+  - podman-compose
+
+podman_user:
+  name: "podman"
+  group: "podman"
+  uid: 5000
+  gid: 5000
+
+emulate_docker: false

@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: MIT-0
+---
+# tasks file for install_podman
+
+- name: Install podman packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ podman_default_pkgs }}"
+
+- name: Install podman docker-compatibility packages
+  ansible.builtin.package:
+    name: "{{ podman_docker_pkgs }}"
+    state: present
+  when: emulate_docker
+
+- name: Ensure group for podman exists with correct gid
+  ansible.builtin.group:
+    name: "{{ podman_user.group }}"
+    state: present
+    gid: "{{ podman_user.gid }}"
+
+- name: Ensure podman user exists
+  ansible.builtin.user:
+    name: "{{ podman_user.name }}"
+    uid: "{{ podman_user.uid }}"
+    group: "{{ podman_user.group }}"
+    shell: "{{ podman_user.shell | default('/bin/bash') }}"
+    home: "{{ podman_user.home | default('/home/' + podman_user.name) }}"
+    state: present
+    create_home: yes
+
+- name: Enable linger for podman user so containers keep running after logout
+  ansible.builtin.command:
+    cmd: "loginctl enable-linger {{ podman_user.name }}"
+  when: not 'molecule' in group_names
