@@ -21,8 +21,6 @@ This module:
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | username | str | yes | - | The username for which to add subordinate UID and GID ranges |
-| subuid_file | str | no | /etc/subuid | Path to the subuid file |
-| subgid_file | str | no | /etc/subgid | Path to the subgid file |
 | range_size | int | no | 65536 | The number of subordinate IDs to allocate for the user |
 
 ## Return Values
