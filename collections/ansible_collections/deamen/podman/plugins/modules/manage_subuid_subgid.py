@@ -41,11 +41,6 @@ EXAMPLES = """
   deamen.podman.manage_subuid_subgid:
     username: containeruser
     range_size: 100000
-
-- name: Check what changes would be made without applying them
-  deamen.podman.manage_subuid_subgid:
-    username: podman
-    check_mode: true
 """
 
 RETURN = """
