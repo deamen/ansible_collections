@@ -51,16 +51,6 @@ This module:
     range_size: 100000
 ```
 
-### Custom File Paths
-
-```yaml
-- name: Use custom subuid/subgid file paths
-  deamen.podman.manage_subuid_subgid:
-    username: podman
-    subuid_file: /custom/path/subuid
-    subgid_file: /custom/path/subgid
-```
-
 ### Complete Playbook Example
 
 ```yaml
