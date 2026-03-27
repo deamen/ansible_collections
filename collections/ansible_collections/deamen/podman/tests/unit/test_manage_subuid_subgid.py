@@ -8,7 +8,27 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", "plugins", "modules")
 )
 
+import manage_subuid_subgid as ms
+
 from manage_subuid_subgid import get_next_range, user_has_entry
+
+
+class DummyModule:
+    def __init__(self, check_mode=False, run_commands=None):
+        self.check_mode = check_mode
+        self._calls = []
+        # queue of (rc, stdout, stderr) tuples to return for run_command
+        self._results = list(run_commands) if run_commands else []
+
+    def run_command(self, cmd, check_rc=False):
+        self._calls.append(cmd)
+        if self._results:
+            return self._results.pop(0)
+        return (0, "", "")
+
+    def fail_json(self, **kwargs):
+        # emulate AnsibleModule.fail_json by raising an exception with the payload
+        raise RuntimeError(kwargs)
 
 
 class TestGetNextRange:
@@ -109,3 +129,89 @@ class TestUserHasEntry:
 def test_basic():
     """Dummy test that always passes."""
     assert bool(1) is True
+
+
+def test_noop_when_both_entries_exist(tmp_path):
+    """No-op when both subuid and subgid entries already exist for user."""
+    uid_file = tmp_path / "subuid"
+    gid_file = tmp_path / "subgid"
+    uid_file.write_text("testuser:100000:65536\n")
+    gid_file.write_text("testuser:100000:65536\n")
+
+    ms.SUBUID_FILE = str(uid_file)
+    ms.SUBGID_FILE = str(gid_file)
+
+    module = DummyModule(check_mode=False)
+    res = ms.add_subuid_subgid_ranges(module, "testuser", 65536)
+
+    assert res["changed"] is False
+    assert res["subuid_range"]["start"] == 100000
+    assert res["subgid_range"]["start"] == 100000
+    # ensure no run_command calls were made
+    assert module._calls == []
+
+
+def test_adds_only_missing_subgid(tmp_path):
+    """When subuid exists but subgid missing, only add subgid."""
+    uid_file = tmp_path / "subuid"
+    gid_file = tmp_path / "subgid"
+    uid_file.write_text("testuser:200000:65536\n")
+    # gid_file does not exist
+
+    ms.SUBUID_FILE = str(uid_file)
+    ms.SUBGID_FILE = str(gid_file)
+
+    # Simulate successful usermod call for adding subgids
+    module = DummyModule(check_mode=False, run_commands=[(0, "", "")])
+    res = ms.add_subuid_subgid_ranges(module, "testuser", 65536)
+
+    assert res["changed"] is True
+    # one run_command call for subgid addition
+    assert len(module._calls) == 1
+    called = module._calls[0]
+    # should call usermod --add-subgids=...
+    assert any("--add-subgids=" in str(x) for x in called)
+    # existing subuid preserved
+    assert res["subuid_range"]["start"] == 200000
+
+
+def test_check_mode_reports_change_without_run_command(tmp_path):
+    """In check mode, report changed=True and do not invoke run_command."""
+    uid_file = tmp_path / "subuid"
+    gid_file = tmp_path / "subgid"
+    # neither file exists
+
+    ms.SUBUID_FILE = str(uid_file)
+    ms.SUBGID_FILE = str(gid_file)
+
+    module = DummyModule(check_mode=True)
+    res = ms.add_subuid_subgid_ranges(module, "checkuser", 65536)
+
+    assert res["changed"] is True
+    assert "Would add" in res.get("msg", "")
+    assert module._calls == []
+
+
+def test_failure_returns_fail_json_on_usermod_error(tmp_path):
+    """If usermod returns non-zero rc, module.fail_json is invoked with details."""
+    uid_file = tmp_path / "subuid"
+    gid_file = tmp_path / "subgid"
+    # neither file exists -> will try to add subuid first
+
+    ms.SUBUID_FILE = str(uid_file)
+    ms.SUBGID_FILE = str(gid_file)
+
+    # Simulate failing usermod for subuid addition
+    module = DummyModule(check_mode=False, run_commands=[(2, "out", "err")])
+
+    try:
+        ms.add_subuid_subgid_ranges(module, "baduser", 65536)
+        assert False, "Expected fail_json to raise"
+    except RuntimeError as exc:
+        payload = exc.args[0]
+        assert "rc" in payload
+        assert payload["rc"] == 2
+        assert "stdout" in payload
+        assert payload["stdout"] == "out"
+        assert "stderr" in payload
+        assert payload["stderr"] == "err"
