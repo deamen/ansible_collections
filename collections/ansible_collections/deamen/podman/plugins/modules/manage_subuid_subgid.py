@@ -23,16 +23,6 @@ options:
       - The username for which to add subordinate UID and GID ranges.
     type: str
     required: true
-  subuid_file:
-    description:
-      - Path to the subuid file.
-    type: str
-    default: "/etc/subuid"
-  subgid_file:
-    description:
-      - Path to the subgid file.
-    type: str
-    default: "/etc/subgid"
   range_size:
     description:
       - The number of subordinate IDs to allocate for the user.
@@ -51,12 +41,6 @@ EXAMPLES = """
   deamen.podman.manage_subuid_subgid:
     username: containeruser
     range_size: 100000
-
-- name: Add subuid and subgid ranges with custom file paths
-  deamen.podman.manage_subuid_subgid:
-    username: podman
-    subuid_file: /custom/path/subuid
-    subgid_file: /custom/path/subgid
 
 - name: Check what changes would be made without applying them
   deamen.podman.manage_subuid_subgid:
@@ -89,6 +73,10 @@ subgid_range:
 
 from ansible.module_utils.basic import AnsibleModule
 import os
+
+# Use system defaults for subuid and subgid files
+SUBUID_FILE = "/etc/subuid"
+SUBGID_FILE = "/etc/subgid"
 
 
 def get_next_range(filepath, range_size):
@@ -173,23 +161,21 @@ def user_has_entry(filepath, username):
     return (False, None)
 
 
-def add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_size):
+def add_subuid_subgid_ranges(module, username, range_size):
     """
     Add subordinate UID and GID ranges for a user using usermod command.
 
     Args:
         module: AnsibleModule instance
         username: Username to add ranges for
-        subuid_file: Path to subuid file
-        subgid_file: Path to subgid file
         range_size: Size of ranges to allocate
 
     Returns:
         dict: Result dictionary with changed status and message
     """
     # Check if user already has entries
-    has_subuid, subuid_info = user_has_entry(subuid_file, username)
-    has_subgid, subgid_info = user_has_entry(subgid_file, username)
+    has_subuid, subuid_info = user_has_entry(SUBUID_FILE, username)
+    has_subgid, subgid_info = user_has_entry(SUBGID_FILE, username)
 
     if has_subuid and has_subgid:
         return {
@@ -200,8 +186,8 @@ def add_subuid_subgid_ranges(module, username, subuid_file, subgid_file, range_s
         }
 
     # Calculate next available ranges
-    subuid_start, subuid_end = get_next_range(subuid_file, range_size)
-    subgid_start, subgid_end = get_next_range(subgid_file, range_size)
+    subuid_start, subuid_end = get_next_range(SUBUID_FILE, range_size)
+    subgid_start, subgid_end = get_next_range(SUBGID_FILE, range_size)
 
     changed = False
 
@@ -276,16 +262,12 @@ def main():
     """Main module execution."""
     module_args = {
         "username": {"type": "str", "required": True},
-        "subuid_file": {"type": "str", "default": "/etc/subuid"},
-        "subgid_file": {"type": "str", "default": "/etc/subgid"},
         "range_size": {"type": "int", "default": 65536},
     }
 
     module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
 
     username = module.params["username"]
-    subuid_file = module.params["subuid_file"]
-    subgid_file = module.params["subgid_file"]
     range_size = module.params["range_size"]
 
     # Validate range size
@@ -293,9 +275,7 @@ def main():
         module.fail_json(msg="range_size must be a positive integer")
 
     # Execute the main logic
-    result = add_subuid_subgid_ranges(
-        module, username, subuid_file, subgid_file, range_size
-    )
+    result = add_subuid_subgid_ranges(module, username, range_size)
 
     module.exit_json(**result)
 
