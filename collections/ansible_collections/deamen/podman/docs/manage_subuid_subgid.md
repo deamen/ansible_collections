@@ -14,7 +14,7 @@ This module:
 
 - Linux system with `usermod` command (part of shadow-utils package)
 - Root/sudo privileges to modify `/etc/subuid` and `/etc/subgid`
-- Python 3.6+
+- Python 3.9+
 
 ## Parameters
 
