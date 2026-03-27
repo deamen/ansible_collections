@@ -59,9 +59,7 @@ class ActionModule(ActionBase):
         module_result = self._execute_module(
             module_name=self._task.action,
             module_args={
-                k: v
-                for k, v in new_module_args.items()
-                if k == "update_ca_command"
+                k: v for k, v in new_module_args.items() if k == "update_ca_command"
             },
             task_vars=task_vars,
         )

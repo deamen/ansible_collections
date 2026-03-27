@@ -46,11 +46,7 @@ class ActionModule(ActionBase):
         Filters the task parameters to only include those supported by
         the 'copy' module.
         """
-        return {
-            k: v
-            for k, v in params.items()
-            if k in self.SUPPORTED_PARAMS
-        }
+        return {k: v for k, v in params.items() if k in self.SUPPORTED_PARAMS}
 
     def prepare_copy_args(self, dest, content, owner, group, mode):
         """
@@ -74,7 +70,7 @@ class ActionModule(ActionBase):
         mode,
         tmp,
         task_vars,
-        ):
+    ):
         """
         Deploys a file using the 'copy' action.
         """
@@ -171,8 +167,7 @@ class ActionModule(ActionBase):
         # Combine results
         result = {
             "changed": (
-                cert_result.get("changed", False)
-                or key_result.get("changed", False)
+                cert_result.get("changed", False) or key_result.get("changed", False)
             ),
             "cert_result": cert_result,
         }

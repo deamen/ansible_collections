@@ -21,11 +21,7 @@ class ActionModule(ActionBase):
         Filters the task parameters to only include those supported by the
         'community.hashi_vault.vault_pki_generate_certificate' module.
         """
-        return {
-            k: v
-            for k, v in params.items()
-            if k in self.supported_sub_module_args
-        }
+        return {k: v for k, v in params.items() if k in self.supported_sub_module_args}
 
     def validate_params(self, params):
         """
@@ -37,11 +33,7 @@ class ActionModule(ActionBase):
             "role_name",
             "token",
         ]
-        missing_params = [
-            p
-            for p in required_params
-            if p not in params
-        ]
+        missing_params = [p for p in required_params if p not in params]
 
         if missing_params:
             raise AnsibleError(
@@ -82,9 +74,7 @@ class ActionModule(ActionBase):
 
         try:
             # Set up local connection
-            local_connection = (
-                connection_loader.get("local", self._play_context)
-            )
+            local_connection = connection_loader.get("local", self._play_context)
             local_connection.set_options()
 
             # Override the current connection with the local connection
@@ -94,9 +84,7 @@ class ActionModule(ActionBase):
 
             # Execute the module locally
             result = self._execute_module(
-                module_name=(
-                    "community.hashi_vault.vault_pki_generate_certificate"
-                ),
+                module_name=("community.hashi_vault.vault_pki_generate_certificate"),
                 module_args=sub_module_args,
                 task_vars=task_vars,
             )

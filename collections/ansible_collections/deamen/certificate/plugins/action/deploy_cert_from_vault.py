@@ -40,11 +40,7 @@ class ActionModule(ActionBase):
             "role_name",
             "token",
         ]
-        missing_params = [
-            p
-            for p in required_params
-            if not gen_cert_params.get(p)
-        ]
+        missing_params = [p for p in required_params if not gen_cert_params.get(p)]
         if missing_params:
             msg = (
                 "Missing required parameters for generating certificate: "
@@ -79,9 +75,7 @@ class ActionModule(ActionBase):
 
         # Prepare parameters for deploying the certificate
         deploy_cert_params = {
-            "name": params.get(
-                "name", f"{gen_cert_params['common_name']}.crt"
-            ),
+            "name": params.get("name", f"{gen_cert_params['common_name']}.crt"),
             "cert_content": cert_content,
             "key_content": key_content,
             "cert_dir": params.get("cert_dir"),

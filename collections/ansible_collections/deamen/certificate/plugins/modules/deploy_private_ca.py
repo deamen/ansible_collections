@@ -67,9 +67,7 @@ def main():
     }
 
     # Initialize the Ansible module
-    module = AnsibleModule(
-        argument_spec=module_args, supports_check_mode=False
-    )
+    module = AnsibleModule(argument_spec=module_args, supports_check_mode=False)
 
     # Command to update the system trust store
     update_command = module.params["update_ca_command"]
