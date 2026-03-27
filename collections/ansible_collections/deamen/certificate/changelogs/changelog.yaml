@@ -1,46 +1,45 @@
 ancestor: null
 releases:
-  1.0.0:
+  "1.0.0":
     modules:
-    - description: Deploy a private CA certificate to a Linux server
-      name: deploy_private_ca
-      namespace: ''
+      - description: Deploy a private CA certificate to a Linux server
+        name: deploy_private_ca
+        namespace: ''
     plugins:
       filter:
-      - description: A custom filter plugin for Ansible.
-        name: hello_world
-        namespace: null
+        - description: A custom filter plugin for Ansible.
+          name: hello_world
+          namespace: null
     release_date: '2024-12-08'
-  1.1.0:
+  "1.1.0":
     changes:
-      release_summary: 'This release adds deploy_certificates module to the collection.
+      release_summary: |
+        This release adds deploy_certificates module to the collection.
 
         It is favoured over the deploy_certificate role.
 
         The role will be deprecated in the next release.
-
-        '
     fragments:
-    - 1.1.0.yml
+      - 1.1.0.yml
     modules:
-    - description: Deploy certificates and keys to specified locations
-      name: deploy_certificate
-      namespace: ''
+      - description: Deploy certificates and keys to specified locations
+        name: deploy_certificate
+        namespace: ''
     release_date: '2024-12-08'
-  1.2.0:
+  "1.2.0":
     changes:
       deprecated_features:
-      - 'Role: deamen.certificate.deploy_certificate'
+        - 'Role: deamen.certificate.deploy_certificate'
       major_changes:
-      - Refactor module deamen.certificate.deploy_certificate as action plugin
+        - Refactor module deamen.certificate.deploy_certificate as action plugin
     fragments:
-    - release_1.1.1.yml
+      - release_1.1.1.yml
     release_date: '2024-12-12'
-  1.3.0:
+  "1.3.0":
     changes:
       major_changes:
-      - Add gen_certificate_from_vault module, runs on localhost by default
+        - Add gen_certificate_from_vault module, runs on localhost by default
       release_summary: Add gen_certificate_from_vault module
     fragments:
-    - release_1.3.0.yml
+      - release_1.3.0.yml
     release_date: '2024-12-13'

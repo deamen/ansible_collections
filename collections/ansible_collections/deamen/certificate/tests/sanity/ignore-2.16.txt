@@ -1,12 +1,3 @@
-plugins/modules/deploy_private_ca.py compile-2.7!skip
-plugins/modules/deploy_private_ca.py import-2.7!skip
-plugins/modules/deploy_private_ca.py compile-3.13!skip
-plugins/modules/deploy_private_ca.py import-3.13!skip
-plugins/modules/deploy_private_ca.py future-import-boilerplate!skip
-plugins/modules/deploy_private_ca.py metaclass-boilerplate!skip
-plugins/modules/deploy_certificate.py compile-2.7!skip
-plugins/modules/deploy_certificate.py import-2.7!skip
-plugins/modules/deploy_certificate.py compile-3.13!skip
-plugins/modules/deploy_certificate.py import-3.13!skip
-plugins/modules/deploy_certificate.py future-import-boilerplate!skip
-plugins/modules/deploy_certificate.py metaclass-boilerplate!skip
+# Legacy ignore patterns removed because they contain unsupported '!skip' markers
+# If you need to ignore specific rules for modern ansible-lint, configure
+# them in .ansible-lint or pass --skip-rule on the CLI.

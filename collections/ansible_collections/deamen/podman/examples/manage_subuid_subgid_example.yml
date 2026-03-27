@@ -39,7 +39,7 @@
     - name: Test check mode - preview what would be done for a new user
       deamen.podman.manage_subuid_subgid:
         username: newuser
-      check_mode: yes
+      check_mode: true
       register: check_result
 
     - name: Display check mode results
