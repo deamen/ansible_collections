@@ -4,3 +4,19 @@
 
 - name: Test deamen.general.install_dev_packages plabook
   ansible.builtin.import_playbook: ../../playbooks/install_development_packages.yml
+
+- name: Test deamen.general.check_is_container module in container
+  hosts: containers
+  become: true
+
+  tasks:
+    - name: Check if running in a container
+      deamen.general.check_is_container:
+      register: container_check_result
+
+    - name: Assert that we are running in a container
+      ansible.builtin.assert:
+        that:
+          - container_check_result.is_container
+        fail_msg: "Expected to be running in a container, but check_is_container returned false."
+        success_msg: "Successfully detected that we are running in a container."
