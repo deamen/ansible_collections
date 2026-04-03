@@ -10,4 +10,4 @@
       loop: "{{ groups['containers'] | default([]) }}"
       loop_control:
         label: "{{ item }}"
-      ignore_errors: true
+      failed_when: false
