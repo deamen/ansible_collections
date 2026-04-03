@@ -1,0 +1,19 @@
+---
+namespace: deamen
+name: general
+version: 1.0.0
+readme: README.md
+authors:
+  - Song Tang <stang@mmz.au>
+description: >-
+  Hold common Ansible roles, playbooks, and plugins that can be used across multiple projects.
+license:
+  - GPL-3.0-or-later
+tags:
+  - application
+dependencies: {}
+repository: https://github.com/deamen/ansible_collections
+documentation: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/general/docs
+homepage: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/general
+issues: https://github.com/deamen/ansible_collections/issues
+build_ignore: []

@@ -1,0 +1,22 @@
+---
+# defaults file for install_system_ansible
+
+ansible_packages:
+  - ansible
+  - python3
+  - python3-pip
+  - python3-hvac
+
+
+dev_packages:
+  - git
+  - git-core-doc
+  - file
+  - tar
+  - gh
+  - vi
+  - vim
+  - iputils
+  - bind-utils
+  - jq
+  - pwgen
