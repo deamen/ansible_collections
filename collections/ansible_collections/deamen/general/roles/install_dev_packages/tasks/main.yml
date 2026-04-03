@@ -1,0 +1,7 @@
+---
+# tasks file for install_dev_packages
+- name: Install development packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ dev_packages + essential_packages }}"

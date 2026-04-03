@@ -1,0 +1,16 @@
+---
+# defaults file for install_dev_packages
+dev_packages:
+  - git
+  - git-core-doc
+  - gh
+  - jq
+
+essential_packages:
+  - file
+  - tar
+  - vi
+  - vim
+  - iputils
+  - bind-utils
+  - pwgen

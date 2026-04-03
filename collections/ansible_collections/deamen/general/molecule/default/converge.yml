@@ -1,3 +1,6 @@
 ---
-- name: Converge
+- name: Test deamen.general.install_system_ansible plabook
   ansible.builtin.import_playbook: ../../playbooks/install_system_ansible.yml
+
+- name: Test deamen.general.install_dev_packages plabook
+  ansible.builtin.import_playbook: ../../playbooks/install_development_packages.yml
