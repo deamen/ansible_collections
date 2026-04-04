@@ -1,12 +1,12 @@
 ---
 galaxy_info:
-    author: Song Tang
-    description: your role description
-    company: Yobibyte
-    license: GPL-3.0-or-later
+  author: Song Tang
+  description: Install ansible from system package manager
+  company: Yobibyte
+  license: GPL-3.0-or-later
 
-    min_ansible_version: "2.14"
+  min_ansible_version: "2.15"
 
-    galaxy_tags: []
+  galaxy_tags: []
 
 dependencies: []

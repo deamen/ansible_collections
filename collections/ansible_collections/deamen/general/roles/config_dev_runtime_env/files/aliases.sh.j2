@@ -1,0 +1,8 @@
+export CURRENT_USER={{ current_user | default("$(id -u -n)") }}
+export PRJ_HOME={{ prj_home | default('$( [ "$(id -u -n)" = "root" ] && echo "/root" || echo "/home" )') }}
+export PRJ_DIR="$( [ "${CURRENT_USER}" = "root" ] && echo "${PRJ_HOME}/Prj/" || echo "${PRJ_HOME}/${CURRENT_USER}/Prj/" )"
+alias prj='cd ${PRJ_DIR}'
+alias noproxy='export http_proxy="" && export HTTP_PROXY=${http_proxy} && export https_proxy="" && export HTTPS_PROXY=${https_proxy} && ftp_proxy=""'
+alias ansiblev='function _ansiblev() { ansible -e @~/.ansible_vault.yml --ask-vault-pass "$@"; }; _ansiblev'
+alias ansible-playbookv='function _ansible-playbookv() { ansible-playbook -e @~/.ansible_vault.yml --ask-vault-pass "$@"; }; _ansible-playbookv'
+alias gh_web_login='gh auth login --git-protocol https --hostname github.com --web'

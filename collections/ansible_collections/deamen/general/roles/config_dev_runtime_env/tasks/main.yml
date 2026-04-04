@@ -1,0 +1,90 @@
+---
+# tasks file for config_dev_runtime_env
+- name: Create ~/.bashrc.d to hold user specific bash configurations
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.bashrc.d"
+    state: directory
+    mode: "0700"
+
+- name: Deploy script to load git-prompt.sh
+  ansible.builtin.copy:
+    dest: "{{ ansible_user_dir }}/.bashrc.d/load_git-prompt.sh"
+    src: "files/load_git-prompt.sh"
+    mode: "0600"
+
+- name: Check if aliases.sh exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.bashrc.d/aliases.sh"
+  register: aliases_stat
+
+
+  # Deploy once-off aliases.sh file
+  # This allows user to customise their aliases without affecting the ansible playbook
+- name: Deploy aliases.sh to set up bash aliases for dev environment
+  ansible.builtin.template:
+    src: "files/aliases.sh.j2"
+    dest: "{{ ansible_user_dir }}/.bashrc.d/aliases.sh"
+    mode: "0600"
+  when: not aliases_stat.stat.exists
+
+- name: Create ~/Ref directory to hold reference git repositories
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/Ref"
+    state: directory
+    mode: "0700"
+
+- name: Create ~/Prj directory to hold git repositories
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/Prj"
+    state: directory
+    mode: "0700"
+
+# To-Do: Move the tasks below to config_ansible_run_time_env role
+- name: Symlink /tmp/ansible to ~/Prj/ansible for molecule testing and development
+  ansible.builtin.file:
+    src: "/tmp/ansible"
+    dest: "{{ ansible_user_dir }}/Prj/ansible"
+    state: link
+  when: inventory_hostname in groups['molecule']
+
+- name: Install ansible collections in dev environment
+  ansible.builtin.shell: |
+    source {{ ansible_user_dir }}/.bashrc.d/aliases.sh
+    prj
+    cd ansible
+    {{ ansible_galaxy_executable }} collection install -r requirements.yml
+  register: ansible_galaxy_install_result
+  changed_when: ansible_galaxy_install_result.rc != 0
+
+- name: Check if requirements.txt exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/Prj/ansible/requirements.txt"
+  register: requirements_stat
+
+- name: Install ansible pip requirements
+  ansible.builtin.pip:
+    executable: "{{ ansible_pip_executable }}"
+    requirements: "{{ ansible_user_dir }}/Prj/ansible/requirements.txt"
+  when: requirements_stat.stat.exists
+
+- name: Check if ansible vault file exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.ansible_vault.yml"
+  register: ansible_vault_stat
+
+- name: Deploy ansible vault file
+  ansible.builtin.copy:
+    dest: "{{ ansible_user_dir }}/.ansible_vault.yml"
+    content: |
+      # ansible_role_id and ansible_secret_id are for production use
+      ansible_role_id:
+      # vault write -force auth/approle/role/ansible/secret-id
+      # ansible_secret_id:
+
+      # Use your personal access token from vault for retrieving credentials
+      vault_pat:
+
+      # Override the default ansible_user
+      # ansible_user:
+    mode: "0600"
+  when: not ansible_vault_stat.stat.exists
