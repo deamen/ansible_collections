@@ -6,7 +6,9 @@
     src: "/tmp/ansible"
     dest: "{{ ansible_user_dir }}/Prj/ansible"
     state: link
-  when: inventory_hostname in groups['molecule']
+  when:
+    - groups['molecule'] is defined
+    - inventory_hostname in groups['molecule']
 
 - name: Install ansible collections in dev environment
   ansible.builtin.shell: |
@@ -38,3 +40,14 @@
     dest: "{{ ansible_user_dir }}/.ansible_vault.yml"
     content: |
       # ansible_role_id and ansible_secret_id are for production use
+      ansible_role_id:
+      # vault write -force auth/approle/role/ansible/secret-id
+      # ansible_secret_id:
+
+      # Use your personal access token from vault for retrieving credentials
+      vault_pat:
+
+      # Override the default ansible_user
+      # ansible_user:
+    mode: "0600"
+  when: not ansible_vault_stat.stat.exists
