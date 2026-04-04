@@ -1,6 +1,0 @@
----
-# defaults file for config_ansible_runtime_env
-
-ansible_galaxy_executable: "/usr/bin/ansible-galaxy"
-# Set pip executable to /usr/bin/python3.14 if fedora 43, if rhel9, set to /usr/bin/pip3.9
-ansible_pip_executable: "{{ '/usr/bin/pip3.14' if ansible_distribution == 'Fedora' and ansible_distribution_major_version == '43' else ('/usr/bin/pip3.9' if ansible_distribution == 'RedHat' and ansible_distribution_major_version == '9') }}"

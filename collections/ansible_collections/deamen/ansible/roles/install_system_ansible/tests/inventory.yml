@@ -1,0 +1,6 @@
+---
+all:
+  hosts:
+    # localhost is added here to avoid typing -i localhost,
+    # when we need to run playbooks on localhost.
+    localhost:

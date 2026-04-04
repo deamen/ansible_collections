@@ -1,0 +1,7 @@
+---
+# tasks file for install_system_ansible
+- name: Install ansible packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ ansible_packages + ansible_lint_packages }}"
