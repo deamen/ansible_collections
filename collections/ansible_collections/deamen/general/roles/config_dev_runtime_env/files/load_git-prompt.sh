@@ -24,8 +24,8 @@ set_git_prompt() {
     if test -f "$prompt_script"
     then
         . "$prompt_script"
-        PS1="$PS1'\[\033[36m\]'"  # change color to cyan
-        PS1="$PS1'`__git_ps1`'"   # bash function
+        PS1="$PS1"'\[\033[36m\]'  # change color to cyan
+        PS1="$PS1"'`__git_ps1`'   # bash function
     fi
 }
 
