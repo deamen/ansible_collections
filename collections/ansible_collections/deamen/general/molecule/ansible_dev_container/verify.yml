@@ -1,0 +1,10 @@
+---
+- name: Verify native inventory sources
+  hosts: containers
+  gather_facts: true
+  tasks:
+    - name: Validate ansible is installed
+      ansible.builtin.assert:
+        that:
+          - ansible_version.full is version('2.9', '>=')
+        fail_msg: "Ansible is not installed or the version is too old"

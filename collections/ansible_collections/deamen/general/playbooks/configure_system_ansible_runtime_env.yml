@@ -1,0 +1,8 @@
+- name: Configure system Ansible runtime environment for development
+  hosts: ansible-dev-container
+  become: true
+
+  tasks:
+    - name: Install Ansible and dependencies
+      ansible.builtin.include_role:
+        name: deamen.general.config_dev_runtime_env
