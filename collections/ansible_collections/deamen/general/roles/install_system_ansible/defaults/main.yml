@@ -7,16 +7,6 @@ ansible_packages:
   - python3-pip
   - python3-hvac
 
-
-dev_packages:
-  - git
-  - git-core-doc
-  - file
-  - tar
-  - gh
-  - vi
-  - vim
-  - iputils
-  - bind-utils
-  - jq
-  - pwgen
+ansible_lint_packages:
+  - python3-detect-secrets
+  - pre-commit
