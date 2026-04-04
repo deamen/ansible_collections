@@ -3,6 +3,10 @@
   become: true
 
   tasks:
-    - name: Install Ansible and dependencies
+    - name: Configure dev runtime environment
       ansible.builtin.include_role:
         name: deamen.general.config_dev_runtime_env
+    
+    - name: Configure Ansible runtime environment
+      ansible.builtin.include_role:
+        name: deamen.general.config_ansible_runtime_env
