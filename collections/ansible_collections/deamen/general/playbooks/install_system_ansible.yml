@@ -1,8 +1,0 @@
-- name: Install Ansible via system package manager
-  hosts: all:!localhost
-  become: true
-
-  tasks:
-    - name: Install Ansible and dependencies
-      ansible.builtin.include_role:
-        name: deamen.general.install_system_ansible

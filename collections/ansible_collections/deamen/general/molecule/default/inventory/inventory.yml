@@ -6,4 +6,3 @@ all:
 containers:
   hosts:
     test-container-1:
-    ansible-dev-container:
