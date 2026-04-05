@@ -21,4 +21,3 @@
     - name: Install Copilot CLI in containers
       ansible.builtin.import_role:
         name: deamen.general.install_copilot_cli
- 
