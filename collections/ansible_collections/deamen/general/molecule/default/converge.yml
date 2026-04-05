@@ -17,3 +17,8 @@
           - container_check_result.is_container
         fail_msg: "Expected to be running in a container, but check_is_container returned false."
         success_msg: "Successfully detected that we are running in a container."
+
+    - name: Install Copilot CLI in containers
+      ansible.builtin.import_role:
+        name: deamen.general.install_copilot_cli
+ 

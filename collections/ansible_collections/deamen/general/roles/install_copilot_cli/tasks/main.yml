@@ -1,0 +1,28 @@
+---
+# tasks file for install_copilot_cli
+
+- name: Deploy install_copilot_cli.sh to /usr/local/bin
+  ansible.builtin.copy:
+    dest: /usr/local/bin/install_copilot_cli.sh
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+
+      if command -v curl >/dev/null 2>&1; then
+        curl -fsSL https://gh.io/copilot-install | bash
+      elif command -v wget >/dev/null 2>&1; then
+        wget -qO- https://gh.io/copilot-install | bash
+      else
+        echo "This script requires curl or wget to download the Copilot installer." >&2
+        exit 1
+      fi
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Execute install_copilot_cli.sh to install Copilot CLI
+  ansible.builtin.command: /usr/local/bin/install_copilot_cli.sh
+  args:
+    creates: /usr/local/bin/copilot
+  become: false
