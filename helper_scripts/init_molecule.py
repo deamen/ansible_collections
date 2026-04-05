@@ -19,8 +19,9 @@ def parse_args():
     )
     parser.add_argument(
         "--scenario",
-        required=True,
-        help="Scenario name (will be created under collection's molecule/ directory)",
+        required=False,
+        default="default",
+        help="Scenario name (will be created under collection's molecule/ directory). Defaults to 'default'",
     )
     return parser.parse_args()
 
@@ -30,7 +31,9 @@ def get_collection_molecule_path(collection_fqcn):
     if len(parts) != 2:
         raise ValueError("Collection FQCN must be in the form <namespace>.<collection>")
     namespace, collection = parts
-    return os.path.join(DEFAULT_COLLECTION_PATH, namespace, collection, "molecule")
+    return os.path.join(
+        DEFAULT_COLLECTION_PATH, namespace, collection, "extensions", "molecule"
+    )
 
 
 def main():
@@ -42,8 +45,28 @@ def main():
         print(f"Scenario directory already exists: {scenario_dir}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Copying template from {TEMPLATE_PATH} to {scenario_dir}")
-    shutil.copytree(TEMPLATE_PATH, scenario_dir)
+    source_dir = os.path.join(TEMPLATE_PATH, args.scenario)
+    if not os.path.exists(source_dir):
+        print(f"Template scenario directory not found: {source_dir}", file=sys.stderr)
+        sys.exit(1)
+
+    os.makedirs(molecule_dir, exist_ok=True)
+    # If using the default template, ensure collection-level requirements.yml exists
+    if args.scenario == "default":
+        requirements_src = os.path.join(TEMPLATE_PATH, "requirements.yml")
+        requirements_dst = os.path.join(molecule_dir, "requirements.yml")
+        if not os.path.exists(requirements_dst):
+            if os.path.exists(requirements_src):
+                shutil.copyfile(requirements_src, requirements_dst)
+                print(f"Copied collection requirements to {requirements_dst}")
+            else:
+                print(
+                    f"Template requirements not found: {requirements_src}",
+                    file=sys.stderr,
+                )
+
+    print(f"Copying template from {source_dir} to {scenario_dir}")
+    shutil.copytree(source_dir, scenario_dir)
     print(f"Molecule scenario '{args.scenario}' created at {scenario_dir}")
 
 

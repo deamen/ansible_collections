@@ -1,0 +1,40 @@
+---
+- name: Verify podman installation
+  hosts: containers
+  gather_facts: true
+  tasks:
+    - name: Check podman version
+      ansible.builtin.command: podman --version
+      register: podman_version_result
+      failed_when: podman_version_result.rc != 0
+      changed_when: false
+
+    - name: Validate podman is installed
+      ansible.builtin.assert:
+        that:
+          - podman_version_result.rc == 0
+        fail_msg: "Podman is not installed"
+
+    - name: Display podman version
+      ansible.builtin.debug:
+        msg: "Podman version: {{ podman_version_result.stdout }}"
+
+    - name: Check /usr/bin/newuidmap capabilities
+      ansible.builtin.command: getcap /usr/bin/newuidmap
+      register: newuidmap_cap_result
+      failed_when: newuidmap_cap_result.rc != 0 or 'cap_setuid=eip' not in newuidmap_cap_result.stdout
+      changed_when: false
+
+    - name: Display newuidmap capabilities
+      ansible.builtin.debug:
+        msg: "newuidmap capabilities: {{ newuidmap_cap_result.stdout }}"
+
+    - name: Check /usr/bin/newgidmap capabilities
+      ansible.builtin.command: getcap /usr/bin/newgidmap
+      register: newgidmap_cap_result
+      failed_when: newgidmap_cap_result.rc != 0 or 'cap_setgid=eip' not in newgidmap_cap_result.stdout
+      changed_when: false
+
+    - name: Display newgidmap capabilities
+      ansible.builtin.debug:
+        msg: "newgidmap capabilities: {{ newgidmap_cap_result.stdout }}"
