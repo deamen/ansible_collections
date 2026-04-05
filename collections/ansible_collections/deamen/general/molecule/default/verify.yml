@@ -8,3 +8,23 @@
         that:
           - ansible_version.full is version('2.9', '>=')
         fail_msg: "Ansible is not installed or the version is too old"
+    
+    - name: Display copilot CLI version
+      ansible.builtin.command: copilot --version
+      register: copilot_version_result
+      failed_when: copilot_version_result.rc != 0
+      changed_when: false
+    
+    - name: Dsiaply copilot CLI version result
+      ansible.builtin.debug:
+        msg: "Copilot CLI version: {{ copilot_version_result.stdout }}"
+  
+    - name: Check the location of the copilot CLI binary
+      ansible.builtin.command: which copilot
+      register: copilot_location_result
+      failed_when: copilot_location_result.rc != 0
+      changed_when: false
+
+    - name: Display copilot CLI location result
+      ansible.builtin.debug:
+        msg: "Copilot CLI location: {{ copilot_location_result.stdout }}"
