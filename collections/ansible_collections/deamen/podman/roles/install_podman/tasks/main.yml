@@ -29,16 +29,41 @@
     state: present
     create_home: true
 
+- name: Check if running in a container
+  deamen.general.check_is_container:
+  register: container_check_result
+
 - name: Check linger status for podman user
   ansible.builtin.command:
     cmd: "loginctl show-user {{ podman_user.name }} --property=Linger --value"
   register: linger_check
   failed_when: false
   changed_when: false
+  when: not container_check_result.is_container
 
 - name: Enable linger for podman user
   ansible.builtin.command:
     cmd: "loginctl enable-linger {{ podman_user.name }}"
-  when: linger_check.stdout != 'yes' and not 'molecule' in group_names
   register: linger_enable
   changed_when: linger_check.stdout != 'yes' and linger_enable.rc == 0
+  when:
+    - not container_check_result.is_container
+    - linger_check.stdout != 'yes'
+
+# This is required by docker privileged mode on windows
+# Don't need this on apple container
+- name: Set cap_setuid on newuidmap binary for podman in container
+  community.general.capabilities:
+    path: /usr/bin/newuidmap
+    capability: cap_setuid+eip
+    state: present
+  when: container_check_result.is_container
+
+# This is required by docker privileged mode on windows
+# Don't need this on apple container
+- name: Set cap_setgid on newgidmap binary for podman in container
+  community.general.capabilities:
+    path: /usr/bin/newgidmap
+    capability: cap_setgid+eip
+    state: present
+  when: container_check_result.is_container

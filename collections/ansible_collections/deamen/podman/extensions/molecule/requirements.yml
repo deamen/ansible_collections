@@ -1,2 +1,5 @@
+---
+roles: []
+
 collections:
   - name: containers.podman

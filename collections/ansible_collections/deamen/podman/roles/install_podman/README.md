@@ -36,7 +36,7 @@ defined in this role's `defaults/main.yml` and may vary by distribution:
 Dependencies
 ------------
 
-Nothing yet
+- deamen.general.check_is_container
 
 Example Playbook
 ----------------
