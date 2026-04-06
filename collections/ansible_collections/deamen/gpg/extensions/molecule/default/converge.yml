@@ -1,0 +1,9 @@
+---
+- name: Install GPG packages
+  hosts: containers
+  become: true
+
+  tasks:
+    - name: Install GPG packages
+      ansible.builtin.include_role:
+        name: deamen.gpg.install_gpg

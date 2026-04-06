@@ -1,0 +1,14 @@
+---
+- name: Verify gpg is installed
+  hosts: containers
+  gather_facts: true
+  tasks:
+    - name: Check gpg version
+      ansible.builtin.command: gpg --version
+      register: gpg_version
+      changed_when: false
+      failed_when: gpg_version.rc != 0
+
+    - name: Display gpg version
+      ansible.builtin.debug:
+        msg: "GPG version: {{ gpg_version.stdout_lines[0] }}"

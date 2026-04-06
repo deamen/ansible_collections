@@ -1,0 +1,5 @@
+---
+# defaults file for install_gpg
+gpg_packages:
+  - gnupg2
+  - pinentry
