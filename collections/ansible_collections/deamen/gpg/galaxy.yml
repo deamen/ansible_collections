@@ -1,0 +1,18 @@
+---
+namespace: deamen
+name: gpg
+version: 1.0.0
+readme: README.md
+authors:
+  - Song Tang <stang@mmz.au>
+description: Install and manage GPG
+license:
+  - GPL-3.0-or-later
+tags:
+  - application
+dependencies: {}
+repository: https://github.com/deamen/ansible_collections
+documentation: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/gpg/docs
+homepage: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/gpg
+issues: https://github.com/deamen/ansible_collections/issues
+build_ignore: []
