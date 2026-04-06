@@ -8,3 +8,19 @@
         that:
           - ansible_version.full is version('2.9', '>=')
         fail_msg: "Ansible is not installed or the version is too old"
+
+    # Workaround for error below
+    # Python 3.14 requires ansible-core version >= 2.20.0, and we found 2.18.12.
+    - name: Check that `molecule` exists in the PATH
+      ansible.builtin.command: which molecule
+      register: molecule_path
+      failed_when: molecule_path.rc != 0
+      changed_when: false
+      when: ansible_user_id == 'root'
+
+    - name: Check that `molecule` CLI is installed
+      ansible.builtin.command: molecule --version
+      register: molecule_cli
+      failed_when: molecule_cli.rc != 0
+      changed_when: false
+      when: ansible_user_id != 'root'

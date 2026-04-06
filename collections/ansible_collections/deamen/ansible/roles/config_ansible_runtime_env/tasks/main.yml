@@ -30,6 +30,12 @@
     requirements: "{{ ansible_user_dir }}/Prj/ansible/requirements.txt"
   when: requirements_stat.stat.exists
 
+- name: Install molecule via pip
+  ansible.builtin.pip:
+    name: molecule
+    executable: "{{ ansible_pip_executable }}"
+    state: present
+
 - name: Check if ansible vault file exists
   ansible.builtin.stat:
     path: "{{ ansible_user_dir }}/.ansible_vault.yml"
