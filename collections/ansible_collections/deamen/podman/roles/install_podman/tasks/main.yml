@@ -71,9 +71,10 @@
   when: container_check_result.is_container
 
 # Ensure the user that runs podman inside container has its id mapped to a range that is maxium 65536, this fix the error:
-# ERRO[0000] running /usr/bin/newuidmap 62 0 1000 1 1 524288 65536: newuidmap: write to uid_map failed: Operation not permitted 
+# ERRO[0000] running /usr/bin/newuidmap 62 0 1000 1 1 524288 65536: newuidmap: write to uid_map failed: Operation not permitted
 # Error: cannot set up namespace using "/usr/bin/newuidmap": exit status 1
 - name: Apply podman in podman subuid/subgid workaround for rootless containers
+  when: container_check_result.is_container
   block:
     - name: Update first entry in /etc/subuid
       ansible.builtin.lineinfile:
