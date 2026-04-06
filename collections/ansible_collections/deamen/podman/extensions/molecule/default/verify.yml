@@ -38,3 +38,23 @@
     - name: Display newgidmap capabilities
       ansible.builtin.debug:
         msg: "newgidmap capabilities: {{ newgidmap_cap_result.stdout }}"
+    
+    - name: Check subuid file content
+      ansible.builtin.command: cat /etc/subuid
+      register: subuid_result
+      failed_when: subuid_result.rc != 0 or '10001:55535' not in subuid_result.stdout
+      changed_when: false
+    
+    - name: Display subuid file content
+      ansible.builtin.debug:
+        msg: "subuid file content: {{ subuid_result.stdout }}"
+    
+    - name: Check subgid file content
+      ansible.builtin.command: cat /etc/subgid
+      register: subgid_result
+      failed_when: subgid_result.rc != 0 or '10001:55535' not in subgid_result.stdout
+      changed_when: false
+
+    - name: Display subgid file content
+      ansible.builtin.debug:  
+        msg: "subgid file content: {{ subgid_result.stdout }}"

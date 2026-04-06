@@ -1,6 +1,10 @@
 ---
 # tasks file for install_podman
 
+- name: Check if running in a container
+  deamen.general.check_is_container:
+  register: container_check_result
+
 - name: Install podman packages
   ansible.builtin.package:
     name: "{{ item }}"
@@ -18,6 +22,7 @@
     name: "{{ podman_user.group }}"
     state: present
     gid: "{{ podman_user.gid }}"
+  when: not container_check_result.is_container
 
 - name: Ensure podman user exists
   ansible.builtin.user:
@@ -28,10 +33,7 @@
     home: "{{ podman_user.home | default('/home/' + podman_user.name) }}"
     state: present
     create_home: true
-
-- name: Check if running in a container
-  deamen.general.check_is_container:
-  register: container_check_result
+  when: not container_check_result.is_container
 
 - name: Check linger status for podman user
   ansible.builtin.command:
@@ -67,3 +69,22 @@
     capability: cap_setgid+eip
     state: present
   when: container_check_result.is_container
+
+# Ensure the user that runs podman inside container has its id mapped to a range that is maxium 65536, this fix the error:
+# ERRO[0000] running /usr/bin/newuidmap 62 0 1000 1 1 524288 65536: newuidmap: write to uid_map failed: Operation not permitted 
+# Error: cannot set up namespace using "/usr/bin/newuidmap": exit status 1
+- name: Apply podman in podman subuid/subgid workaround for rootless containers
+  block:
+    - name: Update first entry in /etc/subuid
+      ansible.builtin.lineinfile:
+        path: /etc/subuid
+        regexp: '^[^:]+:\d+:\d+$'
+        line: "{{ (lookup('file', '/etc/subuid') | split('\n') | first).split(':')[0] }}:10001:55535"
+        firstmatch: true
+
+    - name: Update first entry in /etc/subgid
+      ansible.builtin.lineinfile:
+        path: /etc/subgid
+        regexp: '^[^:]+:\d+:\d+$'
+        line: "{{ (lookup('file', '/etc/subgid') | split('\n') | first).split(':')[0] }}:10001:55535"
+        firstmatch: true
