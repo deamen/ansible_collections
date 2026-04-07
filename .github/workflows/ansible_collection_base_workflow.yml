@@ -1,0 +1,53 @@
+name: Ansible Collection Base Workflow
+
+on:
+  workflow_call:
+    inputs:
+      collection_path:
+        required: true
+        type: string
+        description: 'Relative path from the repository root to the collection folder containing galaxy.yml'
+    secrets:
+      ANSIBLE_GALAXY_APIKEY:
+        required: true
+
+jobs:
+  publish-collection:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install ansible-core
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install ansible-core
+
+      - name: Verify tag version matches galaxy.yml
+        run: |
+          tag_version=$(echo "${GITHUB_REF_NAME}" | grep -oP '\d+\.\d+\.\d+$')
+          galaxy_version=$(grep -oP '(?<=^version:\s)[\d.]+' ${{ inputs.collection_path }}/galaxy.yml)
+          echo "Tag version:     $tag_version"
+          echo "galaxy.yml version: $galaxy_version"
+          if [[ "$tag_version" != "$galaxy_version" ]]; then
+            echo "ERROR: Tag version ($tag_version) does not match galaxy.yml version ($galaxy_version)"
+            exit 1
+          fi
+
+      - name: Build collection
+        id: build
+        run: |
+          build_output=$(ansible-galaxy collection build ${{ inputs.collection_path }})
+          echo "$build_output"
+          tarball=$(echo "$build_output" | grep -oP '[\w-]+-[\w.]+-\d+\.\d+\.\d+\.tar\.gz')
+          echo "tarball=$tarball" >> "$GITHUB_OUTPUT"
+
+      - name: Publish collection
+        run: |
+          ansible-galaxy collection publish ${{ steps.build.outputs.tarball }} --api-key ${{ secrets.ANSIBLE_GALAXY_APIKEY }}
