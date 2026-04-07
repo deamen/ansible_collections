@@ -1,0 +1,37 @@
+---
+- name: Deploy git configuration for test user
+  hosts: containers
+  become: true
+  vars:
+    _molecule_test_user: testuser
+
+  tasks:
+    - name: Install git package
+      ansible.builtin.package:
+        name: git
+        state: present
+
+    - name: Configure passwordless sudo for become operations
+      ansible.builtin.copy:
+        content: 'ALL ALL=(ALL) NOPASSWD: ALL'
+        dest: /etc/sudoers.d/molecule
+        mode: '0440'
+        validate: 'visudo -cf %s'
+
+    - name: Create test user
+      ansible.builtin.user:
+        name: '{{ _molecule_test_user }}'
+        state: present
+        create_home: true
+
+    - name: Deploy git configuration for test user
+      ansible.builtin.include_role:
+        name: deamen.git.deploy_git_conf
+      vars:
+        git_data:
+          user: '{{ _molecule_test_user }}'
+          email: 'testuser@example.com'
+          username: 'Test User'
+          signing_key: 'ABCDEF1234567890ABCDEF1234567890ABCDEF12'
+          github_username: 'testuser'
+          github_helper: '/usr/bin/gopass'

@@ -1,0 +1,6 @@
+---
+roles: []
+
+collections:
+  - name: containers.podman
+  - name: community.general

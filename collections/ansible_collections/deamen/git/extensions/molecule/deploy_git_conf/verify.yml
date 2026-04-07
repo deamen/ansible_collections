@@ -1,0 +1,84 @@
+---
+- name: Verify deploy_git_conf role
+  hosts: containers
+  gather_facts: false
+  vars:
+    _molecule_test_user: testuser
+    _molecule_gitconfig: '/home/{{ _molecule_test_user }}/.gitconfig'
+
+  tasks:
+    - name: Gather .gitconfig file info
+      ansible.builtin.stat:
+        path: '{{ _molecule_gitconfig }}'
+      register: _gitconfig_stat
+
+    - name: Assert .gitconfig exists
+      ansible.builtin.assert:
+        that:
+          - _gitconfig_stat.stat.exists
+          - _gitconfig_stat.stat.isreg
+
+    - name: Read .gitconfig content
+      ansible.builtin.slurp:
+        src: '{{ _molecule_gitconfig }}'
+      register: _gitconfig_content
+
+    - name: Assert user.email is set
+      ansible.builtin.assert:
+        that: >-
+          'testuser@example.com' in (_gitconfig_content.content | b64decode)
+        fail_msg: "user.email not found in .gitconfig"
+
+    - name: Assert user.name is set
+      ansible.builtin.assert:
+        that: >-
+          'Test User' in (_gitconfig_content.content | b64decode)
+        fail_msg: "user.name not found in .gitconfig"
+
+    - name: Assert GPG signing key is set
+      ansible.builtin.assert:
+        that: >-
+          'ABCDEF1234567890ABCDEF1234567890ABCDEF12' in (_gitconfig_content.content | b64decode)
+        fail_msg: "user.signingkey not found in .gitconfig"
+
+    - name: Assert commit.gpgsign is enabled
+      ansible.builtin.assert:
+        that: >-
+          'gpgsign = true' in (_gitconfig_content.content | b64decode)
+        fail_msg: "commit.gpgsign not set in .gitconfig"
+
+    - name: Assert core.autocrlf is disabled
+      ansible.builtin.assert:
+        that: >-
+          'autocrlf = false' in (_gitconfig_content.content | b64decode)
+        fail_msg: "core.autocrlf not set in .gitconfig"
+
+    - name: Assert push.default is set to simple
+      ansible.builtin.assert:
+        that: >-
+          'default = simple' in (_gitconfig_content.content | b64decode)
+        fail_msg: "push.default not set in .gitconfig"
+
+    - name: Assert alias.rpull is set
+      ansible.builtin.assert:
+        that: >-
+          'rpull = pull --rebase' in (_gitconfig_content.content | b64decode)
+        fail_msg: "alias.rpull not set in .gitconfig"
+
+    - name: Assert LFS filter is configured
+      ansible.builtin.assert:
+        that: >-
+          'git-lfs' in (_gitconfig_content.content | b64decode)
+        fail_msg: "LFS filter settings not found in .gitconfig"
+
+    - name: Assert diff tool is set to meld
+      ansible.builtin.assert:
+        that: >-
+          'tool = meld' in (_gitconfig_content.content | b64decode)
+        fail_msg: "diff.tool not set to meld in .gitconfig"
+
+    - name: Assert safe.directory is set
+      ansible.builtin.assert:
+        that: >-
+          '/github/workspace' in (_gitconfig_content.content | b64decode)
+        fail_msg: "safe.directory not set in .gitconfig"
