@@ -24,5 +24,5 @@
 - name: Execute install_copilot_cli.sh to install Copilot CLI
   ansible.builtin.command: /usr/local/bin/install_copilot_cli.sh
   args:
-    creates: /usr/local/bin/copilot
+    creates: "{{ '/usr/local/bin/copilot' if ansible_user_id == 'root' else (ansible_env.HOME ~ '/.local/bin/copilot') }}"
   become: false
