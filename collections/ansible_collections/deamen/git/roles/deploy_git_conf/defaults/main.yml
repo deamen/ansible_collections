@@ -1,2 +1,9 @@
 ---
 # defaults file for deploy_git_conf
+git_data:
+  user: ""
+  email: ""
+  username: ""
+  signing_key: ""
+  github_username: ""
+  github_helper: ""
