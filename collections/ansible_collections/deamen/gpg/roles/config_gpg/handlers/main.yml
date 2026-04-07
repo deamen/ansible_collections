@@ -1,2 +1,17 @@
 ---
 # handlers file for config_gpg
+- name: Remove private GPG key file
+  ansible.builtin.file:
+    path: '{{ config_gpg_private_key_path }}'
+    state: absent
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+
+- name: Remove ownertrust file
+  ansible.builtin.file:
+    path: '/home/{{ config_gpg_user }}/.gnupg/owntrust.txt'
+    state: absent
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
