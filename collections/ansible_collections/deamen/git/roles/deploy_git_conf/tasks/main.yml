@@ -1,2 +1,148 @@
 ---
 # tasks file for deploy_git_conf
+- name: Set Git user email
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: user.email
+    value: "{{ git_data.email }}"
+
+- name: Set Git user name
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: user.name
+    value: "{{ git_data.username }}"
+
+- name: Set Git signing key
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: user.signingkey
+    value: "{{ git_data.signing_key }}"
+
+- name: Disable autocrlf
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: core.autocrlf
+    value: 'false'
+
+- name: Set git alias hist
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: alias.hist
+    value: 'log --pretty=format:"%h %ad | %s%d [%an]" --graph --date=short'
+
+- name: Set git alias rpull
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: alias.rpull
+    value: "pull --rebase"
+
+- name: Set default push behavior
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: push.default
+    value: simple
+
+- name: Set merge driver to true
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: merge.ours.driver
+    value: 'true'
+
+- name: Set LFS filter clean
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: filter.lfs.clean
+    value: "git-lfs clean -- %f"
+
+- name: Set LFS filter smudge
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: filter.lfs.smudge
+    value: "git-lfs smudge -- %f"
+
+- name: Set LFS filter process
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: filter.lfs.process
+    value: "git-lfs filter-process"
+
+- name: Require LFS filter
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: filter.lfs.required
+    value: 'true'
+
+- name: Set diff tool to meld
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: diff.tool
+    value: meld
+
+- name: Disable difftool prompt
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: difftool.prompt
+    value: 'false'
+
+- name: Set meld command for difftool
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: 'difftool."meld".cmd'
+    value: 'meld "$LOCAL" "$REMOTE"'
+
+- name: Set GitHub credential username
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: "credential.https://github.com/.username"
+    value: "{{ git_data.github_username }}"
+
+- name: Set GitHub credential helper to gopass
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: "credential.https://github.com/.helper"
+    value: "{{ git_data.github_helper }}"
+
+- name: Enable GPG sign by default
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: commit.gpgsign
+    value: 'true'
+
+- name: Mark /github/workspace as safe directory
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: safe.directory
+    value: /github/workspace
+
+- name: Set GitHub credential helper override
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: "credential.https://github.com.helper"
+    value: "!/usr/bin/gh auth git-credential"
+
+- name: Set Gist GitHub credential helper override
+  community.general.git_config:
+    scope: file
+    file: "/home/{{ git_data.user }}/.gitconfig"
+    name: "credential.https://gist.github.com.helper"
+    value: "!/usr/bin/gh auth git-credential"
