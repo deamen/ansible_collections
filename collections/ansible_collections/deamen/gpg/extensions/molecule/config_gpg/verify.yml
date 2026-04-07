@@ -1,0 +1,74 @@
+---
+- name: Verify config_gpg role
+  hosts: containers
+  gather_facts: false
+  vars:
+    _molecule_test_user: testuser
+    _molecule_test_fingerprint: '58E9E1EDCDF7B0B801849FB61E8C4D240EE0E2E2'
+
+  tasks:
+    - name: Gather .gnupg directory info
+      ansible.builtin.stat:
+        path: '/home/{{ _molecule_test_user }}/.gnupg'
+      register: _gnupg_dir
+
+    - name: Assert .gnupg directory exists with correct permissions
+      ansible.builtin.assert:
+        that:
+          - _gnupg_dir.stat.exists
+          - _gnupg_dir.stat.isdir
+          - _gnupg_dir.stat.mode == '0700'
+          - _gnupg_dir.stat.pw_name == _molecule_test_user
+
+    - name: Gather gpg-agent.conf file info
+      ansible.builtin.stat:
+        path: '/home/{{ _molecule_test_user }}/.gnupg/gpg-agent.conf'
+      register: _gpg_agent_conf
+
+    - name: Assert gpg-agent.conf exists with correct permissions
+      ansible.builtin.assert:
+        that:
+          - _gpg_agent_conf.stat.exists
+          - _gpg_agent_conf.stat.mode == '0600'
+          - _gpg_agent_conf.stat.pw_name == _molecule_test_user
+
+    - name: Check GPG secret key is imported
+      ansible.builtin.command:
+        cmd: 'gpg --list-secret-keys --with-colons {{ _molecule_test_fingerprint }}'
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      failed_when: _gpg_key_imported.rc != 0
+      register: _gpg_key_imported
+
+    - name: Check GPG key has ultimate trust
+      ansible.builtin.shell:
+        cmd: "set -o pipefail && gpg --export-ownertrust | grep {{ _molecule_test_fingerprint }} | grep ':6'"
+        executable: /bin/bash
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      failed_when: _gpg_trust.rc != 0
+      register: _gpg_trust
+
+    - name: Gather private GPG key file info
+      ansible.builtin.stat:
+        path: '/home/{{ _molecule_test_user }}/.gnupg/private_gpg.key'
+      register: _private_key_file
+
+    - name: Assert private key file was removed by handler
+      ansible.builtin.assert:
+        that:
+          - not _private_key_file.stat.exists
+
+    - name: Gather ownertrust file info
+      ansible.builtin.stat:
+        path: '/home/{{ _molecule_test_user }}/.gnupg/owntrust.txt'
+      register: _ownertrust_file
+
+    - name: Assert ownertrust file was removed by handler
+      ansible.builtin.assert:
+        that:
+          - not _ownertrust_file.stat.exists
