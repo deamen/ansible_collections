@@ -1,2 +1,5 @@
 ---
 # defaults file for config_gpg
+config_gpg_fingerprint: ''
+config_gpg_private_key_path: '/home/{{ config_gpg_user }}/.gnupg/private_gpg.key'
+config_gpg_user: ''
