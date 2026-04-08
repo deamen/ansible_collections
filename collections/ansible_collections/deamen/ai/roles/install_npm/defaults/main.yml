@@ -1,0 +1,6 @@
+---
+# defaults file for install_npm
+
+npm_packages:
+  - nodejs
+  - npm
