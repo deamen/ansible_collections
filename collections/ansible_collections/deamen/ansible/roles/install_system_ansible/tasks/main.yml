@@ -4,4 +4,4 @@
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  loop: "{{ ansible_packages + ansible_lint_packages }}"
+  loop: "{{ ansible_packages + ansible_lint_packages + ansible_runtime_packages }}"

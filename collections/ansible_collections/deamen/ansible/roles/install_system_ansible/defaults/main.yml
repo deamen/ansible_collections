@@ -10,3 +10,6 @@ ansible_packages:
 ansible_lint_packages:
   - python3-detect-secrets
   - pre-commit
+
+ansible_runtime_packages:
+  - sshpass
