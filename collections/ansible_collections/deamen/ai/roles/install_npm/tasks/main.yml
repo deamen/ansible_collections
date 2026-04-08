@@ -1,0 +1,9 @@
+---
+# tasks file for install_npm
+
+- name: Install Node.js and npm packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ npm_packages }}"
+  become: true

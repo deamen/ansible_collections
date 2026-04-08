@@ -1,0 +1,12 @@
+---
+# tasks file for install_gemini_cli
+
+- name: Install npm prerequisites
+  ansible.builtin.import_role:
+    name: deamen.ai.install_npm
+
+- name: Install Gemini CLI globally with npm
+  ansible.builtin.command:
+    cmd: npm install -g @google/gemini-cli
+    creates: /usr/local/bin/gemini
+  become: true

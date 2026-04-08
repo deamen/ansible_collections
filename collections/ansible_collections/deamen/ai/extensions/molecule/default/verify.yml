@@ -1,0 +1,15 @@
+---
+- name: Verify native inventory sources
+  hosts: molecule:&containers
+  gather_facts: true
+
+  tasks:
+    - name: Check Gemini CLI version
+      ansible.builtin.command: gemini --version
+      register: gemini_version_result
+      changed_when: false
+      failed_when: gemini_version_result.rc != 0
+
+    - name: Display Gemini CLI version
+      ansible.builtin.debug:
+        msg: "Gemini CLI version: {{ gemini_version_result.stdout }}"

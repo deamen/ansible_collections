@@ -1,0 +1,9 @@
+---
+- name: Test deamen.ai.install_gemini_cli
+  hosts: molecule:&containers
+  gather_facts: no
+
+  tasks:
+    - name: Install Gemini CLI
+      ansible.builtin.import_role:
+        name: deamen.ai.install_gemini_cli
