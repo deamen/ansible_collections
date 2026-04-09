@@ -6,6 +6,8 @@ import sys
 
 DEFAULT_COLLECTION_PATH = "collections/ansible_collections/"
 TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "files", "molecule_template")
+DEFAULT_TEMPLATE_DIR = os.path.join(TEMPLATE_PATH, "default")
+TEMPLATE_REQUIREMENTS_FILE = os.path.join(TEMPLATE_PATH, "requirements.yml")
 
 
 def parse_args():
@@ -36,6 +38,24 @@ def get_collection_molecule_path(collection_fqcn):
     )
 
 
+def ensure_collection_requirements_file(molecule_dir):
+    requirements_src = TEMPLATE_REQUIREMENTS_FILE
+    requirements_dst = os.path.join(molecule_dir, "requirements.yml")
+
+    if os.path.exists(requirements_dst):
+        return
+
+    if os.path.exists(requirements_src):
+        shutil.copyfile(requirements_src, requirements_dst)
+        print(f"Copied collection requirements to {requirements_dst}")
+        return
+
+    print(
+        f"Template requirements not found: {requirements_src}",
+        file=sys.stderr,
+    )
+
+
 def main():
     args = parse_args()
     molecule_dir = get_collection_molecule_path(args.collection)
@@ -45,25 +65,13 @@ def main():
         print(f"Scenario directory already exists: {scenario_dir}", file=sys.stderr)
         sys.exit(1)
 
-    source_dir = os.path.join(TEMPLATE_PATH, args.scenario)
+    source_dir = DEFAULT_TEMPLATE_DIR
     if not os.path.exists(source_dir):
-        print(f"Template scenario directory not found: {source_dir}", file=sys.stderr)
+        print(f"Default template scenario directory not found: {source_dir}", file=sys.stderr)
         sys.exit(1)
 
     os.makedirs(molecule_dir, exist_ok=True)
-    # If using the default template, ensure collection-level requirements.yml exists
-    if args.scenario == "default":
-        requirements_src = os.path.join(TEMPLATE_PATH, "requirements.yml")
-        requirements_dst = os.path.join(molecule_dir, "requirements.yml")
-        if not os.path.exists(requirements_dst):
-            if os.path.exists(requirements_src):
-                shutil.copyfile(requirements_src, requirements_dst)
-                print(f"Copied collection requirements to {requirements_dst}")
-            else:
-                print(
-                    f"Template requirements not found: {requirements_src}",
-                    file=sys.stderr,
-                )
+    ensure_collection_requirements_file(molecule_dir)
 
     print(f"Copying template from {source_dir} to {scenario_dir}")
     shutil.copytree(source_dir, scenario_dir)
