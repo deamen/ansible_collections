@@ -67,7 +67,10 @@ def main():
 
     source_dir = DEFAULT_TEMPLATE_DIR
     if not os.path.exists(source_dir):
-        print(f"Default template scenario directory not found: {source_dir}", file=sys.stderr)
+        print(
+            f"Default template scenario directory not found: {source_dir}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     os.makedirs(molecule_dir, exist_ok=True)
