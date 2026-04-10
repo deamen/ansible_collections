@@ -17,7 +17,7 @@ jobs:
       - name: Run ansible-lint
         uses: ansible/ansible-lint@v26.3.0
         with:
-          args: ""
+          args: "deamen/"
           setup_python: "true"
-          working_directory: ""
+          working_directory: "collections/ansible_collections"
           requirements_file: "requirements.yml"
