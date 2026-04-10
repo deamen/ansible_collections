@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 get_git_paths() {
     if [ -f /etc/redhat-release ]; then
         if grep -q "Red Hat Enterprise Linux release 9" /etc/redhat-release; then
