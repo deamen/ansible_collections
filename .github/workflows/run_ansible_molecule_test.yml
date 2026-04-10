@@ -1,0 +1,66 @@
+name: Run Ansible Molecule Test
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'collections/ansible_collections/**'
+      - 'requirements.yml'
+      - '.github/workflows/run_ansible_molecule_test.yml'
+
+jobs:
+  run_molecule_test:
+    name: Run Molecule Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.14"
+        ansible-core-version:
+          - "2.20"
+        collection:
+          - "deamen/ai"
+          - "deamen/certificate"
+          - "deamen/git"
+          - "deamen/gpg"
+          - "deamen/podman"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          show-progress: false
+
+      - name: Set up Python ${{ matrix.python-version }}
+        id: python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - name: Install ansible-core and molecule
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install "ansible-core~=${{ matrix.ansible-core-version }}" molecule molecule-plugins
+
+      # - name: Set up molecule base config
+      #   run: |
+      #     mkdir -p ~/.config/molecule
+      #     cp .config/molecule/config.yml ~/.config/molecule/config.yml
+
+      - name: Install ansible collections
+        run: |
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Install collection molecule requirements
+        working-directory: collections/ansible_collections/${{ matrix.collection }}
+        run: |
+          if [ -f extensions/molecule/requirements.yml ]; then
+            ansible-galaxy collection install -r extensions/molecule/requirements.yml
+          fi
+
+      - name: Run molecule test - ${{ matrix.collection }}
+        working-directory: collections/ansible_collections/${{ matrix.collection }}
+        # env:
+        #   ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}/collections
+        run: |
+          molecule test --all
