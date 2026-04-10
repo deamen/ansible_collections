@@ -54,21 +54,41 @@
 
 # This is required by docker privileged mode on windows
 # Don't need this on apple container
+- name: Get current capabilities on newuidmap binary for podman in container
+  ansible.builtin.command:
+    cmd: getcap /usr/bin/newuidmap
+  register: newuidmap_caps
+  changed_when: false
+  failed_when: false
+  when: container_check_result.is_container
+
 - name: Set cap_setuid on newuidmap binary for podman in container
   community.general.capabilities:
     path: /usr/bin/newuidmap
     capability: cap_setuid+eip
     state: present
-  when: container_check_result.is_container
+  when:
+    - container_check_result.is_container
+    - "'cap_setuid=eip' not in (newuidmap_caps.stdout | default(''))"
 
 # This is required by docker privileged mode on windows
 # Don't need this on apple container
+- name: Get current capabilities on newgidmap binary for podman in container
+  ansible.builtin.command:
+    cmd: getcap /usr/bin/newgidmap
+  register: newgidmap_caps
+  changed_when: false
+  failed_when: false
+  when: container_check_result.is_container
+
 - name: Set cap_setgid on newgidmap binary for podman in container
   community.general.capabilities:
     path: /usr/bin/newgidmap
     capability: cap_setgid+eip
     state: present
-  when: container_check_result.is_container
+  when:
+    - container_check_result.is_container
+    - "'cap_setgid=eip' not in (newgidmap_caps.stdout | default(''))"
 
 # Ensure the user that runs podman inside container has its id mapped to a range that is maxium 65536, this fix the error:
 # ERRO[0000] running /usr/bin/newuidmap 62 0 1000 1 1 524288 65536: newuidmap: write to uid_map failed: Operation not permitted
