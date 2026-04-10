@@ -1,6 +1,6 @@
 ---
 - name: Test deamen.general.install_dev_packages plabook
-  ansible.builtin.import_playbook: ../../playbooks/install_development_packages.yml
+  ansible.builtin.import_playbook: ../../../playbooks/install_development_packages.yml
 
 - name: Test deamen.general.check_is_container module in container
   hosts: containers

@@ -14,4 +14,4 @@
 
 
 - name: Test deamen.general.config_dev_runtime_env plabook
-  ansible.builtin.import_playbook: ../../playbooks/configure_system_ansible_runtime_env.yml
+  ansible.builtin.import_playbook: ../../../playbooks/configure_system_ansible_runtime_env.yml

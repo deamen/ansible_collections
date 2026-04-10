@@ -1,7 +1,7 @@
 ---
 - name: Test deamen.ai.install_gemini_cli
   hosts: molecule:&containers
-  gather_facts: no
+  gather_facts: false
 
   tasks:
     - name: Install Gemini CLI
