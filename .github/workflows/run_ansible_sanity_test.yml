@@ -1,0 +1,53 @@
+name: Run Ansible Sanity test
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'collections/ansible_collections/**'
+      - 'requirements.yml'
+      - '.github/workflows/run_ansible_sanity_test.yml'
+
+jobs:
+  run_sanity_test:
+    name: Run Ansible Sanity Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.14"
+        collection:
+          - "deamen/account"
+          - "deamen/git"
+          - "deamen/podman"
+          - "deamen/ansible"
+          - "deamen/ai"
+          - "deamen/gpg"
+          - "deamen/general"
+          - "deamen/certificate"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          show-progress: false
+
+      - name: Set up Python ${{ matrix.python-version }}
+        id: python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - name: Install ansible-test
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install ansible-core
+
+      - name: Install ansible collections
+        run: |
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Run ansible-test sanity ${{ matrix.collection }}
+        working-directory: collections/ansible_collections/${{ matrix.collection }}
+        run: |
+          ansible-test sanity --docker --python ${{ matrix.python-version }}
