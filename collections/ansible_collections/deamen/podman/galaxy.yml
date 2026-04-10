@@ -23,6 +23,7 @@ tags: ["linux", "containers", "podman", "automation"]
 
 dependencies:
   deamen.general: ">=1.0.0,<2.0.0"
+  community.general: ">=9.0.0"
 
 # The URL of the originating SCM repository
 repository: https://github.com/deamen/ansible_collections
