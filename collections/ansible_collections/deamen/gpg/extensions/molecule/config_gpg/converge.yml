@@ -32,6 +32,16 @@
         path: '/home/{{ _molecule_test_user }}/.gnupg'
         state: directory
 
+    - name: Check if GPG key is already imported
+      ansible.builtin.command:
+        cmd: 'gpg --list-secret-keys --with-colons {{ _molecule_test_fingerprint }}'
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      failed_when: false
+      register: _molecule_gpg_key_check
+
     - name: Copy test GPG private key to container
       ansible.builtin.copy:
         dest: '/home/{{ _molecule_test_user }}/.gnupg/private_gpg.key'
@@ -39,6 +49,7 @@
         mode: '0600'
         owner: '{{ _molecule_test_user }}'
         src: '{{ playbook_dir }}/test-ed25519-secret.asc'
+      when: _molecule_gpg_key_check.rc != 0
 
     - name: Configure GPG for test user
       ansible.builtin.include_role:
