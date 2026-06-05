@@ -22,14 +22,16 @@
 
   tasks:
     - name: Start Buildah working container
-      command: buildah from --arch {{ arch }} {{ base_image }}
+      ansible.builtin.command: buildah from --arch {{ arch }} {{ base_image }}
       register: from_out
+      changed_when: true
 
-    - set_fact:
-        container_id: "{{ from_out.stdout | trim }}"
+    - name: Set container ID from Buildah output
+      ansible.builtin.set_fact:
+        container_id: '{{ from_out.stdout | trim }}'
 
     - name: Add working container as dynamic host (Buildah connection)
-      add_host:
+      ansible.builtin.add_host:
         name: "buildcntr_{{ container_id }}"
         ansible_connection: containers.podman.buildah
         ansible_host: "{{ container_id }}"
@@ -52,7 +54,7 @@
             state: present
             install_weak_deps: false
 
-        - name: Build OpenBLAS (install to /blas)
+        - name: Build OpenBLAS (install to /blas)  # noqa: command-instead-of-module
           ansible.builtin.shell: |
             git clone https://github.com/OpenMathLib/OpenBLAS.git /OpenBLAS
             mkdir -p /OpenBLAS/build
@@ -67,7 +69,7 @@
           args:
             creates: /blas/lib/libopenblas.a
 
-        - name: Build llama.cpp (install to /llama)
+        - name: Build llama.cpp (install to /llama)  # noqa: command-instead-of-module
           ansible.builtin.shell: |
             git clone https://github.com/ggml-org/llama.cpp.git /llama_src
             mkdir -p /llama_src/build
@@ -88,7 +90,7 @@
             creates: /llama
 
     - name: Create temporary copy script to run inside buildah unshare
-      copy:
+      ansible.builtin.copy:
         dest: "{{ playbook_dir }}/copy_artifacts.sh"
         content: |
           #!/bin/sh
@@ -101,19 +103,20 @@
         mode: '0755'
 
     - name: Ensure local output base exists at repo root/out/llama
-      file:
+      ansible.builtin.file:
         path: "{{ playbook_dir }}/../out/llama"
         state: directory
         mode: '0755'
 
     - name: Copy selected artifacts from container using temporary script
-      command: >-
-        buildah unshare -- {{ playbook_dir }}/copy_artifacts.sh
+      ansible.builtin.command: buildah unshare -- {{ playbook_dir }}/copy_artifacts.sh
+      changed_when: true
 
     - name: Remove temporary copy script
-      file:
+      ansible.builtin.file:
         path: "{{ playbook_dir }}/copy_artifacts.sh"
         state: absent
 
     - name: Remove working container
-      command: buildah rm {{ container_id }}
+      ansible.builtin.command: buildah rm {{ container_id }}
+      changed_when: true
