@@ -1,0 +1,119 @@
+---
+- name: Build llama.cpp and OpenBLAS using Buildah on Fedora
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+
+  vars:
+    arch: "amd64"
+    base_image: "registry.fedoraproject.org/fedora:latest"
+    image_name: "{{ registry_url }}/fedora-init-{{ arch }}"
+    build_packages:
+      - git
+      - gcc
+      - gcc-c++
+      - gcc-gfortran
+      - cmake
+      - ninja-build
+      - make
+      - openssl-devel
+      - kernel-headers
+
+  tasks:
+    - name: Start Buildah working container
+      command: buildah from --arch {{ arch }} {{ base_image }}
+      register: from_out
+
+    - set_fact:
+        container_id: "{{ from_out.stdout | trim }}"
+
+    - name: Add working container as dynamic host (Buildah connection)
+      add_host:
+        name: "buildcntr_{{ container_id }}"
+        ansible_connection: containers.podman.buildah
+        ansible_host: "{{ container_id }}"
+
+    - name: Build llama.cpp
+      delegate_to: "buildcntr_{{ container_id }}"
+      become: true
+      block:
+        - name: Install python3-libdnf5 package
+          # Using raw module because the ansible.builtin.dnf module itself depends on python3-libdnf5
+          # This creates a chicken-and-egg problem where we need to install this package first
+          # before we can use the dnf module for other package management tasks
+          ansible.builtin.raw: microdnf install -y python3-libdnf5
+          changed_when: result.rc != 0
+          register: result
+
+        - name: Install build dependencies
+          ansible.builtin.dnf:
+            name: "{{ build_packages }}"
+            state: present
+            install_weak_deps: false
+
+        - name: Build OpenBLAS (install to /blas)
+          ansible.builtin.shell: |
+            git clone https://github.com/OpenMathLib/OpenBLAS.git /OpenBLAS
+            mkdir -p /OpenBLAS/build
+            cd /OpenBLAS/build
+            cmake .. \
+              -DUSE_OPENMP=1 \
+              -DTARGET=SKYLAKEX \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DBUILD_STATIC_LIBS=ON
+            cmake --build . -j$(nproc --ignore=1)
+            cmake --install . --prefix /blas
+          args:
+            creates: /blas/lib/libopenblas.a
+
+        - name: Build llama.cpp (install to /llama)
+          ansible.builtin.shell: |
+            git clone https://github.com/ggml-org/llama.cpp.git /llama_src
+            mkdir -p /llama_src/build
+            cd /llama_src/build
+            cmake .. -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DGGML_BLAS=ON \
+              -DGGML_BLAS_VENDOR=OpenBLAS \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DBLAS_LIBRARIES=/blas/lib64/libopenblas.a \
+              -DBLAS_INCLUDE_DIRS=/blas/include/openblas \
+              -DCMAKE_C_FLAGS="-march=cascadelake" \
+              -DCMAKE_CXX_FLAGS="-march=cascadelake" \
+              -DGGML_NATIVE=OFF
+            cmake --build . -j$(nproc --ignore=1)
+            cmake --install . --prefix /llama
+          args:
+            creates: /llama
+
+    - name: Create temporary copy script to run inside buildah unshare
+      copy:
+        dest: "{{ playbook_dir }}/copy_artifacts.sh"
+        content: |
+          #!/bin/sh
+          container="{{ container_id }}"
+          mnt=$(buildah mount "$container")
+          mkdir -p "{{ playbook_dir }}/../out/llama/bin"
+          # copy only llama executables into out/llama/bin
+          cp -a "$mnt/llama/bin" "{{ playbook_dir }}/../out/llama/"
+          buildah umount "$container"
+        mode: '0755'
+
+    - name: Ensure local output base exists at repo root/out/llama
+      file:
+        path: "{{ playbook_dir }}/../out/llama"
+        state: directory
+        mode: '0755'
+
+    - name: Copy selected artifacts from container using temporary script
+      command: >-
+        buildah unshare -- {{ playbook_dir }}/copy_artifacts.sh
+
+    - name: Remove temporary copy script
+      file:
+        path: "{{ playbook_dir }}/copy_artifacts.sh"
+        state: absent
+
+    - name: Remove working container
+      command: buildah rm {{ container_id }}
