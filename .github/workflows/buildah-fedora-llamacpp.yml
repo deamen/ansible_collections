@@ -1,9 +1,6 @@
 name: Test build llama on fedora
 
 on:
-  push:
-    paths:
-      - 'collections/ansible_collections/deamen/ai/playbooks/buildah_fedora-llamacpp.yml'
   pull_request:
     paths:
       - 'collections/ansible_collections/deamen/ai/playbooks/buildah_fedora-llamacpp.yml'
