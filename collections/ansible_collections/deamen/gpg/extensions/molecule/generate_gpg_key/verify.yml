@@ -1,0 +1,90 @@
+---
+- name: Verify generate_gpg_key role
+  hosts: containers
+  gather_facts: false
+  vars:
+    _molecule_test_user: testuser
+    _molecule_key_email: "molecule@test.example.com"
+
+  tasks:
+    - name: Check GPG secret key exists with Ed25519
+      ansible.builtin.shell: |
+        gpg --with-colons --list-secret-keys "{{ _molecule_key_email }}" | grep '^sec' | grep ':1:' | head -1
+      args:
+        executable: /bin/bash
+      become: true
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      register: _gpg_sec_check
+      failed_when: _gpg_sec_check.rc != 0
+      ignore_errors: true
+
+    - name: Assert GPG secret key exists
+      ansible.builtin.assert:
+        that:
+          - _gpg_sec_check.rc == 0
+        fail_msg: "GPG secret key for {{ _molecule_key_email }} was not found"
+
+    - name: Check GPG public key exists
+      ansible.builtin.shell: |
+        gpg --with-colons --list-keys "{{ _molecule_key_email }}" | grep '^pub' | grep ':1:' | head -1
+      args:
+        executable: /bin/bash
+      become: true
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      register: _gpg_pub_check
+      failed_when: _gpg_pub_check.rc != 0
+      ignore_errors: true
+
+    - name: Assert GPG public key exists
+      ansible.builtin.assert:
+        that:
+          - _gpg_pub_check.rc == 0
+        fail_msg: "GPG public key for {{ _molecule_key_email }} was not found"
+
+    - name: Get fingerprint
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail &&
+          gpg --with-colons --list-keys {{ _molecule_key_email }}
+          | grep '^fpr' | head -1 | cut -d: -f10
+        executable: /bin/bash
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      register: _gpg_fingerprint
+      failed_when: false
+
+    - name: Check encryption subkey exists (Curve25519)
+      ansible.builtin.shell: |
+        gpg --with-colons --list-keys "{{ _gpg_fingerprint.stdout }}" | grep '^sub' | head -1
+      args:
+        executable: /bin/bash
+      become: true
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      register: _gpg_sub_check
+      failed_when: _gpg_sub_check.rc != 0
+      ignore_errors: true
+
+    - name: Assert encryption subkey exists
+      ansible.builtin.assert:
+        that:
+          - _gpg_sub_check.rc == 0
+        fail_msg: "Encryption subkey (Curve25519) was not created"
+
+    - name: Check temporary params file was cleaned up
+      ansible.builtin.stat:
+        path: /tmp/gpg_params
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
+      register: _params_file
+
+    - name: Assert temporary params file was removed
+      ansible.builtin.assert:
+        that:
+          - not _params_file.stat.exists
+        fail_msg: "Temporary GPG params file /tmp/gpg_params was not cleaned up"
