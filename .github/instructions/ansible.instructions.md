@@ -21,6 +21,8 @@ applyTo: '**/*.yaml, **/*.yml'
 - Use dynamic inventory for cloud resources
   - Use tags to dynamically create groups based on environment, function, location, etc.
   - Use `group_vars` to set variables based on these attributes
+- Don't use default empty value unless specifically asked to.
+- Don't assert variable value unless specifically asked to.
 - Use idempotent Ansible modules whenever possible; avoid `shell`, `command`, and `raw`, as they break idempotency
   - If you have to use `shell` or `command`, use the `creates:` or `removes:` parameter, where feasible, to prevent unnecessary execution
 - Use [fully qualified collection names (FQCN)](https://docs.ansible.com/ansible/latest/reference_appendices/glossary.html#term-Fully-Qualified-Collection-Name-FQCN) to ensure the correct module or plugin is selected
