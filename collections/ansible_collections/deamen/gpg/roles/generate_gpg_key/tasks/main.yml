@@ -1,0 +1,99 @@
+---
+# tasks file for generate_gpg_key
+
+- name: Validate required variables
+  ansible.builtin.fail:
+    msg: "gpg_key_real_name and gpg_key_email variables are required."
+  when: (gpg_key_real_name | default('')) | length == 0 or (gpg_key_email | default('')) | length == 0
+
+- name: Check if secret key already exists
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail &&
+      gpg --list-secret-keys --with-colons {{ gpg_key_email }}
+      | grep sec | head -1
+    executable: /bin/bash
+  failed_when: false
+  register: _gpg_secret_key_check
+  changed_when: false
+
+- name: Set skip flag if secret key already exists
+  ansible.builtin.set_fact:
+    _gpg_skip: true
+  when: _gpg_secret_key_check.rc == 0
+
+- name: Skip key generation if secret key already exists
+  ansible.builtin.debug:
+    msg: "A secret key already exists for {{ gpg_key_email }}. Skipping key generation."
+  when: _gpg_skip | default(false)
+
+- name: Generate and configure GPG key
+  when: not (_gpg_skip | default(false))
+  block:
+    - name: Generate GPG key pair (Ed25519, no password)
+      ansible.builtin.copy:
+        content: |
+          Key-Type: eddsa
+          Key-Curve: Ed25519
+          Key-Usage: sign
+          Name-Real: {{ gpg_key_real_name }}
+          Name-Email: {{ gpg_key_email }}
+          Expire-Date: 0
+          %no-protection
+          %commit
+        dest: "{{ gpg_params_path | default('/tmp/gpg_params') }}"
+        mode: '0600'
+      no_log: true
+
+    - name: Generate GPG key
+      ansible.builtin.command:
+        cmd: gpg --batch --gen-key {{ gpg_params_path | default('/tmp/gpg_params') }}
+      register: gpg_gen_key_result
+      changed_when: gpg_gen_key_result.rc == 0
+
+    - name: Get GPG key fingerprint
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail &&
+          gpg --with-colons --list-keys {{ gpg_key_email }}
+          | grep fpr | head -1 | cut -d: -f10
+        executable: /bin/bash
+      failed_when: false
+      register: gpg_fingerprint
+      changed_when: false
+
+    - name: Fail if key generation produced no fingerprint
+      ansible.builtin.fail:
+        msg: "GPG key generation failed. No key found for {{ gpg_key_email }}."
+      when: gpg_fingerprint.stdout | length == 0
+
+    - name: Display GPG primary key fingerprint
+      ansible.builtin.debug:
+        msg: "Primary Key (Ed25519): {{ gpg_fingerprint.stdout }}"
+
+    - name: Add encryption subkey (Curve25519)
+      ansible.builtin.command:
+        cmd: >-
+          gpg --batch --pinentry-mode loopback --passphrase ''
+          --quick-add-key {{ gpg_fingerprint.stdout }} curve25519 encr 0
+      register: gpg_add_subkey_result
+      changed_when: gpg_add_subkey_result.rc == 0
+
+    - name: Display encryption subkey result
+      ansible.builtin.debug:
+        msg: "ECDH (Curve25519) subkey added successfully."
+      when: gpg_add_subkey_result.rc == 0
+
+    - name: Fail if encryption subkey addition failed
+      ansible.builtin.fail:
+        msg: >-
+          Failed to add Curve25519 encryption subkey.
+          Your GPG version may be too old to support this operation non-interactively.
+          Please upgrade GPG: dnf update gpg
+      when: gpg_add_subkey_result.rc != 0
+
+    - name: Remove temporary gpg params file
+      ansible.builtin.file:
+        path: "{{ gpg_params_path | default('/tmp/gpg_params') }}"
+        state: absent
+      changed_when: false

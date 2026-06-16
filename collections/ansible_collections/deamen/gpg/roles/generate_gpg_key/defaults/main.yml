@@ -1,0 +1,8 @@
+---
+# defaults file for generate_gpg_key
+
+gpg_key_real_name: ""
+# email address for the key owner
+gpg_key_email: ""
+# temporary path for generated gpg params file
+gpg_params_path: "/tmp/gpg_params"

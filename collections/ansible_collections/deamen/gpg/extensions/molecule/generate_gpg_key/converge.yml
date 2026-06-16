@@ -1,0 +1,44 @@
+---
+- name: Prepare environment and generate GPG key
+  hosts: containers
+  gather_facts: true
+  become: true
+  vars:
+    _molecule_test_user: testuser
+    _molecule_key_real_name: "Molecule Test User"
+    _molecule_key_email: "molecule@test.example.com"
+
+  tasks:
+    - name: Configure passwordless sudo for test user
+      ansible.builtin.copy:
+        content: "{{ _molecule_test_user }} ALL=(ALL) NOPASSWD: ALL\n"
+        dest: /etc/sudoers.d/molecule
+        mode: '0440'
+        validate: 'visudo -cf %s'
+
+    - name: Create test user
+      ansible.builtin.user:
+        name: '{{ _molecule_test_user }}'
+        state: present
+        create_home: true
+
+    - name: Install GPG packages
+      ansible.builtin.include_role:
+        name: deamen.gpg.install_gpg
+
+    - name: Ensure .gnupg directory exists for test user
+      ansible.builtin.file:
+        group: '{{ _molecule_test_user }}'
+        mode: '0700'
+        owner: '{{ _molecule_test_user }}'
+        path: '/home/{{ _molecule_test_user }}/.gnupg'
+        state: directory
+
+    - name: Generate GPG key for test user
+      ansible.builtin.import_role:
+        name: deamen.gpg.generate_gpg_key
+      vars:
+        gpg_key_real_name: '{{ _molecule_key_real_name }}'
+        gpg_key_email: '{{ _molecule_key_email }}'
+      become: true
+      become_user: "{{ _molecule_test_user }}"

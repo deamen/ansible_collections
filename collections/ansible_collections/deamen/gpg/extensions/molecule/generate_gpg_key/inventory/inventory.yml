@@ -1,0 +1,12 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+molecule:
+  children:
+    containers:
+
+containers:
+  hosts:
+    test-container-1:
