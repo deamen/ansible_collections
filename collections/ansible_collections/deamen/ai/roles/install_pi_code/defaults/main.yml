@@ -1,0 +1,7 @@
+---
+# defaults file for install_pi_code
+
+pi_code_dependency_packages:
+  - curl
+  - fd
+  - ripgrep

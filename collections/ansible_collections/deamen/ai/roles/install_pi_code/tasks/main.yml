@@ -1,0 +1,28 @@
+---
+# tasks file for install_pi_code
+
+- name: Set OS-family specific variables
+  ansible.builtin.include_vars: "{{ __vars_file }}"
+  vars:
+    __vars_file: "{{ role_path }}/vars/{{ item }}"
+  loop:
+    - "{{ ansible_facts['os_family'] }}.yml"
+    - "{{ ansible_facts['distribution'] }}.yml"
+  when: __vars_file is file
+
+- name: Install npm prerequisites
+  ansible.builtin.import_role:
+    name: deamen.ai.install_npm
+
+- name: Install extra packages required by pi-coding-agent
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ pi_code_dependency_packages }}"
+  become: true
+
+- name: Install pi-coding-agent globally with npm
+  ansible.builtin.command:
+    cmd: npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+    creates: /usr/local/bin/pi
+  become: true
