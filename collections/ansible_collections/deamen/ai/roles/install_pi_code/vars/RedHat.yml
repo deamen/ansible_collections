@@ -1,0 +1,8 @@
+---
+# vars file for install_pi_code - RedHat/Fedora family
+# 'fd' is packaged as 'fd-find' on Fedora/RHEL
+
+pi_code_dependency_packages:
+  - curl
+  - fd-find
+  - ripgrep
