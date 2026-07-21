@@ -1,0 +1,8 @@
+---
+# vars file for install_pi_code - Alpine family
+# Explicitly mirrors the defaults for clarity
+
+pi_code_dependency_packages:
+  - curl
+  - fd
+  - ripgrep
