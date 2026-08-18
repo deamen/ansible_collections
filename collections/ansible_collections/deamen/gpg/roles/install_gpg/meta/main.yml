@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-    author: Song Tang
-    description: Install GPG
+    author: Song Tang <stang@mmz.au>
+    description: Install GPG packages
     company: Yobibyte
     license: GPL-3.0-or-later
 

@@ -1,7 +1,7 @@
 install_gpg
 ===========
 
-Install GPG
+Install GPG packages.
 
 Requirements
 ------------
