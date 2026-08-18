@@ -1,62 +1,44 @@
 generate_gpg_key
 ================
 
-An Ansible role that generates an Ed25519 primary GPG key and an encryption subkey (Curve25519) in a non-interactive way. The role is intentionally small and opinionated: it requires a name and email and will skip creation when a secret key for the given email already exists.
+Generate GPG keys with an Ed25519 primary signing key and a Curve25519 encryption subkey.
 
 Requirements
 ------------
 
-- GnuPG must be installed on the target host (`gpg` or `gpg2`).
-- Run the task as the user that should own the key (use `become_user`) so the key is created in the intended keyring.
+`gpg` must be installed on the target host.
 
 Role Variables
 --------------
 
-- `gpg_key_real_name` (string, required) — Real name for the UID (e.g. "Alice Example").
-- `gpg_key_email` (string, required) — Email address for the UID and the lookup key.
-- `gpg_params_path` (string, optional) — Temporary path for the GPG batch parameter file. Default: `/tmp/gpg_params`.
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+|gpg_key_real_name|The real name of the GPG key owner|N.A.|"Jane Doe"|
+|gpg_key_email|The email address of the GPG key owner|N.A.|"jane.doe@example.com"|
+|gpg_key_passphrase|The passphrase to protect the GPG key. If omitted or empty, the key is generated without passphrase protection|N.A.|"s3cr3tP@ss"|
+|gpg_params_path|The temporary path for the GPG batch params file|"/tmp/gpg_params"|"/tmp/my_gpg_params"|
 
 Dependencies
 ------------
 
-- System: `gpg`/`gnupg` must be installed.
-- No role dependencies.
+No role dependencies.
 
 Example Playbook
 ----------------
 
-Generate a key as a specific user (recommended — keys are created in that user's home):
-
 ```yaml
-- name: Generate GPG key for user
-  hosts: all
-  become: true
+- name: Generate GPG key
+  hosts: localhost
+
   tasks:
-    - name: Generate GPG key for alice
+    - name: Import the deamen.gpg.generate_gpg_key role
       ansible.builtin.import_role:
         name: deamen.gpg.generate_gpg_key
       vars:
-        gpg_key_real_name: "Alice Example"
-        gpg_key_email: "alice@example.com"
-      become: true
-      become_user: alice
+        gpg_key_real_name: Jane Doe
+        gpg_key_email: jane.doe@example.com
+        gpg_key_passphrase: "{{ vault_gpg_passphrase }}"
 ```
-
-If running the playbook as the target user already (no become_user):
-
-```yaml
-- name: Generate GPG key as current user
-  hosts: all
-  become: true
-  tasks:
-    - name: Generate GPG key as current user
-      ansible.builtin.import_role:
-        name: deamen.gpg.generate_gpg_key
-      vars:
-        gpg_key_real_name: "Alice Example"
-        gpg_key_email: "alice@example.com"
-```
-
 
 License
 -------
@@ -66,4 +48,4 @@ GPL-3.0-or-later
 Author Information
 ------------------
 
-stang <stang@mmz.au>
+Song Tang <stang@mmz.au>

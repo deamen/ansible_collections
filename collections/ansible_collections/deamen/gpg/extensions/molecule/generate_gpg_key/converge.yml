@@ -7,6 +7,9 @@
     _molecule_test_user: testuser
     _molecule_key_real_name: "Molecule Test User"
     _molecule_key_email: "molecule@test.example.com"
+    _molecule_key_email_pw: "molecule-pw@test.example.com"
+    # Fixed test passphrase — not a real secret, used only in ephemeral test containers
+    _molecule_key_passphrase: MoleculeTest1!
 
   tasks:
     - name: Configure passwordless sudo for test user
@@ -40,5 +43,15 @@
       vars:
         gpg_key_real_name: '{{ _molecule_key_real_name }}'
         gpg_key_email: '{{ _molecule_key_email }}'
+      become: true
+      become_user: "{{ _molecule_test_user }}"
+
+    - name: Generate passphrase-protected GPG key for test user
+      ansible.builtin.import_role:
+        name: deamen.gpg.generate_gpg_key
+      vars:
+        gpg_key_real_name: '{{ _molecule_key_real_name }}'
+        gpg_key_email: '{{ _molecule_key_email_pw }}'
+        gpg_key_passphrase: '{{ _molecule_key_passphrase }}'
       become: true
       become_user: "{{ _molecule_test_user }}"
