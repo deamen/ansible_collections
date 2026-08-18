@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-    author: stang
-    description: your role description
+    author: Song Tang <stang@mmz.au>
+    description: Generate GPG key
     company: Yobibyte
     license: GPL-3.0-or-later
 
