@@ -55,7 +55,7 @@
 
     - name: Gather private GPG key file info
       ansible.builtin.stat:
-        path: '/home/{{ _molecule_test_user }}/.gnupg/private_gpg.key'
+        path: '/tmp/private_gpg.key'
       register: _private_key_file
 
     - name: Assert private key file was removed by handler

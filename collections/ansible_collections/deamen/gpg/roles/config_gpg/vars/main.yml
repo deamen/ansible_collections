@@ -1,2 +1,4 @@
 ---
 # vars file for config_gpg
+_config_gpg_fingerprint: >-
+  {{ config_gpg_fingerprint if (config_gpg_import_key | bool) else '' }}

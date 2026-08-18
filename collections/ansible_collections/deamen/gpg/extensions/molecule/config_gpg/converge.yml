@@ -24,14 +24,6 @@
       ansible.builtin.include_role:
         name: deamen.gpg.install_gpg
 
-    - name: Ensure .gnupg directory exists for test user
-      ansible.builtin.file:
-        group: '{{ _molecule_test_user }}'
-        mode: '0700'
-        owner: '{{ _molecule_test_user }}'
-        path: '/home/{{ _molecule_test_user }}/.gnupg'
-        state: directory
-
     - name: Check if GPG key is already imported
       ansible.builtin.command:
         cmd: 'gpg --list-secret-keys --with-colons {{ _molecule_test_fingerprint }}'
@@ -44,7 +36,7 @@
 
     - name: Copy test GPG private key to container
       ansible.builtin.copy:
-        dest: '/home/{{ _molecule_test_user }}/.gnupg/private_gpg.key'
+        dest: /tmp/private_gpg.key
         group: '{{ _molecule_test_user }}'
         mode: '0600'
         owner: '{{ _molecule_test_user }}'
@@ -56,4 +48,25 @@
         name: deamen.gpg.config_gpg
       vars:
         config_gpg_fingerprint: '{{ _molecule_test_fingerprint }}'
+        config_gpg_private_key_path: /tmp/private_gpg.key
         config_gpg_user: '{{ _molecule_test_user }}'
+
+- name: Configure GPG agent only (no key import)
+  hosts: containers
+  become: true
+  vars:
+    _molecule_test_user_no_import: testuser_no_import
+
+  tasks:
+    - name: Create test user
+      ansible.builtin.user:
+        name: '{{ _molecule_test_user_no_import }}'
+        state: present
+        create_home: true
+
+    - name: Configure GPG agent without importing a key
+      ansible.builtin.include_role:
+        name: deamen.gpg.config_gpg
+      vars:
+        config_gpg_import_key: false
+        config_gpg_user: '{{ _molecule_test_user_no_import }}'
