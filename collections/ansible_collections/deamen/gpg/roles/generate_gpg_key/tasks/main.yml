@@ -4,7 +4,9 @@
 - name: Validate required variables
   ansible.builtin.fail:
     msg: "gpg_key_real_name and gpg_key_email variables are required."
-  when: (gpg_key_real_name | default('')) | length == 0 or (gpg_key_email | default('')) | length == 0
+  when: >-
+    (gpg_key_real_name is not defined or gpg_key_real_name | length == 0) or
+    (gpg_key_email is not defined or gpg_key_email | length == 0)
 
 - name: Check if secret key already exists
   ansible.builtin.shell:
@@ -30,7 +32,7 @@
 - name: Generate and configure GPG key
   when: not (_gpg_skip | default(false))
   block:
-    - name: Generate GPG key pair (Ed25519, no password)
+    - name: Generate GPG key pair (Ed25519)
       ansible.builtin.copy:
         content: |
           Key-Type: eddsa
@@ -39,7 +41,11 @@
           Name-Real: {{ gpg_key_real_name }}
           Name-Email: {{ gpg_key_email }}
           Expire-Date: 0
+          {% if gpg_key_passphrase is defined and gpg_key_passphrase | length > 0 -%}
+          Passphrase: {{ gpg_key_passphrase }}
+          {% else -%}
           %no-protection
+          {% endif -%}
           %commit
         dest: "{{ gpg_params_path | default('/tmp/gpg_params') }}"
         mode: '0600'
@@ -47,7 +53,9 @@
 
     - name: Generate GPG key
       ansible.builtin.command:
-        cmd: gpg --batch --gen-key {{ gpg_params_path | default('/tmp/gpg_params') }}
+        # --pinentry-mode loopback is required for GPG 2.1+ to honour the
+        # Passphrase: field in the batch params file via gpg-agent loopback
+        cmd: gpg --batch --pinentry-mode loopback --gen-key {{ gpg_params_path | default('/tmp/gpg_params') }}
       register: gpg_gen_key_result
       changed_when: gpg_gen_key_result.rc == 0
 
@@ -73,9 +81,20 @@
 
     - name: Add encryption subkey (Curve25519)
       ansible.builtin.command:
-        cmd: >-
-          gpg --batch --pinentry-mode loopback --passphrase ''
-          --quick-add-key {{ gpg_fingerprint.stdout }} curve25519 encr 0
+        # argv avoids shell quoting issues with the passphrase
+        argv:
+          - gpg
+          - --batch
+          - --pinentry-mode
+          - loopback
+          - --passphrase
+          - "{{ gpg_key_passphrase | default('') }}"
+          - --quick-add-key
+          - "{{ gpg_fingerprint.stdout }}"
+          - cv25519
+          - encr
+          - "0"
+      no_log: true
       register: gpg_add_subkey_result
       changed_when: gpg_add_subkey_result.rc == 0
 

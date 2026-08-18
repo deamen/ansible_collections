@@ -5,6 +5,9 @@
   vars:
     _molecule_test_user: testuser
     _molecule_key_email: "molecule@test.example.com"
+    _molecule_key_email_pw: "molecule-pw@test.example.com"
+    # Fixed test passphrase — must match converge.yml
+    _molecule_key_passphrase: MoleculeTest1!
 
   tasks:
     - name: Check GPG secret key exists with Ed25519
@@ -88,3 +91,95 @@
         that:
           - not _params_file.stat.exists
         fail_msg: "Temporary GPG params file /tmp/gpg_params was not cleaned up"
+
+    # Passphrase-protected key tests
+    - name: Check passphrase-protected GPG secret key exists
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail &&
+          gpg --with-colons --list-secret-keys "{{ _molecule_key_email_pw }}"
+          | grep '^sec' | head -1
+        executable: /bin/bash
+      become: true
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      failed_when: false
+      register: _gpg_pw_sec_check
+
+    - name: Assert passphrase-protected GPG secret key exists
+      ansible.builtin.assert:
+        that:
+          - _gpg_pw_sec_check.rc == 0
+        fail_msg: "Passphrase-protected GPG secret key for {{ _molecule_key_email_pw }} was not found"
+
+    - name: Create test file to sign
+      ansible.builtin.copy:
+        content: molecule passphrase test content
+        dest: /tmp/gpg_sign_test.txt
+        mode: '0644'
+
+    - name: Sign test file with passphrase-protected key
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail &&
+          gpg --batch --pinentry-mode loopback
+          -u {{ _molecule_key_email_pw }}
+          --passphrase '{{ _molecule_key_passphrase }}'
+          --armor --detach-sign
+          --output /tmp/gpg_sign_test.txt.asc /tmp/gpg_sign_test.txt
+        executable: /bin/bash
+      become: true
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      no_log: true
+      register: _gpg_sign_result
+
+    - name: Assert signing with correct passphrase succeeded
+      ansible.builtin.assert:
+        that:
+          - _gpg_sign_result.rc == 0
+        fail_msg: "Failed to sign test file with passphrase-protected GPG key"
+
+    - name: Verify detached signature
+      ansible.builtin.command:
+        cmd: gpg --verify /tmp/gpg_sign_test.txt.asc /tmp/gpg_sign_test.txt
+      become: true
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      register: _gpg_verify_result
+
+    - name: Assert signature verification succeeded
+      ansible.builtin.assert:
+        that:
+          - _gpg_verify_result.rc == 0
+        fail_msg: "GPG signature verification failed for passphrase-protected key"
+
+    - name: Kill gpg-agent to clear passphrase cache before wrong-passphrase test
+      ansible.builtin.command:
+        cmd: gpgconf --kill gpg-agent
+      become: true
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      failed_when: false
+
+    - name: Attempt to sign with wrong passphrase
+      ansible.builtin.shell:
+        cmd: >-
+          set -o pipefail &&
+          gpg --batch --pinentry-mode loopback
+          -u {{ _molecule_key_email_pw }}
+          --passphrase 'wrongpassphrase'
+          --armor --detach-sign
+          --output /tmp/gpg_sign_wrong.txt.asc /tmp/gpg_sign_test.txt
+        executable: /bin/bash
+      become: true
+      become_user: '{{ _molecule_test_user }}'
+      changed_when: false
+      failed_when: false
+      register: _gpg_wrong_sign_result
+
+    - name: Assert signing with wrong passphrase failed
+      ansible.builtin.assert:
+        that:
+          - _gpg_wrong_sign_result.rc != 0
+        fail_msg: "GPG key accepted a wrong passphrase — key may not be passphrase-protected"
