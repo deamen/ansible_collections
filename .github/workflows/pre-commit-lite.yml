@@ -16,4 +16,4 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Run pre-commit lite
-        uses: pre-commit-ci/lite-action@v1.1.0
+        uses: pre-commit-ci/lite-action@v1.2.0
