@@ -10,6 +10,12 @@
     - groups['molecule'] is defined
     - inventory_hostname in groups['molecule']
 
+- name: Check if requirements.yml exists
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/Prj/ansible/requirements.yml"
+  register: requirements_yml_stat
+
+# Skipped when there is no checkout, e.g. container images install the published collections instead
 - name: Install ansible collections in dev environment
   ansible.builtin.shell: |
     source {{ ansible_user_dir }}/.bashrc.d/aliases.sh
@@ -17,7 +23,8 @@
     cd ansible
     {{ ansible_galaxy_executable }} collection install -r requirements.yml
   register: ansible_galaxy_install_result
-  changed_when: ansible_galaxy_install_result.rc != 0
+  changed_when: "'Nothing to do' not in ansible_galaxy_install_result.stdout"
+  when: requirements_yml_stat.stat.exists
 
 - name: Check if requirements.txt exists
   ansible.builtin.stat:
@@ -28,6 +35,7 @@
   ansible.builtin.pip:
     executable: "{{ ansible_pip_executable }}"
     requirements: "{{ ansible_user_dir }}/Prj/ansible/requirements.txt"
+  become: true
   when: requirements_stat.stat.exists
 
 - name: Install molecule via pip
@@ -35,6 +43,8 @@
     name: molecule
     executable: "{{ ansible_pip_executable }}"
     state: present
+  become: true
+  when: install_molecule_via_pip | bool
 
 - name: Check if ansible vault file exists
   ansible.builtin.stat:

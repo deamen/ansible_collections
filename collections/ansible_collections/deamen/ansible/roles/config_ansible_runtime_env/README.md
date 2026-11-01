@@ -10,6 +10,12 @@ Requirements
 Role Variables
 --------------
 
+| Variable                  | Description                                                        | Default                   |
+|---------------------------|--------------------------------------------------------------------|---------------------------|
+| ansible_galaxy_executable | Path to ansible-galaxy executable.                                 | /usr/bin/ansible-galaxy   |
+| ansible_pip_executable    | Path to pip executable for installing molecule and requirements.   | /usr/bin/pip3             |
+| install_molecule_via_pip  | Install molecule with pip. Set to false when installed otherwise.  | true                      |
+
 
 Dependencies
 ------------

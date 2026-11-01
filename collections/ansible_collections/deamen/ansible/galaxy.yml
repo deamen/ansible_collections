@@ -10,7 +10,8 @@ license:
   - GPL-3.0-or-later
 tags:
   - application
-dependencies: {}
+dependencies:
+  deamen.general: ">=1.0.2"
 repository: https://github.com/deamen/ansible_collections
 documentation: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/ansible/docs
 homepage: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/ansible
