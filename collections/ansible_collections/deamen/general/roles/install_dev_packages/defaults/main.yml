@@ -9,6 +9,9 @@ dev_packages:
 essential_packages:
   - file
   - tar
+  - gzip
+  - which
+  - procps-ng
   - vi
   - vim
   - iputils
