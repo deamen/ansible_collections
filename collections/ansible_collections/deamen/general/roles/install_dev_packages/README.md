@@ -10,6 +10,11 @@ Requirements
 Role Variables
 --------------
 
+| Variable           | Description                                                       |
+|--------------------|-------------------------------------------------------------------|
+| dev_packages       | Development tools, e.g. git, gh, jq.                              |
+| essential_packages | Basic tools missing from minimal images, e.g. tar, gzip, procps-ng. |
+
 
 Dependencies
 ------------
