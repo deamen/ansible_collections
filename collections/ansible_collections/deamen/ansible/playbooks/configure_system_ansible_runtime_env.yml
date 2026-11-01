@@ -1,6 +1,7 @@
 - name: Configure system Ansible runtime environment for development
   hosts: ansible-dev-container
-  become: true
+  # Configure the connecting user; tasks that write system paths escalate individually
+  become: false
 
   tasks:
     - name: Configure dev runtime environment
