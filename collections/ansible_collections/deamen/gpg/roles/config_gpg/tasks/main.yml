@@ -2,10 +2,17 @@
 # tasks file for config_gpg
 - name: Validate required variables
   ansible.builtin.fail:
-    msg: config_gpg_user is required, and config_gpg_fingerprint is required when config_gpg_import_key is true.
-  when: >-
-    (config_gpg_user | length == 0) or
-    ((config_gpg_import_key | bool) and (_config_gpg_fingerprint | length == 0))
+    msg: "{{ item.msg }}"
+  when: item.condition
+  loop:
+    - msg: config_gpg_user is required
+      condition: "{{ config_gpg_user | length == 0 }}"
+
+    - msg: config_gpg_fingerprint is required when importing a GPG key
+      condition: "{{ (config_gpg_import_secret_key | bool or config_gpg_import_public_key | bool) and (config_gpg_fingerprint | length == 0) }}"
+
+    - msg: config_gpg_public_key is required when config_gpg_import_public_key is true
+      condition: "{{ (config_gpg_import_public_key | bool) and (config_gpg_public_key | length == 0) }}"
 
 - name: Ensure GPG directory exists
   ansible.builtin.file:
@@ -31,5 +38,14 @@
 
 - name: Import GPG key and configure owner trust
   ansible.builtin.include_tasks:
-    file: import_gpg_key.yml
-  when: _config_gpg_fingerprint | length > 0
+    file: import_gpg_secret_key.yml
+  when:
+    - config_gpg_import_secret_key | bool
+    - _config_gpg_fingerprint | length > 0
+
+- name: Import GPG public key
+  ansible.builtin.include_tasks:
+    file: import_gpg_public_key.yml
+  when:
+    - config_gpg_import_public_key | bool
+    - _config_gpg_fingerprint | length > 0
