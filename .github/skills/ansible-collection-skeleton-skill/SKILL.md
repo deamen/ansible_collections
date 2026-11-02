@@ -9,11 +9,10 @@ license: Complete terms in LICENSE.txt
 
 ## Instructions
 
-1. Run `helper_scripts/init_collection.py --collection <namespace.collection_name>` to create a new Ansible collection skeleton.
-2. Run `helper_scripts/fix_ansible_collection_lint.py --collection <namespace.collection_name>` to apply fixes for common ansible-lint issues in generated skeletons.
-3. Run `pre-commit run --all-files` in the repository's root directory to apply configured hooks.
-4. Run `ansible-lint` to detect linting issues; when `ansible-lint` reports problems, follow the deterministic fixes described below.
-5. Return CLI output and a short list of created files (or the error message if the command fails).
+1. Run `helper_scripts/init_collection.py --collection <namespace.collection_name>` to create a new Ansible collection skeleton; it also applies fixes for common ansible-lint issues in generated skeletons.
+2. Run `pre-commit run --all-files` in the repository's root directory to apply configured hooks.
+3. Run `ansible-lint` to detect linting issues; when `ansible-lint` reports problems, follow the deterministic fixes described below.
+4. Return CLI output and a short list of created files (or the error message if the command fails).
 
 ## Troubleshooting
 
@@ -33,7 +32,7 @@ license: Complete terms in LICENSE.txt
 
 ## Ansible-lint fixes
 
- - When a generated collection fails `ansible-lint`, the agent follows a small set of deterministic fixes and provides clear instructions. Before running `ansible-lint`, the agent will attempt to run the skill-bundled `./scripts/fix_ansible_collection_lint.py` when available, falling back to a repository-root `fix_ansible_collection_lint.py` when present; when no script is available or additional issues remain, apply the manual fixes below one-by-one and re-run `ansible-lint` after each change.
+ - `init_collection.py` already applies these fixes automatically. When a generated collection still fails `ansible-lint`, apply the manual fixes below one-by-one and re-run `ansible-lint` after each change.
 
 - Fix: missing changelog
   - Problem: `galaxy.yml` may require a changelog file (e.g., `CHANGELOG.md`) to be present.

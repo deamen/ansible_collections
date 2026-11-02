@@ -1,7 +1,7 @@
 ---
 - name: Converge (molecule dummy)
   hosts: molecule
-  gather_facts: no
+  gather_facts: false
   tasks:
     - name: Dummy converge - display message
       ansible.builtin.debug:
