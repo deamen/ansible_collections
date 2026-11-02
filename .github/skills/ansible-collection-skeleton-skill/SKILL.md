@@ -38,11 +38,11 @@ license: Complete terms in LICENSE.txt
 
 - `galaxy.yml`: sets `license` to `['GPL-3.0-or-later']` and removes `license_file`, defaults empty `tags` to `['application']`, lowercases `namespace`, `name`, and `tags`, fills `authors` from git config, fills `repository`, `homepage`, `documentation`, and `issues` from the GitHub remote, and drops empty placeholder keys
 - `meta/runtime.yml`: adds `requires_ansible: '>=2.15.0'` when missing
-- `CHANGELOG.md`: creates one when the collection has neither `CHANGELOG.md` nor `CHANGELOG.rst`
+- `changelogs/`: sets up antsibull-changelog when `changelogs/config.yaml` is missing: `config.yaml` (from `helper_scripts/files/changelogs/config.yaml`), `changelog.yaml` with an initial release entry for the `galaxy.yml` version, and `fragments/`; then renders `CHANGELOG.md` with `antsibull-changelog generate`
 
 When a generated collection still fails `ansible-lint`, apply the matching manual fix below and re-run `ansible-lint` after each change:
 
-- Missing changelog: add a `CHANGELOG.md` to the collection root with an initial release entry.
+- Missing changelog: run `antsibull-changelog generate` in the collection root (the script skips this step when `antsibull-changelog` is not installed). Never hand-edit `CHANGELOG.md`.
 - License metadata: `license` must be a list with no `license_file` key alongside it:
 
 ```yaml

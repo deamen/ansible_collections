@@ -32,11 +32,26 @@ jobs:
       - name: Verify tag version matches galaxy.yml
         run: |
           tag_version=$(echo "${GITHUB_REF_NAME}" | grep -oP '\d+\.\d+\.\d+$')
-          galaxy_version=$(grep -oP '(?<=^version:\s)[\d.]+' ${{ inputs.collection_path }}/galaxy.yml)
+          galaxy_version=$(python3 -c 'import sys, yaml; print(yaml.safe_load(open(sys.argv[1]))["version"])' ${{ inputs.collection_path }}/galaxy.yml)
           echo "Tag version:     $tag_version"
           echo "galaxy.yml version: $galaxy_version"
           if [[ "$tag_version" != "$galaxy_version" ]]; then
             echo "ERROR: Tag version ($tag_version) does not match galaxy.yml version ($galaxy_version)"
+            exit 1
+          fi
+
+      - name: Verify changelog is released for galaxy.yml version
+        working-directory: ${{ inputs.collection_path }}
+        run: |
+          galaxy_version=$(python3 -c 'import yaml; print(yaml.safe_load(open("galaxy.yml"))["version"])')
+          python3 -c 'import sys, yaml; releases = yaml.safe_load(open("changelogs/changelog.yaml"))["releases"]; sys.exit(0 if sys.argv[1] in releases else 1)' "$galaxy_version" || {
+            echo "ERROR: changelogs/changelog.yaml has no release $galaxy_version; run 'antsibull-changelog release'"
+            exit 1
+          }
+          fragments=$(find changelogs/fragments -type f ! -name .keep 2>/dev/null)
+          if [[ -n "$fragments" ]]; then
+            echo "ERROR: unreleased changelog fragments found; run 'antsibull-changelog release':"
+            echo "$fragments"
             exit 1
           fi
 

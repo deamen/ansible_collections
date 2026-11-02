@@ -1,0 +1,45 @@
+name: Run changelog lint
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'collections/ansible_collections/**/changelogs/**'
+      - '.github/workflows/run_changelog_lint.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'collections/ansible_collections/**/changelogs/**'
+      - '.github/workflows/run_changelog_lint.yml'
+
+jobs:
+  changelog_lint:
+    name: Run antsibull-changelog lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          show-progress: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install antsibull-changelog
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install antsibull-changelog
+
+      - name: Lint changelogs of all collections
+        run: |
+          rc=0
+          for config in collections/ansible_collections/*/*/changelogs/config.yaml; do
+            collection_dir=$(dirname "$(dirname "$config")")
+            echo "::group::$collection_dir"
+            (cd "$collection_dir" && antsibull-changelog lint) || rc=1
+            echo "::endgroup::"
+          done
+          exit $rc

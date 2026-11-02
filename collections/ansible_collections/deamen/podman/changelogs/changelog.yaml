@@ -1,0 +1,28 @@
+ancestor: null
+releases:
+  1.0.0:
+    release_date: '2025-10-17'
+    changes:
+      release_summary: Initial release of the ``deamen.podman`` collection.
+    modules:
+    - name: manage_subuid_subgid
+      description: Manage subordinate UID and GID ranges for users.
+      namespace: ''
+    objects:
+      role:
+      - name: install_podman
+        description: Install Podman and related packages; prepare host for running containers (rootful and rootless).
+        namespace: null
+  1.0.1:
+    release_date: '2026-04-05'
+    changes:
+      minor_changes:
+      - Update the ansible-native molecule test.
+  1.0.2:
+    release_date: '2026-04-10'
+    changes:
+      minor_changes:
+      - install_podman - apply a podman-in-podman workaround when running inside a container.
+      - Declare collection dependencies.
+      bugfixes:
+      - install_podman - make the role idempotent.

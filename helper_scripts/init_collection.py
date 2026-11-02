@@ -10,8 +10,10 @@ live in ansible_utils.py.
 """
 
 import argparse
+import datetime
 import os
 import shutil
+import subprocess
 import sys
 
 import yaml
@@ -314,31 +316,74 @@ def process_galaxy_files(root_dir, dry_run=False, verbose=False):
     return updated
 
 
+CHANGELOG_CONFIG_TEMPLATE = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "files", "changelogs", "config.yaml"
+)
+
+
+def init_changelog(col_dir, dry_run=False, verbose=False):
+    """Set up antsibull-changelog in a collection directory.
+
+    Writes changelogs/config.yaml (from the template), changelogs/changelog.yaml
+    with an initial release entry for the galaxy.yml version, and an empty
+    changelogs/fragments/ directory, then renders CHANGELOG.md with
+    antsibull-changelog when it is installed.
+    """
+    changelogs_dir = os.path.join(col_dir, "changelogs")
+    if dry_run:
+        if verbose:
+            print(f"DRY RUN - would create: {changelogs_dir}")
+        return
+
+    with open(os.path.join(col_dir, "galaxy.yml"), encoding="utf-8") as fh:
+        galaxy = yaml.safe_load(fh) or {}
+    namespace = str(galaxy.get("namespace", ""))
+    name = str(galaxy.get("name", ""))
+    version = str(galaxy.get("version", "1.0.0"))
+
+    with open(CHANGELOG_CONFIG_TEMPLATE, encoding="utf-8") as fh:
+        config = yaml.safe_load(fh)
+    config["title"] = f"{namespace.title()} {name.replace('_', ' ').title()} Collection"
+
+    changelog = {
+        "ancestor": None,
+        "releases": {
+            version: {
+                "changes": {
+                    "release_summary": f"Initial release of the ``{namespace}.{name}`` collection."
+                },
+                "release_date": datetime.date.today().isoformat(),
+            }
+        },
+    }
+
+    os.makedirs(os.path.join(changelogs_dir, "fragments"), exist_ok=True)
+    open(os.path.join(changelogs_dir, "fragments", ".keep"), "w").close()
+    with open(os.path.join(changelogs_dir, "config.yaml"), "w", encoding="utf-8") as fh:
+        yaml.safe_dump(config, fh, sort_keys=False)
+    with open(
+        os.path.join(changelogs_dir, "changelog.yaml"), "w", encoding="utf-8"
+    ) as fh:
+        yaml.safe_dump(changelog, fh, sort_keys=False)
+    print(f"Created: {changelogs_dir}")
+
+    if shutil.which("antsibull-changelog") is None:
+        print(
+            "Warning: antsibull-changelog not found; run "
+            "'antsibull-changelog generate' in the collection root to render CHANGELOG.md."
+        )
+        return
+    subprocess.run(["antsibull-changelog", "generate"], cwd=col_dir, check=True)
+    print(f"Created: {os.path.join(col_dir, 'CHANGELOG.md')}")
+
+
 def ensure_changelog(root_dir, dry_run=False, verbose=False):
-    """Create a basic CHANGELOG.md in each collection that is missing one.
+    """Set up antsibull-changelog in each collection that is missing it.
 
     Returns the number of changelogs created (or that would be created during
     a dry run).
     """
     created = 0
-
-    def _create_md(target_path):
-        header = (
-            "# Changelog\n\n"
-            "All notable changes to this collection will be documented in this file.\n\n"
-            "The format is based on Keep a Changelog "
-            "(https://keepachangelog.com/en/1.0.0/) and this project follows "
-            "Semantic Versioning.\n\n"
-            "## Unreleased\n\n"
-            "- Initial scaffold\n"
-        )
-        if dry_run:
-            if verbose:
-                print(f"DRY RUN - would create: {target_path}")
-        else:
-            with open(target_path, "w", encoding="utf-8") as fh:
-                fh.write(header)
-            print(f"Created: {target_path}")
 
     candidates = []
     try:
@@ -381,11 +426,9 @@ def ensure_changelog(root_dir, dry_run=False, verbose=False):
                             candidates.append(col_dir)
 
     for col_dir in candidates:
-        md_path = os.path.join(col_dir, "CHANGELOG.md")
-        rst_path = os.path.join(col_dir, "CHANGELOG.rst")
-        if os.path.exists(md_path) or os.path.exists(rst_path):
+        if os.path.exists(os.path.join(col_dir, "changelogs", "config.yaml")):
             continue
-        _create_md(md_path)
+        init_changelog(col_dir, dry_run=dry_run, verbose=verbose)
         created += 1
 
     return created
