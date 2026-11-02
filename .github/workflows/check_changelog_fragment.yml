@@ -1,0 +1,44 @@
+name: Check changelog fragment
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
+    branches:
+      - master
+    paths:
+      - 'collections/ansible_collections/**'
+
+jobs:
+  check_changelog_fragment:
+    name: Require changelog fragment
+    runs-on: ubuntu-latest
+    # Add the skip-changelog label to a PR that needs no changelog entry
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          show-progress: false
+
+      - name: Check each changed collection has a fragment
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          changed=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          # Collections with user-facing changes: plugins/, roles/, playbooks/ or meta/
+          collections=$(echo "$changed" | grep -oP '^collections/ansible_collections/[^/]+/[^/]+(?=/(plugins|roles|playbooks|meta)/)' | sort -u)
+          rc=0
+          for collection in $collections; do
+            if echo "$changed" | grep -qP "^${collection}/changelogs/fragments/(?!\.keep$)"; then
+              echo "OK: $collection has a changelog fragment"
+            else
+              echo "::error::$collection changed but has no fragment in changelogs/fragments/; add one, or label the PR skip-changelog"
+              rc=1
+            fi
+          done
+          exit $rc

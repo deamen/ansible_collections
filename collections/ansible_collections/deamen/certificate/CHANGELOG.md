@@ -49,13 +49,15 @@ Add gen\_certificate\_from\_vault module
 ### Release Summary
 
 This release adds deploy\_certificates module to the collection\.
+
 It is favoured over the deploy\_certificate role\.
+
 The role will be deprecated in the next release\.
 
 <a id="new-modules"></a>
 ### New Modules
 
-* deploy\_certificate \- Deploy certificates and keys to specified locations
+* deamen\.certificate\.deploy\_certificate \- Deploy certificates and keys to specified locations
 
 <a id="v1-0-0"></a>
 ## v1\.0\.0
@@ -66,9 +68,9 @@ The role will be deprecated in the next release\.
 <a id="filter"></a>
 #### Filter
 
-* hello\_world \- A custom filter plugin for Ansible\.
+* deamen\.certificate\.hello\_world \- A custom filter plugin for Ansible\.
 
 <a id="new-modules-1"></a>
 ### New Modules
 
-* deploy\_private\_ca \- Deploy a private CA certificate to a Linux server
+* deamen\.certificate\.deploy\_private\_ca \- Deploy a private CA certificate to a Linux server

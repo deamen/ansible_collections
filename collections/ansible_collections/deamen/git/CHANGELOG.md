@@ -1,9 +1,20 @@
-# Changelog
+# Deamen Git Collection Release Notes
 
-All notable changes to this collection will be documented in this file.
+**Topics**
 
-The format is based on Keep a Changelog (https://keepachangelog.com/en/1.0.0/) and this project follows Semantic Versioning.
+- <a href="#v1-0-0">v1\.0\.0</a>
+    - <a href="#release-summary">Release Summary</a>
+    - <a href="#new-roles">New Roles</a>
 
-## Unreleased
+<a id="v1-0-0"></a>
+## v1\.0\.0
 
-- Initial scaffold
+<a id="release-summary"></a>
+### Release Summary
+
+Initial release of the <code>deamen\.git</code> collection\.
+
+<a id="new-roles"></a>
+### New Roles
+
+* deamen\.git\.deploy\_git\_conf \- Deploy git configuration file\.

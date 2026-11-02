@@ -1,0 +1,28 @@
+ancestor: null
+releases:
+  1.0.0:
+    release_date: '2026-04-07'
+    changes:
+      release_summary: Initial release of the ``deamen.gpg`` collection.
+    objects:
+      role:
+      - name: config_gpg
+        description: Configure GPG.
+        namespace: null
+      - name: install_gpg
+        description: Install GPG packages.
+        namespace: null
+  1.0.1:
+    release_date: '2026-08-18'
+    changes:
+      minor_changes:
+      - config_gpg - improve the role.
+      - generate_gpg_key - improve the role and update role metadata.
+      - install_gpg - update role metadata.
+      bugfixes:
+      - config_gpg - make the role idempotent.
+    objects:
+      role:
+      - name: generate_gpg_key
+        description: Generate GPG key.
+        namespace: null

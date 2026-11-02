@@ -1,0 +1,35 @@
+ancestor: null
+releases:
+  1.0.0:
+    release_date: '2026-04-04'
+    changes:
+      release_summary: Initial release. The Ansible roles were moved here from ``deamen.general``.
+    objects:
+      role:
+      - name: config_ansible_runtime_env
+        description: Configure Ansible runtime environment.
+        namespace: null
+      - name: install_system_ansible
+        description: Install ansible from system package manager.
+        namespace: null
+  1.0.1:
+    release_date: '2026-04-05'
+    changes:
+      bugfixes:
+      - config_ansible_runtime_env - check the ``molecule`` group is defined before checking membership.
+      minor_changes:
+      - install_system_ansible - remove role-level tests.
+  1.0.2:
+    release_date: '2026-11-01'
+    changes:
+      minor_changes:
+      - Declare dependency on ``deamen.general`` (used by ``configure_system_ansible_runtime_env.yml``).
+      - configure_system_ansible_runtime_env.yml - configure the connecting user instead of root; only pip installs use become.
+      - config_ansible_runtime_env - install molecule via pip.
+      - config_ansible_runtime_env - add ``install_molecule_via_pip`` option (default ``true``).
+      - config_ansible_runtime_env - default ``ansible_pip_executable`` to ``/usr/bin/pip3`` so it works on any Fedora release.
+      - install_system_ansible - install ``sshpass``.
+      - Move molecule scenarios under ``extensions/``.
+      bugfixes:
+      - config_ansible_runtime_env - skip collection install when ``~/Prj/ansible/requirements.yml`` is absent.
+      - Fix playbook relative path in molecule scenarios.
