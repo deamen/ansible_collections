@@ -34,10 +34,11 @@ jobs:
           collections=$(echo "$changed" | grep -oP '^collections/ansible_collections/[^/]+/[^/]+(?=/(plugins|roles|playbooks|meta)/)' | sort -u)
           rc=0
           for collection in $collections; do
-            if echo "$changed" | grep -qP "^${collection}/changelogs/fragments/(?!\.keep$)"; then
+            # A release in the same PR consumes the fragments into changelog.yaml
+            if echo "$changed" | grep -qP "^${collection}/changelogs/(fragments/(?!\.keep$)|changelog\.yaml$)"; then
               echo "OK: $collection has a changelog fragment"
             else
-              echo "::error::$collection changed but has no fragment in changelogs/fragments/; add one, or label the PR skip-changelog"
+              echo "::error::$collection changed but has no fragment in changelogs/fragments/ or release in changelogs/changelog.yaml; add one, or label the PR skip-changelog"
               rc=1
             fi
           done
