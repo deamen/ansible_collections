@@ -3,10 +3,19 @@ all:
     localhost:
       ansible_connection: local
 
-containers:
-  hosts:
-    test-container-1:
-
 molecule:
   children:
     containers:
+
+containers:
+  children:
+    gpg_source:
+    gpg_public_destination:
+
+gpg_source:
+  hosts:
+    test-container-source:
+
+gpg_public_destination:
+  hosts:
+    test-container-public:

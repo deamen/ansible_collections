@@ -1,0 +1,37 @@
+---
+# Import GPG public key and check idempotency via fingerprint
+- name: Check if GPG public key is already imported
+  ansible.builtin.command:
+    cmd: 'gpg --list-keys --with-colons {{ _config_gpg_fingerprint }}'
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+  changed_when: false
+  failed_when: false
+  register: _config_gpg_pub_key_check
+
+- name: Write GPG public key to temp file
+  ansible.builtin.copy:
+    content: '{{ config_gpg_public_key }}'
+    dest: /tmp/config_gpg_public_key.key
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+  when: _config_gpg_pub_key_check.rc != 0
+
+- name: Import GPG public key
+  ansible.builtin.command:
+    cmd: gpg --batch --import /tmp/config_gpg_public_key.key
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+  changed_when: true
+  when: _config_gpg_pub_key_check.rc != 0
+
+- name: Remove GPG public key temp file
+  ansible.builtin.file:
+    path: /tmp/config_gpg_public_key.key
+    state: absent
+  become: true
+  when: _config_gpg_pub_key_check.rc != 0

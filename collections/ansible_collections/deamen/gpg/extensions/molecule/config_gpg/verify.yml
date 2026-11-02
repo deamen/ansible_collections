@@ -1,15 +1,18 @@
 ---
 - name: Verify config_gpg role
-  hosts: containers
+  hosts: gpg_source
   gather_facts: false
   vars:
     _molecule_test_user: testuser
-    _molecule_test_fingerprint: '58E9E1EDCDF7B0B801849FB61E8C4D240EE0E2E2'
+    _molecule_test_fingerprint: '7C694A119306CD575A5E129EF3D29D4FB47F0B00'
 
   tasks:
     - name: Gather .gnupg directory info
       ansible.builtin.stat:
         path: '/home/{{ _molecule_test_user }}/.gnupg'
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
       register: _gnupg_dir
 
     - name: Assert .gnupg directory exists with correct permissions
@@ -23,6 +26,9 @@
     - name: Gather gpg-agent.conf file info
       ansible.builtin.stat:
         path: '/home/{{ _molecule_test_user }}/.gnupg/gpg-agent.conf'
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
       register: _gpg_agent_conf
 
     - name: Assert gpg-agent.conf exists with correct permissions
@@ -55,20 +61,69 @@
 
     - name: Gather private GPG key file info
       ansible.builtin.stat:
-        path: '/tmp/private_gpg.key'
-      register: _private_key_file
+        path: /tmp/private_gpg.key
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
+      register: _secret_key_file
 
     - name: Assert private key file was removed by handler
       ansible.builtin.assert:
         that:
-          - not _private_key_file.stat.exists
+          - not _secret_key_file.stat.exists
 
     - name: Gather ownertrust file info
       ansible.builtin.stat:
         path: '/home/{{ _molecule_test_user }}/.gnupg/owntrust.txt'
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user }}'
       register: _ownertrust_file
 
     - name: Assert ownertrust file was removed by handler
       ansible.builtin.assert:
         that:
           - not _ownertrust_file.stat.exists
+
+- name: Verify GPG public-key import
+  hosts: gpg_public_destination
+  gather_facts: false
+  vars:
+    _molecule_test_user_public_key: testuser_public_key
+    _molecule_test_fingerprint: '7C694A119306CD575A5E129EF3D29D4FB47F0B00'
+
+  tasks:
+    - name: Check GPG public key is imported
+      ansible.builtin.command:
+        cmd: 'gpg --list-keys --with-colons {{ _molecule_test_fingerprint }}'
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user_public_key }}'
+      changed_when: false
+      failed_when: _gpg_public_key_imported.rc != 0
+      register: _gpg_public_key_imported
+
+    - name: Check GPG secret key is not imported
+      ansible.builtin.command:
+        cmd: 'gpg --list-secret-keys --with-colons {{ _molecule_test_fingerprint }}'
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_test_user_public_key }}'
+      changed_when: false
+      failed_when: false
+      register: _gpg_secret_key_not_imported
+
+    - name: Assert only the public key is imported
+      ansible.builtin.assert:
+        that:
+          - _gpg_secret_key_not_imported.rc != 0
+
+    - name: Gather public-key temporary file info
+      ansible.builtin.stat:
+        path: /tmp/config_gpg_public_key.key
+      register: _public_key_temp_file
+
+    - name: Assert public-key temporary file was removed
+      ansible.builtin.assert:
+        that:
+          - not _public_key_temp_file.stat.exists

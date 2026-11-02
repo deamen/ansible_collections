@@ -1,11 +1,7 @@
 ---
-- name: Configure GPG for test user
+- name: Prepare test containers
   hosts: containers
   become: true
-  vars:
-    _molecule_test_user: testuser
-    _molecule_test_fingerprint: '58E9E1EDCDF7B0B801849FB61E8C4D240EE0E2E2'
-
   tasks:
     - name: Configure passwordless sudo for become operations
       ansible.builtin.copy:
@@ -14,6 +10,14 @@
         mode: '0440'
         validate: 'visudo -cf %s'
 
+- name: Configure GPG for test user
+  hosts: gpg_source
+  become: true
+  vars:
+    _molecule_test_user: testuser
+    _molecule_test_fingerprint: '7C694A119306CD575A5E129EF3D29D4FB47F0B00'
+
+  tasks:
     - name: Create test user
       ansible.builtin.user:
         name: '{{ _molecule_test_user }}'
@@ -47,12 +51,13 @@
       ansible.builtin.include_role:
         name: deamen.gpg.config_gpg
       vars:
+        config_gpg_import_secret_key: true
         config_gpg_fingerprint: '{{ _molecule_test_fingerprint }}'
-        config_gpg_private_key_path: /tmp/private_gpg.key
+        config_gpg_secret_key_path: /tmp/private_gpg.key
         config_gpg_user: '{{ _molecule_test_user }}'
 
 - name: Configure GPG agent only (no key import)
-  hosts: containers
+  hosts: gpg_source
   become: true
   vars:
     _molecule_test_user_no_import: testuser_no_import
@@ -68,5 +73,32 @@
       ansible.builtin.include_role:
         name: deamen.gpg.config_gpg
       vars:
-        config_gpg_import_key: false
         config_gpg_user: '{{ _molecule_test_user_no_import }}'
+
+- name: Configure GPG with public-key import
+  hosts: gpg_public_destination
+  become: true
+  vars:
+    _molecule_test_user_public_key: testuser_public_key
+    _molecule_test_fingerprint: '7C694A119306CD575A5E129EF3D29D4FB47F0B00'
+
+  tasks:
+    - name: Create public-key test user
+      ansible.builtin.user:
+        name: '{{ _molecule_test_user_public_key }}'
+        state: present
+        create_home: true
+
+    - name: Install GPG packages
+      ansible.builtin.include_role:
+        name: deamen.gpg.install_gpg
+
+    - name: Configure GPG with public key only
+      ansible.builtin.include_role:
+        name: deamen.gpg.config_gpg
+      vars:
+        config_gpg_import_public_key: true
+        config_gpg_import_secret_key: false
+        config_gpg_fingerprint: '{{ _molecule_test_fingerprint }}'
+        config_gpg_public_key: "{{ lookup('ansible.builtin.file', playbook_dir + '/test-ed25519-public.asc') }}"
+        config_gpg_user: '{{ _molecule_test_user_public_key }}'
