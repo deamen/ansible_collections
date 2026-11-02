@@ -1,11 +1,12 @@
+---
 ancestor: null
 releases:
   1.0.0:
-    release_date: '2026-04-07'
     changes:
       release_summary: Initial release of the ``deamen.git`` collection.
     objects:
       role:
-      - name: deploy_git_conf
-        description: Deploy git configuration file.
-        namespace: null
+        - description: Deploy git configuration file.
+          name: deploy_git_conf
+          namespace: null
+    release_date: '2026-04-07'

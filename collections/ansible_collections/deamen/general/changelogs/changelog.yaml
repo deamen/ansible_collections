@@ -1,49 +1,54 @@
+---
 ancestor: null
 releases:
   1.0.0:
-    release_date: '2026-04-04'
     changes:
+      minor_changes:
+        - config_dev_runtime_env - install pre-commit and detect-secrets.
       release_summary: Initial release of the ``deamen.general`` collection.
-      minor_changes:
-      - config_dev_runtime_env - install pre-commit and detect-secrets.
     modules:
-    - name: check_is_container
-      description: Check if running inside a container (Docker, Podman, etc.)
-      namespace: ''
+      - description: Check if running inside a container (Docker, Podman, etc.)
+        name: check_is_container
+        namespace: ''
     objects:
       role:
-      - name: config_dev_runtime_env
-        description: Configures the runtime environment for development.
-        namespace: null
-      - name: install_dev_packages
-        description: Install general development packages.
-        namespace: null
-  1.0.1:
+        - description: Configures the runtime environment for development.
+          name: config_dev_runtime_env
+          namespace: null
+        - description: Install general development packages.
+          name: install_dev_packages
+          namespace: null
     release_date: '2026-04-04'
+  1.0.1:
     changes:
       bugfixes:
-      - config_dev_runtime_env - fix git prompt formatting.
+        - config_dev_runtime_env - fix git prompt formatting.
+    release_date: '2026-04-04'
   1.0.2:
-    release_date: '2026-04-05'
     objects:
       role:
-      - name: install_copilot_cli
-        description: Deploy Microsoft Copilot CLI installation script to target hosts and execute it.
-        namespace: null
+        - description: Deploy Microsoft Copilot CLI installation script to target
+            hosts and execute it.
+          name: install_copilot_cli
+          namespace: null
+    release_date: '2026-04-05'
   1.0.3:
-    release_date: '2026-11-01'
     changes:
-      minor_changes:
-      - install_dev_packages - add ``tmux`` to ``essential_packages``.
-      - Move molecule scenarios under ``extensions/``.
       bugfixes:
-      - install_copilot_cli - check both root and non-root copilot binary locations.
-      - config_dev_runtime_env - look up ``git-prompt.sh`` under ``/usr/share/git-core`` on Fedora/RHEL and Alpine.
-      - config_dev_runtime_env - add shell type directive for shellcheck to sourced scripts.
-      - Fix playbook relative path in molecule scenarios.
-  1.0.4:
+        - Fix playbook relative path in molecule scenarios.
+        - config_dev_runtime_env - add shell type directive for shellcheck to sourced
+          scripts.
+        - config_dev_runtime_env - look up ``git-prompt.sh`` under ``/usr/share/git-core``
+          on Fedora/RHEL and Alpine.
+        - install_copilot_cli - check both root and non-root copilot binary locations.
+      minor_changes:
+        - Move molecule scenarios under ``extensions/``.
+        - install_dev_packages - add ``tmux`` to ``essential_packages``.
     release_date: '2026-11-01'
+  1.0.4:
     changes:
       minor_changes:
-      - install_dev_packages - add ``gzip``, ``which`` and ``procps-ng`` to ``essential_packages`` (needed by VS Code server in minimal containers).
-      - install_dev_packages - install all packages in one transaction.
+        - install_dev_packages - add ``gzip``, ``which`` and ``procps-ng`` to ``essential_packages``
+          (needed by VS Code server in minimal containers).
+        - install_dev_packages - install all packages in one transaction.
+    release_date: '2026-11-01'

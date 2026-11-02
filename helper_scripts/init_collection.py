@@ -359,12 +359,13 @@ def init_changelog(col_dir, dry_run=False, verbose=False):
 
     os.makedirs(os.path.join(changelogs_dir, "fragments"), exist_ok=True)
     open(os.path.join(changelogs_dir, "fragments", ".keep"), "w").close()
+    # Indented lists, matching changelog_nice_yaml so the files pass ansible-lint
     with open(os.path.join(changelogs_dir, "config.yaml"), "w", encoding="utf-8") as fh:
-        yaml.safe_dump(config, fh, sort_keys=False)
+        fh.write(dump_yaml_to_string(config))
     with open(
         os.path.join(changelogs_dir, "changelog.yaml"), "w", encoding="utf-8"
     ) as fh:
-        yaml.safe_dump(changelog, fh, sort_keys=False)
+        fh.write(dump_yaml_to_string(changelog))
     print(f"Created: {changelogs_dir}")
 
     if shutil.which("antsibull-changelog") is None:
