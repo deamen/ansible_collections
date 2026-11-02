@@ -45,7 +45,7 @@ antsibull-changelog lint
 
 | Workflow | Runs on | Fails when |
 | --- | --- | --- |
-| `check_changelog_fragment.yml` | PRs to `master` | A collection's `plugins/`, `roles/`, `playbooks/` or `meta/` changed but the PR adds nothing under that collection's `changelogs/fragments/` |
+| `check_changelog_fragment.yml` | PRs to `master` | A collection's `plugins/`, `roles/`, `playbooks/` or `meta/` changed but the PR neither adds a fragment under that collection's `changelogs/fragments/` nor releases it in `changelogs/changelog.yaml` |
 | `run_changelog_lint.yml` | PRs and pushes to `master` that touch `changelogs/` | `antsibull-changelog lint` fails for any collection |
 
 Changes to `tests/`, `extensions/`, `docs/`, `README.md` or `.github/` do not need a fragment. To skip the fragment check for a PR that changes code but needs no changelog entry, add the `skip-changelog` label.
