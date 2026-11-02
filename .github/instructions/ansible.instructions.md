@@ -32,6 +32,9 @@ applyTo: '**/*.yaml, **/*.yml'
 - Use the lowest privileges necessary to perform a task
   - Only set `become: true` at the play level or on an `include:` statement, if all included tasks require super user privileges; otherwise, specify `become: true` at the task level
   - Only set `become: true` on a task if it requires super user privileges
+- Use the `ansible-role-skeleton` skill to create ansible roles
+- Use the `ansible-collection-skeleton-skill` skill to create ansible collections
+- Use the `molecule-init-skill` skill to create molecule tests for ansible collections
 
 ## Secret Management
 
