@@ -3,6 +3,9 @@ ansible:
   cfg:
     defaults:
       deprecation_warnings: false
+  env:
+    # Repository collections first, so scenarios test the working copy rather than an installed release
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_SCENARIO_DIRECTORY}/../../../../../../../collections/:$HOME/.ansible/collections
   executor:
     backend: ansible-playbook
     args:
