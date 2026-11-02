@@ -1,0 +1,6 @@
+---
+# defaults file for install_linear_cli
+
+# Release tag from https://github.com/schpet/linear-cli/releases
+linear_cli_version: v3.1.0
+linear_cli_install_dir: /usr/local/bin

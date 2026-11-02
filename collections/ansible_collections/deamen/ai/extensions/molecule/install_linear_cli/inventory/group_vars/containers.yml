@@ -1,0 +1,2 @@
+ansible_connection: containers.podman.podman
+container_image: quay.io/deamen/fedora-molecule:latest

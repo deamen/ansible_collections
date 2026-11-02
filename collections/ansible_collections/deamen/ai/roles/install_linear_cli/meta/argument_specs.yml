@@ -1,0 +1,19 @@
+---
+argument_specs:
+  main:
+    short_description: Install linear-cli, the command-line interface for Linear.
+    description:
+      - Run the C(linear-installer.sh) published with the release, which verifies the tarball checksum and installs the C(linear) binary without editing C(PATH).
+      - The download is skipped when the installed binary already reports O(linear_cli_version).
+    version_added: 1.1.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      linear_cli_version:
+        description: Release tag to install from U(https://github.com/schpet/linear-cli/releases).
+        type: str
+        default: v3.1.0
+      linear_cli_install_dir:
+        description: Directory the C(linear) binary is installed into.
+        type: path
+        default: /usr/local/bin
