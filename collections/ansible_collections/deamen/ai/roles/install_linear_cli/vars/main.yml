@@ -1,0 +1,13 @@
+---
+# vars file for install_linear_cli
+
+# Release architectures published by linear-cli, keyed by ansible_facts['architecture']
+__linear_cli_supported_archs:
+  - x86_64
+  - aarch64
+# The installer is pinned to its release and embeds the sha256 of each tarball
+__linear_cli_installer_url: "https://github.com/schpet/linear-cli/releases/download/{{ linear_cli_version }}/linear-installer.sh"
+# The installer needs tar and xz to unpack the .tar.xz release archive
+__linear_cli_dependency_packages:
+  - tar
+  - xz

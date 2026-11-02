@@ -1,0 +1,55 @@
+---
+# tasks file for install_linear_cli
+
+- name: Check that linear-cli is published for this architecture
+  ansible.builtin.assert:
+    that: ansible_facts['architecture'] in __linear_cli_supported_archs
+    fail_msg: "linear-cli is not available for {{ ansible_facts['architecture'] }}"
+    quiet: true
+
+- name: Get the installed linear-cli version
+  ansible.builtin.command: "{{ linear_cli_install_dir }}/linear --version"
+  register: __linear_cli_installed
+  changed_when: false
+  failed_when: false
+
+- name: Install linear-cli {{ linear_cli_version }}
+  # --version prints e.g. "linear 3.1.0", while release tags carry a leading "v"
+  when: >-
+    __linear_cli_installed.rc != 0 or
+    (linear_cli_version | regex_replace('^v', '')) not in __linear_cli_installed.stdout
+  block:
+    - name: Install packages needed by the installer
+      ansible.builtin.package:
+        name: "{{ __linear_cli_dependency_packages }}"
+        state: present
+      become: true
+
+    - name: Create a temporary download directory
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: linear-cli
+      register: __linear_cli_tmp
+
+    - name: Download the linear-cli installer
+      ansible.builtin.get_url:
+        url: "{{ __linear_cli_installer_url }}"
+        dest: "{{ __linear_cli_tmp.path }}/linear-installer.sh"
+        mode: "0755"
+
+    - name: Run the linear-cli installer
+      # LINEAR_UNMANAGED_INSTALL installs the binary straight into the directory,
+      # without editing PATH/shell rc files or installing the self-updater
+      ansible.builtin.command:
+        cmd: "{{ __linear_cli_tmp.path }}/linear-installer.sh --quiet"
+      environment:
+        LINEAR_UNMANAGED_INSTALL: "{{ linear_cli_install_dir }}"
+      changed_when: true
+      become: true
+
+  always:
+    - name: Remove the temporary download directory
+      ansible.builtin.file:
+        path: "{{ __linear_cli_tmp.path }}"
+        state: absent
+      when: __linear_cli_tmp.path is defined

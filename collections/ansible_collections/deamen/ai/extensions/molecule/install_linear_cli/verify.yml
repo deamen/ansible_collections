@@ -1,0 +1,42 @@
+---
+- name: Verify deamen.ai.install_linear_cli
+  hosts: molecule:&containers
+  gather_facts: false
+
+  vars:
+    expected_version: "{{ linear_cli_version | default('v3.1.0') | regex_replace('^v', '') }}"
+
+  tasks:
+    - name: Get the linear binary status
+      ansible.builtin.stat:
+        path: /usr/local/bin/linear
+      register: linear_binary
+
+    - name: Check the linear binary is installed and executable
+      ansible.builtin.assert:
+        that:
+          - linear_binary.stat.exists
+          - linear_binary.stat.mode == '0755'
+        fail_msg: "/usr/local/bin/linear is missing or has the wrong mode"
+
+    - name: Check linear-cli version
+      ansible.builtin.command: linear --version
+      register: linear_version_result
+      changed_when: false
+
+    - name: Check the expected linear-cli version is installed
+      ansible.builtin.assert:
+        that:
+          - expected_version in linear_version_result.stdout
+        fail_msg: "Expected linear {{ expected_version }}, got: {{ linear_version_result.stdout }}"
+
+    - name: Get the installer env script status
+      ansible.builtin.stat:
+        path: /usr/local/bin/env
+      register: linear_env_script
+
+    - name: Check the installer did not write an env script next to the binary
+      ansible.builtin.assert:
+        that:
+          - not linear_env_script.stat.exists
+        fail_msg: "The installer wrote /usr/local/bin/env; LINEAR_UNMANAGED_INSTALL was not honoured"

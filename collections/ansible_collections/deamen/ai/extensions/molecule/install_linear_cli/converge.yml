@@ -1,0 +1,9 @@
+---
+- name: Test deamen.ai.install_linear_cli
+  hosts: molecule:&containers
+  gather_facts: true
+
+  tasks:
+    - name: Install linear-cli
+      ansible.builtin.import_role:
+        name: deamen.ai.install_linear_cli

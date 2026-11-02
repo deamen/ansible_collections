@@ -1,0 +1,2 @@
+minor_changes:
+  - Add ``install_linear_cli.yml`` playbook to install linear-cli with the new ``install_linear_cli`` role.

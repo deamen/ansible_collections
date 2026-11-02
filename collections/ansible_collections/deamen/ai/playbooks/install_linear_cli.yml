@@ -1,0 +1,7 @@
+- name: Install linear-cli
+  hosts: all:!localhost
+
+  tasks:
+    - name: Install linear-cli
+      ansible.builtin.include_role:
+        name: deamen.ai.install_linear_cli
