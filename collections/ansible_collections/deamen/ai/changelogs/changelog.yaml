@@ -1,23 +1,24 @@
+---
 ancestor: null
 releases:
   1.0.0:
-    release_date: '2026-06-05'
     changes:
-      release_summary: Initial release of the ``deamen.ai`` collection.
       minor_changes:
-      - Add ``buildah_fedora-llamacpp.yml`` playbook.
+        - Add ``buildah_fedora-llamacpp.yml`` playbook.
+      release_summary: Initial release of the ``deamen.ai`` collection.
     objects:
       role:
-      - name: install_gemini_cli
-        description: Install gemini-cli, the command-line interface for Gemini.
-        namespace: null
-      - name: install_npm
-        description: Install Node.js and npm packages.
-        namespace: null
+        - description: Install gemini-cli, the command-line interface for Gemini.
+          name: install_gemini_cli
+          namespace: null
+        - description: Install Node.js and npm packages.
+          name: install_npm
+          namespace: null
+    release_date: '2026-06-05'
   1.0.1:
-    release_date: '2026-07-21'
     objects:
       role:
-      - name: install_pi_code
-        description: Install pi-coding-agent globally with npm.
-        namespace: null
+        - description: Install pi-coding-agent globally with npm.
+          name: install_pi_code
+          namespace: null
+    release_date: '2026-07-21'
