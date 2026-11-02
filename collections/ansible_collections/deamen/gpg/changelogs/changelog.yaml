@@ -27,3 +27,19 @@ releases:
           name: generate_gpg_key
           namespace: null
     release_date: '2026-08-18'
+  2.0.0:
+    changes:
+      breaking_changes:
+        - config_gpg - rename ``config_gpg_private_key_path`` to ``config_gpg_secret_key_path``.
+        - 'config_gpg - replace ``config_gpg_import_key`` with ``config_gpg_import_secret_key``,
+          which defaults to ``false``. Set ``config_gpg_import_secret_key: true``
+          to keep importing the private key.'
+      minor_changes:
+        - config_gpg - add ``config_gpg_import_public_key`` and ``config_gpg_public_key``
+          to import a public key without a private key.
+      release_summary: Adds public key import to ``config_gpg`` and renames its key
+        import variables.
+    fragments:
+      - config-gpg-public-key-import.yml
+      - v2.0.0-summary.yml
+    release_date: '2026-11-02'
