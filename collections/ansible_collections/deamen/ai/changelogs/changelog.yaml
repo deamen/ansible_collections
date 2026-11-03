@@ -22,3 +22,25 @@ releases:
           name: install_pi_code
           namespace: null
     release_date: '2026-07-21'
+  2.0.0:
+    changes:
+      breaking_changes:
+        - Rename ``buildah_fedora-llamacpp.yml`` playbook to ``buildah_fedora_llamacpp.yml``
+          so it can be run by its FQCN ``deamen.ai.buildah_fedora_llamacpp``; it now
+          writes the llama.cpp executables to ``build_outputs/llama.cpp/fedora`` under
+          the current directory instead of ``../out/llama`` relative to the playbook
+          (override with ``llamacpp_output_dir``).
+      minor_changes:
+        - Add ``buildah_alpine_llamacpp.yml`` playbook to build statically linked
+          ``llama-cli`` and ``llama-server`` with OpenBLAS on Alpine Linux.
+        - Add ``install_linear_cli.yml`` playbook to install linear-cli with the new
+          ``install_linear_cli`` role.
+    fragments:
+      - add-install-linear-cli.yml
+      - rename-llamacpp-builds.yml
+    objects:
+      role:
+        - description: Install linear\-cli, the command\-line interface for Linear.
+          name: install_linear_cli
+          namespace: null
+    release_date: '2026-11-03'
