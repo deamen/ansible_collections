@@ -85,6 +85,7 @@
 
 # ansible_vault_pass_gpg.sh is referenced by ANSIBLE_VAULT_PASSWORD_FILE in ~/.bashrc.d/aliases.sh (deamen.general.config_dev_runtime_env)
 # setup_ansible_vault_gpg.py creates the ~/.ansible_vault_pass.gpg it decrypts
+# gpg_cat.sh is the generic variant taking the file from --gpg_file or GPG_FILE
 - name: Install vault password GPG scripts
   ansible.builtin.copy:
     dest: "/usr/local/bin/{{ item }}"
@@ -92,5 +93,6 @@
     mode: "0755"
   loop:
     - ansible_vault_pass_gpg.sh
+    - gpg_cat.sh
     - setup_ansible_vault_gpg.py
   become: true

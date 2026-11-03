@@ -21,6 +21,10 @@ The role also installs `/usr/local/bin/ansible_vault_pass_gpg.sh`, which decrypt
 (override with `ANSIBLE_VAULT_GPG_FILE`) and prints the Ansible Vault password. `deamen.general.config_dev_runtime_env`
 sets `ANSIBLE_VAULT_PASSWORD_FILE` to it when both files exist.
 
+`/usr/local/bin/gpg_cat.sh` is a generic variant that decrypts any GPG file and prints it to stdout. It reads
+the file from `--gpg_file <file>`, falling back to the `GPG_FILE` environment variable; `--gpg_file` wins when both
+are set.
+
 `/usr/local/bin/setup_ansible_vault_gpg.py` is installed alongside it for the one-time setup. By default it imports the
 GPG secret key from `~/.gnupg/private_gpg.key` (removed after a successful import) via the `deamen.gpg.config_gpg`
 playbook, then writes a random vault password encrypted to that key into `~/.ansible_vault_pass.gpg`. Use `--gpg-file`
