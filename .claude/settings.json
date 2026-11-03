@@ -14,7 +14,7 @@
       "Bash(./helper_scripts/init_molecule.py:*)"
     ],
     "deny": [
-      "Read(./**/*vault_pass*)",
+      "Read(./**/*.gpg)",
       "Read(./**/.ssh/**)",
       "Read(./**/*.pkey)",
       "Read(./**/*.p12)",
