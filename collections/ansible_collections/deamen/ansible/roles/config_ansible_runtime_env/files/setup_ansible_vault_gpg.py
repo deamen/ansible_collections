@@ -219,7 +219,7 @@ def generate_password() -> str:
         secrets.choice(string.digits),
         secrets.choice(string.punctuation),
     ]
-    filler = [secrets.choice(alphabet) for _ in range(16)]
+    filler = secrets.SystemRandom().choices(alphabet, k=16)
     password = required + filler
     secrets.SystemRandom().shuffle(password)
     return "".join(password)
