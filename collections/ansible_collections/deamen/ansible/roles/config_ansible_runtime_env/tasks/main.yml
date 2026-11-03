@@ -67,3 +67,22 @@
       # ansible_user:
     mode: "0600"
   when: not ansible_vault_stat.stat.exists
+
+# Both vault password GPG scripts below need gpg before any key is configured
+- name: Install GPG packages
+  ansible.builtin.include_role:
+    name: deamen.gpg.install_gpg
+    apply:
+      become: true
+
+# ansible_vault_pass_gpg.sh is referenced by ANSIBLE_VAULT_PASSWORD_FILE in ~/.bashrc.d/aliases.sh (deamen.general.config_dev_runtime_env)
+# setup_ansible_vault_gpg.py creates the ~/.ansible_vault_pass.gpg it decrypts
+- name: Install vault password GPG scripts
+  ansible.builtin.copy:
+    dest: "/usr/local/bin/{{ item }}"
+    src: "{{ item }}"
+    mode: "0755"
+  loop:
+    - ansible_vault_pass_gpg.sh
+    - setup_ansible_vault_gpg.py
+  become: true
