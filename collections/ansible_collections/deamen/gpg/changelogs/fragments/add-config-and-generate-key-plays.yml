@@ -1,4 +1,0 @@
----
-minor_changes:
-  - Add ``deamen.gpg.config_gpg`` and ``deamen.gpg.generate_gpg_key`` playbooks for configuring GPG on localhost
-    (used by ``setup_ansible_vault_gpg.py`` from ``deamen.ansible``).
