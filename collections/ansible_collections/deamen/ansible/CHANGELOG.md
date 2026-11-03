@@ -2,20 +2,34 @@
 
 **Topics**
 
-- <a href="#v1-0-2">v1\.0\.2</a>
+- <a href="#v1-0-3">v1\.0\.3</a>
     - <a href="#minor-changes">Minor Changes</a>
+- <a href="#v1-0-2">v1\.0\.2</a>
+    - <a href="#minor-changes-1">Minor Changes</a>
     - <a href="#bugfixes">Bugfixes</a>
 - <a href="#v1-0-1">v1\.0\.1</a>
-    - <a href="#minor-changes-1">Minor Changes</a>
+    - <a href="#minor-changes-2">Minor Changes</a>
     - <a href="#bugfixes-1">Bugfixes</a>
 - <a href="#v1-0-0">v1\.0\.0</a>
     - <a href="#release-summary">Release Summary</a>
     - <a href="#new-roles">New Roles</a>
 
+<a id="v1-0-3"></a>
+## v1\.0\.3
+
+<a id="minor-changes"></a>
+### Minor Changes
+
+* Declare dependency on <code>deamen\.gpg</code> \(playbooks used by <code>setup\_ansible\_vault\_gpg\.py</code>\)\.
+* config\_ansible\_runtime\_env \- install GPG packages with <code>deamen\.gpg\.install\_gpg</code>\.
+* config\_ansible\_runtime\_env \- install <code>/usr/local/bin/ansible\_vault\_pass\_gpg\.sh</code> to read the Ansible Vault password from the GPG\-encrypted <code>\~/\.ansible\_vault\_pass\.gpg</code> \(override with <code>ANSIBLE\_VAULT\_GPG\_FILE</code>\)\.
+* config\_ansible\_runtime\_env \- install <code>/usr/local/bin/setup\_ansible\_vault\_gpg\.py</code> to create <code>\~/\.ansible\_vault\_pass\.gpg</code>\, importing the GPG secret key from <code>\~/\.gnupg/private\_gpg\.key</code> by default\.
+* config\_ansible\_runtime\_env \- install <code>unversioned\_python\_packages</code> \(default <code>python\-unversioned\-command</code>\) for the <code>\#\!/usr/bin/env python</code> shebang of <code>setup\_ansible\_vault\_gpg\.py</code>\.
+
 <a id="v1-0-2"></a>
 ## v1\.0\.2
 
-<a id="minor-changes"></a>
+<a id="minor-changes-1"></a>
 ### Minor Changes
 
 * Declare dependency on <code>deamen\.general</code> \(used by <code>configure\_system\_ansible\_runtime\_env\.yml</code>\)\.
@@ -35,7 +49,7 @@
 <a id="v1-0-1"></a>
 ## v1\.0\.1
 
-<a id="minor-changes-1"></a>
+<a id="minor-changes-2"></a>
 ### Minor Changes
 
 * install\_system\_ansible \- remove role\-level tests\.
