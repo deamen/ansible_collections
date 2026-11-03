@@ -15,4 +15,5 @@ repository: https://github.com/deamen/ansible_collections
 documentation: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/ai/docs
 homepage: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/ai
 issues: https://github.com/deamen/ansible_collections/issues
-build_ignore: []
+build_ignore:
+  - build_outputs

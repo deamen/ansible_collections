@@ -1,0 +1,124 @@
+---
+- name: Build llama.cpp and OpenBLAS using Buildah on Alpine Linux
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+
+  vars:
+    # Defaults to build_outputs/llama.cpp/alpine under the directory the playbook is run from
+    llamacpp_output_dir: "{{ lookup('env', 'PWD') }}/build_outputs/llama.cpp/alpine"
+    arch: 'amd64'
+    base_image: 'docker.io/library/alpine:latest'
+    build_packages:
+      - build-base
+      - cmake
+      - gfortran
+      - git
+      - linux-headers
+      - ninja
+      - openssl-dev
+      - openssl-libs-static
+    cpu_target: 'skylake-avx512'
+
+  tasks:
+    - name: Start Buildah working container
+      ansible.builtin.command: buildah from --arch {{ arch }} {{ base_image }}
+      register: from_out
+      changed_when: true
+
+    - name: Set container_id fact
+      ansible.builtin.set_fact:
+        container_id: '{{ from_out.stdout | trim }}'
+
+    - name: Add working container as dynamic host (Buildah connection)
+      ansible.builtin.add_host:
+        name: 'buildcntr_{{ container_id }}'
+        ansible_connection: containers.podman.buildah
+        ansible_host: '{{ container_id }}'
+
+    - name: Build llama.cpp
+      delegate_to: 'buildcntr_{{ container_id }}'
+      block:
+        - name: Install python3 for Ansible module support
+          # Bootstrap python3 so subsequent tasks can use full Ansible modules
+          ansible.builtin.raw: apk add --no-cache python3
+          changed_when: false
+
+        - name: Install build dependencies
+          ansible.builtin.raw: apk add --no-cache {{ build_packages | join(' ') }}
+          changed_when: false
+
+        - name: Clone OpenBLAS
+          ansible.builtin.git:
+            repo: https://github.com/OpenMathLib/OpenBLAS.git
+            dest: /OpenBLAS
+            version: develop
+            depth: 1
+
+        - name: Build OpenBLAS (install to /blas)
+          ansible.builtin.shell: |
+            mkdir -p /OpenBLAS/build
+            cd /OpenBLAS/build
+            cmake -DUSE_OPENMP=1 -DTARGET=SKYLAKEX -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON ..
+            cmake --build . -j$(nproc --ignore=1)
+            cmake --install . --prefix /blas
+          args:
+            creates: /blas/lib/libopenblas.a
+
+        - name: Clone llama.cpp
+          ansible.builtin.git:
+            repo: https://github.com/ggml-org/llama.cpp.git
+            dest: /llama_src
+            version: master
+            depth: 1
+
+        - name: Build llama.cpp (install to /llama)
+          ansible.builtin.shell: |
+            mkdir -p /llama_src/build
+            cd /llama_src/build
+            cmake .. -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_EXE_LINKER_FLAGS="-static -Wl,--whole-archive,/usr/lib/libgomp.a,--no-whole-archive" \
+              -DCMAKE_C_FLAGS="-march=cascadelake" \
+              -DCMAKE_CXX_FLAGS="-march=cascadelake" \
+              -DGGML_BLAS=ON \
+              -DGGML_BLAS_VENDOR=OpenBLAS \
+              -DGGML_STATIC=ON \
+              -DGGML_NATIVE=OFF \
+              -DGGML_OPENMP=ON \
+              -DGGML_CCACHE=OFF \
+              -DLLAMA_BUILD_SERVER=ON \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DOPENSSL_USE_STATIC_LIBS=ON \
+              -DBLAS_LIBRARIES=/blas/lib/libopenblas.a \
+              -DBLAS_INCLUDE_DIRS=/blas/include/openblas
+            cmake --build . --config Release --target llama-cli --target llama-server -j$(nproc --ignore=1)
+            # cmake --install would fail on the targets not built above, so install only these two
+            install -Dm755 -t /llama/bin bin/llama-cli bin/llama-server
+          args:
+            creates: /llama
+
+    - name: Ensure local output directory exists
+      ansible.builtin.file:
+        path: '{{ llamacpp_output_dir }}'
+        state: directory
+        mode: '0755'
+
+    - name: Copy llama executables out of the working container
+      ansible.builtin.command:
+        argv:
+          - buildah
+          - unshare
+          - --
+          - sh
+          - -c
+          - mnt=$(buildah mount "$1") && cp -a "$mnt/llama/bin" "$2/"; rc=$?; buildah umount "$1"; exit $rc
+          - sh
+          - '{{ container_id }}'
+          - '{{ llamacpp_output_dir }}'
+      changed_when: true
+
+    - name: Remove working container
+      ansible.builtin.command: buildah rm {{ container_id }}
+      changed_when: true
