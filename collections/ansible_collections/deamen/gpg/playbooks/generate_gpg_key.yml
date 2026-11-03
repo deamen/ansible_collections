@@ -1,0 +1,32 @@
+---
+- name: Install GPG, configure gpg-agent and generate a GPG key pair
+  hosts: localhost
+  become: false
+  connection: ansible.builtin.local
+  gather_facts: false
+  vars_prompt:
+    - name: gpg_key_passphrase
+      prompt: Enter new GPG key passphrase
+      private: true
+      confirm: true
+  tasks:
+    - name: Install GPG packages
+      ansible.builtin.import_role:
+        name: deamen.gpg.install_gpg
+      become: true
+
+    - name: Configure GPG
+      ansible.builtin.import_role:
+        name: deamen.gpg.config_gpg
+      vars:
+        config_gpg_default_cache_ttl: 7200
+        config_gpg_max_cache_ttl: 36000
+
+    - name: Restart gpg-agent with updated configuration
+      ansible.builtin.command:
+        cmd: gpgconf --kill gpg-agent
+      changed_when: true
+
+    - name: Generate GPG key pair
+      ansible.builtin.import_role:
+        name: deamen.gpg.generate_gpg_key
