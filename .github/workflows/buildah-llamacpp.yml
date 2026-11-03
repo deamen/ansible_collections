@@ -1,0 +1,37 @@
+name: Test build llama
+
+on:
+  pull_request:
+    paths:
+      - 'collections/ansible_collections/deamen/ai/playbooks/buildah_*_llamacpp.yml'
+      - '.github/workflows/buildah-llamacpp.yml'
+
+jobs:
+  run-playbook:
+    name: Run buildah_${{ matrix.distro }}_llamacpp playbook
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - fedora
+          - alpine
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Test buildah_${{ matrix.distro }}_llamacpp playbook
+        run: |
+          ansible-playbook -i localhost, \
+            collections/ansible_collections/deamen/ai/playbooks/buildah_${{ matrix.distro }}_llamacpp.yml
