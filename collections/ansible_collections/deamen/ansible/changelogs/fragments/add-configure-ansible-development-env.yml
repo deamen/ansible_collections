@@ -1,4 +1,0 @@
-minor_changes:
-  - Add ``configure_ansible_development_env.yml`` playbook to install and configure a full Ansible development environment
-    (system Ansible, dev packages, runtime env, Copilot CLI, podman and linear-cli).
-  - Declare dependencies on ``deamen.podman`` and ``deamen.ai`` (roles used by ``configure_ansible_development_env.yml``).
