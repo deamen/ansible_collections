@@ -7,7 +7,7 @@ argument_specs:
         Run the C(linear-installer.sh) published with the release, which verifies the tarball checksum
         and installs the C(linear) binary without editing C(PATH).
       - The download is skipped when the installed binary already reports O(linear_cli_version).
-    version_added: 1.1.0
+    version_added: 2.0.0
     author:
       - Song Tang <stang@mmz.au>
     options:
