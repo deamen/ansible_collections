@@ -137,3 +137,6 @@ collections/**/tests/output/**/*.stats
 tmp
 
 .gitconfig.host_for_container
+
+# llama.cpp build playbook outputs
+build_outputs/
