@@ -77,12 +77,18 @@
 
 # ansible_vault_pass_gpg.sh is referenced by ANSIBLE_VAULT_PASSWORD_FILE in ~/.bashrc.d/aliases.sh (deamen.general.config_dev_runtime_env)
 # setup_ansible_vault_gpg.py creates the ~/.ansible_vault_pass.gpg it decrypts
-- name: Install vault password GPG scripts
+- name: Install vault password retrieval script
   ansible.builtin.copy:
-    dest: "/usr/local/bin/{{ item }}"
-    src: "{{ item }}"
+    dest: /usr/local/bin/ansible_vault_pass_gpg.sh
+    src: ansible_vault_pass_gpg.sh
     mode: "0755"
-  loop:
-    - ansible_vault_pass_gpg.sh
-    - setup_ansible_vault_gpg.py
+  become: true
+
+# The shebang is added here: ansible-test sanity only allows "#!/usr/bin/env python",
+# and minimal Fedora images have no unversioned python
+- name: Install vault password setup script
+  ansible.builtin.copy:
+    dest: /usr/local/bin/setup_ansible_vault_gpg.py
+    content: "#!/usr/bin/python3\n{{ lookup('ansible.builtin.file', 'setup_ansible_vault_gpg.py') }}\n"
+    mode: "0755"
   become: true
