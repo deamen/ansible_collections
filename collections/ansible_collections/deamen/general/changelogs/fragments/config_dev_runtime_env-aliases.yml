@@ -1,5 +1,0 @@
----
-minor_changes:
-  - config_dev_runtime_env - define ``ansiblev`` and ``ansible-playbookv`` as bash functions instead of aliases wrapping functions.
-  - config_dev_runtime_env - use ``ANSIBLE_VAULT_PASSWORD_FILE`` when ``~/.ansible_vault_pass.gpg`` and the gpg helper script exist,
-    and only pass ``--ask-vault-pass`` when no vault password file is configured.
