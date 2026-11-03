@@ -1,4 +1,0 @@
-breaking_changes:
-  - Rename ``buildah_fedora-llamacpp.yml`` playbook to ``buildah_fedora_llamacpp.yml`` so it can be run by its FQCN ``deamen.ai.buildah_fedora_llamacpp``; it now writes the llama.cpp executables to ``build_outputs/llama.cpp/fedora`` under the current directory instead of ``../out/llama`` relative to the playbook (override with ``llamacpp_output_dir``).
-minor_changes:
-  - Add ``buildah_alpine_llamacpp.yml`` playbook to build statically linked ``llama-cli`` and ``llama-server`` with OpenBLAS on Alpine Linux.
