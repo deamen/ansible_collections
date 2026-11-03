@@ -14,6 +14,9 @@ dependencies:
   deamen.general: ">=1.0.2"
   # setup_ansible_vault_gpg.py runs the deamen.gpg.config_gpg and deamen.gpg.generate_gpg_key playbooks
   deamen.gpg: ">=2.1.0"
+  # configure_ansible_development_env.yml installs podman and linear-cli
+  deamen.podman: ">=1.0.2"
+  deamen.ai: ">=2.0.0"
 repository: https://github.com/deamen/ansible_collections
 documentation: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/ansible/docs
 homepage: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/ansible
