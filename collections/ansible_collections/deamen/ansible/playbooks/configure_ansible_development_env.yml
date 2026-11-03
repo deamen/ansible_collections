@@ -1,0 +1,39 @@
+- name: Configure Ansible development environment
+  hosts: all:!localhost
+  # Configure the connecting user; tasks that write system paths escalate individually
+  become: false
+
+  tasks:
+    - name: Install Ansible and dependencies via system package manager
+      ansible.builtin.include_role:
+        name: deamen.ansible.install_system_ansible
+        apply:
+          become: true
+
+    - name: Install development packages via system package manager
+      ansible.builtin.include_role:
+        name: deamen.general.install_dev_packages
+        apply:
+          become: true
+
+    - name: Configure dev runtime environment
+      ansible.builtin.include_role:
+        name: deamen.general.config_dev_runtime_env
+
+    - name: Configure Ansible runtime environment
+      ansible.builtin.include_role:
+        name: deamen.ansible.config_ansible_runtime_env
+
+    - name: Install Copilot CLI
+      ansible.builtin.include_role:
+        name: deamen.general.install_copilot_cli
+
+    - name: Install podman
+      ansible.builtin.include_role:
+        name: deamen.podman.install_podman
+        apply:
+          become: true
+
+    - name: Install linear-cli
+      ansible.builtin.include_role:
+        name: deamen.ai.install_linear_cli
