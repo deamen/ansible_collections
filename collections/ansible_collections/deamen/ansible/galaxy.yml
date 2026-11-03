@@ -1,7 +1,7 @@
 ---
 namespace: deamen
 name: ansible
-version: 1.0.3
+version: 1.1.0
 readme: README.md
 authors:
   - Song Tang <stang@mmz.au>

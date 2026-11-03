@@ -2,22 +2,33 @@
 
 **Topics**
 
-- <a href="#v1-0-3">v1\.0\.3</a>
+- <a href="#v1-1-0">v1\.1\.0</a>
     - <a href="#minor-changes">Minor Changes</a>
-- <a href="#v1-0-2">v1\.0\.2</a>
+- <a href="#v1-0-3">v1\.0\.3</a>
     - <a href="#minor-changes-1">Minor Changes</a>
+- <a href="#v1-0-2">v1\.0\.2</a>
+    - <a href="#minor-changes-2">Minor Changes</a>
     - <a href="#bugfixes">Bugfixes</a>
 - <a href="#v1-0-1">v1\.0\.1</a>
-    - <a href="#minor-changes-2">Minor Changes</a>
+    - <a href="#minor-changes-3">Minor Changes</a>
     - <a href="#bugfixes-1">Bugfixes</a>
 - <a href="#v1-0-0">v1\.0\.0</a>
     - <a href="#release-summary">Release Summary</a>
     - <a href="#new-roles">New Roles</a>
 
+<a id="v1-1-0"></a>
+## v1\.1\.0
+
+<a id="minor-changes"></a>
+### Minor Changes
+
+* Add <code>configure\_ansible\_development\_env\.yml</code> playbook to install and configure a full Ansible development environment \(system Ansible\, dev packages\, runtime env\, Copilot CLI\, podman and linear\-cli\)\.
+* Declare dependencies on <code>deamen\.podman</code> and <code>deamen\.ai</code> \(roles used by <code>configure\_ansible\_development\_env\.yml</code>\)\.
+
 <a id="v1-0-3"></a>
 ## v1\.0\.3
 
-<a id="minor-changes"></a>
+<a id="minor-changes-1"></a>
 ### Minor Changes
 
 * Declare dependency on <code>deamen\.gpg</code> \(playbooks used by <code>setup\_ansible\_vault\_gpg\.py</code>\)\.
@@ -29,7 +40,7 @@
 <a id="v1-0-2"></a>
 ## v1\.0\.2
 
-<a id="minor-changes-1"></a>
+<a id="minor-changes-2"></a>
 ### Minor Changes
 
 * Declare dependency on <code>deamen\.general</code> \(used by <code>configure\_system\_ansible\_runtime\_env\.yml</code>\)\.
@@ -49,7 +60,7 @@
 <a id="v1-0-1"></a>
 ## v1\.0\.1
 
-<a id="minor-changes-2"></a>
+<a id="minor-changes-3"></a>
 ### Minor Changes
 
 * install\_system\_ansible \- remove role\-level tests\.
