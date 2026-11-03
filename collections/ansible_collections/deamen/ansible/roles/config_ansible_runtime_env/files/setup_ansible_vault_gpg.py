@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """One-time setup: secure Ansible Vault password with GPG encryption.
 
 Import the GPG secret key from ~/.gnupg/private_gpg.key (default):
