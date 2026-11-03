@@ -41,6 +41,7 @@ _DEFAULT_GPG_SECRET_KEY = GNUPG_HOME / "private_gpg.key"
 # Low-level utilities
 # ---------------------------------------------------------------------------
 
+
 def check_prerequisites() -> None:
     for cmd in ("gpg", "gpgconf", "ansible-playbook"):
         if not shutil.which(cmd):
@@ -54,6 +55,7 @@ def shred_file(path: Path) -> None:
         subprocess.run(["shred", "--remove", "--force", str(path)], check=False)
     else:
         path.unlink(missing_ok=True)
+
 
 # This decorator (@contextlib.contextmanager) makes the function usable
 # inside a 'with' block, without needing to write a class.
@@ -81,6 +83,7 @@ def sensitive_temp_file():
 # Ansible
 # ---------------------------------------------------------------------------
 
+
 def run_playbook(playbook: str, extra_vars: dict[str, str]) -> None:
     """Run a collection playbook by FQCN without any vault password file."""
     env = {**os.environ}
@@ -90,10 +93,12 @@ def run_playbook(playbook: str, extra_vars: dict[str, str]) -> None:
     subprocess.run(
         [
             "ansible-playbook",
-            "--inventory", "localhost,",
+            "--inventory",
+            "localhost,",
             # JSON is required; bare YAML multi-line strings are not reliably detected by ansible-playbook
             # Only @file yaml is supported for extra-vars, but we want to avoid creating a temporary file
-            "--extra-vars", json.dumps(extra_vars),
+            "--extra-vars",
+            json.dumps(extra_vars),
             playbook,
         ],
         env=env,
@@ -105,11 +110,15 @@ def run_playbook(playbook: str, extra_vars: dict[str, str]) -> None:
 # GPG key generation
 # ---------------------------------------------------------------------------
 
+
 def get_fingerprint(email_or_id: str, env: dict[str, str]) -> str:
     """Return the primary key fingerprint for the given email or key ID."""
     result = subprocess.run(
         ["gpg", "--with-colons", "--list-keys", email_or_id],
-        env=env, capture_output=True, text=True, check=False,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     for line in result.stdout.splitlines():
         if line.startswith("fpr:"):
@@ -119,11 +128,14 @@ def get_fingerprint(email_or_id: str, env: dict[str, str]) -> str:
 
 def generate_key(key_name: str, key_email: str, config_gpg_user: str) -> str:
     """Run the generate_gpg_key playbook (which prompts for passphrase); return fingerprint."""
-    run_playbook("deamen.gpg.generate_gpg_key", {
-        "config_gpg_user": config_gpg_user,
-        "gpg_key_real_name": key_name,
-        "gpg_key_email": key_email,
-    })
+    run_playbook(
+        "deamen.gpg.generate_gpg_key",
+        {
+            "config_gpg_user": config_gpg_user,
+            "gpg_key_real_name": key_name,
+            "gpg_key_email": key_email,
+        },
+    )
     return get_fingerprint(key_email, dict(os.environ))
 
 
@@ -133,12 +145,22 @@ def generate_key(key_name: str, key_email: str, config_gpg_user: str) -> str:
 # it is not yet fully tested or documented.
 # ---------------------------------------------------------------------------
 
+
 def get_fingerprint_from_file(gpg_key_file: Path) -> str:
     """Extract the primary fingerprint from a key file without importing it."""
     result = subprocess.run(
-        ["gpg", "--batch", "--with-colons",
-         "--import-options", "show-only", "--import", str(gpg_key_file)],
-        capture_output=True, text=True, check=False,
+        [
+            "gpg",
+            "--batch",
+            "--with-colons",
+            "--import-options",
+            "show-only",
+            "--import",
+            str(gpg_key_file),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
     )
     for line in result.stdout.splitlines():
         if line.startswith("fpr:"):
@@ -165,12 +187,15 @@ def import_key(gpg_key_file: Path, config_gpg_user: str) -> str:
         staged.chmod(0o600)
         shutil.copyfile(str(gpg_key_file), str(staged))
     try:
-        run_playbook("deamen.gpg.config_gpg", {
-            "config_gpg_import_secret_key": "true",
-            "config_gpg_user": config_gpg_user,
-            "config_gpg_fingerprint": fingerprint,
-            "config_gpg_secret_key_path": str(staged),
-        })
+        run_playbook(
+            "deamen.gpg.config_gpg",
+            {
+                "config_gpg_import_secret_key": "true",
+                "config_gpg_user": config_gpg_user,
+                "config_gpg_fingerprint": fingerprint,
+                "config_gpg_secret_key_path": str(staged),
+            },
+        )
     finally:
         # The config_gpg handler normally removes it; shred anything left behind,
         # but never the default key file, which may still be needed after a failure
@@ -182,6 +207,7 @@ def import_key(gpg_key_file: Path, config_gpg_user: str) -> str:
 # ---------------------------------------------------------------------------
 # Vault password
 # ---------------------------------------------------------------------------
+
 
 def generate_password() -> str:
     """Generate a cryptographically random 20-character vault password."""
@@ -205,10 +231,14 @@ def encrypt_vault_password(fingerprint: str, output_file: Path) -> None:
         plain_file.write_text(generate_password())
         subprocess.run(
             [
-                "gpg", "--encrypt",
-                "--recipient", fingerprint,
-                "--trust-model", "always",
-                "--output", str(output_file),
+                "gpg",
+                "--encrypt",
+                "--recipient",
+                fingerprint,
+                "--trust-model",
+                "always",
+                "--output",
+                str(output_file),
                 str(plain_file),
             ],
             check=True,
@@ -225,6 +255,7 @@ def encrypt_vault_password(fingerprint: str, output_file: Path) -> None:
 # CLI
 # ---------------------------------------------------------------------------
 
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="One-time setup: secure Ansible Vault password with GPG encryption.",
@@ -235,31 +266,41 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        "--gpg-file", metavar="FILE",
+        "--gpg-file",
+        metavar="FILE",
         help=f"GPG secret key to import  [{_DEFAULT_GPG_SECRET_KEY}]",
     )
     parser.add_argument(
-        "--key-name", metavar="NAME",
+        "--key-name",
+        metavar="NAME",
         help="Name for a new GPG key; generate a key instead of importing one",
     )
     parser.add_argument(
-        "--key-email", metavar="EMAIL",
+        "--key-email",
+        metavar="EMAIL",
         help="Email for a new GPG key; generate a key instead of importing one",
     )
     parser.add_argument(
-        "--config-gpg-user", metavar="USER", default=os.environ.get("USER") or getpass.getuser(),
+        "--config-gpg-user",
+        metavar="USER",
+        default=os.environ.get("USER") or getpass.getuser(),
         help="OS user for whom GPG is configured [default: USER environment variable or current user]",
     )
     parser.add_argument(
-        "--vault-file", metavar="PATH", default=str(_DEFAULT_VAULT_FILE),
+        "--vault-file",
+        metavar="PATH",
+        default=str(_DEFAULT_VAULT_FILE),
         help=f"Ansible Vault secrets file  [{_DEFAULT_VAULT_FILE}]",
     )
     parser.add_argument(
-        "--gpg-encrypted-file", metavar="PATH", default=str(_DEFAULT_GPG_ENCRYPTED),
+        "--gpg-encrypted-file",
+        metavar="PATH",
+        default=str(_DEFAULT_GPG_ENCRYPTED),
         help=f"GPG-encrypted vault password file  [{_DEFAULT_GPG_ENCRYPTED}]",
     )
     parser.add_argument(
-        "--force", action="store_true",
+        "--force",
+        action="store_true",
         help="Overwrite an existing GPG-encrypted vault password file",
     )
     return parser.parse_args()
@@ -276,7 +317,9 @@ def validate_args(args: argparse.Namespace) -> None:
         )
     if args.key_name or args.key_email:
         if args.gpg_file:
-            sys.exit("ERROR: --gpg-file cannot be combined with --key-name/--key-email.")
+            sys.exit(
+                "ERROR: --gpg-file cannot be combined with --key-name/--key-email."
+            )
         if not args.key_name:
             sys.exit("ERROR: --key-name is required when generating a new GPG key.")
         if not args.key_email:
@@ -317,7 +360,9 @@ def main() -> None:
         if args.gpg_file:
             fingerprint = import_key(Path(args.gpg_file), args.config_gpg_user)
         else:
-            fingerprint = generate_key(args.key_name, args.key_email, args.config_gpg_user)
+            fingerprint = generate_key(
+                args.key_name, args.key_email, args.config_gpg_user
+            )
         print(f"\nGPG key fingerprint: {fingerprint}")
         encrypt_vault_password(fingerprint, Path(args.gpg_encrypted_file))
     except KeyboardInterrupt:
