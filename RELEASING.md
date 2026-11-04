@@ -54,7 +54,21 @@ Direct pushes to `master` are not checked for fragments; add them anyway, or the
 
 ## Releasing a collection
 
-Run from the collection root, for example `collections/ansible_collections/deamen/general`:
+`helper_scripts/prepare_release.py` and `helper_scripts/release.py` run the steps below. `-c` takes the collection root or `namespace.name`:
+
+```bash
+helper_scripts/prepare_release.py -c deamen.general --dry-run   # show the version it would release
+helper_scripts/prepare_release.py -c deamen.general             # bump galaxy.yml, run antsibull-changelog release
+git add -A collections/ansible_collections/deamen/general
+git commit -m "Release deamen.general 1.1.0" && git push
+helper_scripts/release.py -c deamen.general                     # tag HEAD and push the tag
+```
+
+Without `--version`, `prepare_release.py` bumps one part of the latest version in `changelogs/changelog.yaml` from the fragment sections: `breaking_changes` or `removed_features` give a major release; `major_changes`, `minor_changes` or `deprecated_features` a minor one; anything else a patch. It stops when there are no fragments. Pass `--version x.y.z` to choose the version yourself, for example when the release only adds new roles or modules through `version_added`; it must be newer than every released version.
+
+`release.py` runs the release workflow's checks (listed below) before it creates the `release_<namespace>.<collection>_v<version>` tag, and refuses to tag a collection with uncommitted changes or an existing tag. `--no-push` creates the tag without pushing it.
+
+To release by hand, run from the collection root, for example `collections/ansible_collections/deamen/general`:
 
 1. Bump `version` in `galaxy.yml`, following semantic versioning (`bugfixes` only: patch; `minor_changes` or new content: minor; `breaking_changes` or `removed_features`: major).
 2. Optionally add a fragment with a `release_summary`:
