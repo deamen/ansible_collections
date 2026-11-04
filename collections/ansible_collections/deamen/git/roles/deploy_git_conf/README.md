@@ -6,6 +6,10 @@ Deploy git configuration file.
 Requirements
 ------------
 
+The git configuration tasks run as `git_data.user` via `become_user`, so the
+target host needs `sudo` and the connecting user must be able to become that
+user. An existing `.gitconfig` that is not owned by `git_data.user` (for example
+one created by an earlier run as root) is handed back to that user.
 
 Role Variables
 --------------
