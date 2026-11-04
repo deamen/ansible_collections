@@ -11,6 +11,13 @@ target host needs `sudo` and the connecting user must be able to become that
 user. An existing `.gitconfig` that is not owned by `git_data.user` (for example
 one created by an earlier run as root) is handed back to that user.
 
+GitHub and Gist credentials come from the GitHub CLI (`gh auth login`). The role
+makes `gh auth git-credential` the only credential helper for
+`https://github.com` and `https://gist.github.com`, so helpers inherited from
+`/etc/gitconfig` or a generic `[credential]` section (such as the VS Code dev
+container helper) are not consulted for GitHub. It also removes the legacy
+`credential.https://github.com/.username` and `.helper` (gopass) settings.
+
 Role Variables
 --------------
 
@@ -22,8 +29,6 @@ All variables are provided via the `git_data` dictionary:
 | `git_data.email` | yes | `""` | Git `user.email` |
 | `git_data.username` | yes | `""` | Git `user.name` |
 | `git_data.signing_key` | yes | `""` | GPG signing key fingerprint for `user.signingkey` |
-| `git_data.github_username` | yes | `""` | GitHub credential username |
-| `git_data.github_helper` | yes | `""` | GitHub credential helper (e.g. `gopass`) |
 
 Dependencies
 ------------
@@ -44,8 +49,6 @@ Example Playbook
           email: "alice@example.com"
           username: "Alice Smith"
           signing_key: "ABCDEF1234567890"
-          github_username: "alice"
-          github_helper: "/usr/bin/gopass"
 ```
 
 
