@@ -82,3 +82,34 @@
         that: >-
           '/github/workspace' in (_gitconfig_content.content | b64decode)
         fail_msg: "safe.directory not set in .gitconfig"
+
+    - name: Read GitHub credential helpers
+      ansible.builtin.command:
+        argv:
+          - git
+          - config
+          - --file
+          - '{{ _molecule_gitconfig }}'
+          - --get-all
+          - 'credential.{{ item }}.helper'
+      loop:
+        - https://github.com
+        - https://gist.github.com
+      register: _gh_helpers
+      changed_when: false
+
+    - name: Assert gh is the only GitHub credential helper
+      ansible.builtin.assert:
+        that:
+          - item.stdout_lines == ['', '!/usr/bin/gh auth git-credential']
+        fail_msg: "credential.{{ item.item }}.helper is {{ item.stdout_lines }}"
+      loop: '{{ _gh_helpers.results }}'
+      loop_control:
+        label: '{{ item.item }}'
+
+    - name: Assert legacy GitHub credential settings are removed
+      ansible.builtin.assert:
+        that:
+          - "'gopass' not in (_gitconfig_content.content | b64decode)"
+          - "'credential \"https://github.com/\"' not in (_gitconfig_content.content | b64decode)"
+        fail_msg: "legacy gopass GitHub credential settings still in .gitconfig"

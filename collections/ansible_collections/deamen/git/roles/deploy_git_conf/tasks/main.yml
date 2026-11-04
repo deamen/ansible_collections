@@ -127,20 +127,6 @@
         name: 'difftool."meld".cmd'
         value: 'meld "$LOCAL" "$REMOTE"'
 
-    - name: Set GitHub credential username
-      community.general.git_config:
-        scope: file
-        file: "/home/{{ git_data.user }}/.gitconfig"
-        name: "credential.https://github.com/.username"
-        value: "{{ git_data.github_username }}"
-
-    - name: Set GitHub credential helper to gopass
-      community.general.git_config:
-        scope: file
-        file: "/home/{{ git_data.user }}/.gitconfig"
-        name: "credential.https://github.com/.helper"
-        value: "{{ git_data.github_helper }}"
-
     - name: Enable GPG sign by default
       community.general.git_config:
         scope: file
@@ -155,16 +141,48 @@
         name: safe.directory
         value: /github/workspace
 
-    - name: Set GitHub credential helper override
+    # The old gopass setup pinned a username for https://github.com/, which
+    # makes gh's helper refuse to answer. Remove it.
+    - name: Remove legacy GitHub credential settings
       community.general.git_config:
         scope: file
         file: "/home/{{ git_data.user }}/.gitconfig"
-        name: "credential.https://github.com.helper"
-        value: "!/usr/bin/gh auth git-credential"
+        name: "credential.https://github.com/.{{ item }}"
+        state: absent
+      loop:
+        - username
+        - helper
 
-    - name: Set Gist GitHub credential helper override
-      community.general.git_config:
-        scope: file
-        file: "/home/{{ git_data.user }}/.gitconfig"
-        name: "credential.https://gist.github.com.helper"
-        value: "!/usr/bin/gh auth git-credential"
+    # Git runs every matching helper in order, so the helpers inherited from
+    # /etc/gitconfig or the generic [credential] section (for example the
+    # VS Code dev container helper) answer before gh. An empty helper entry
+    # clears that list, leaving gh as the only helper for GitHub.
+    - name: Read GitHub credential helpers
+      ansible.builtin.command:
+        argv:
+          - git
+          - config
+          - --file
+          - "/home/{{ git_data.user }}/.gitconfig"
+          - --get-all
+          - "credential.{{ item }}.helper"
+      loop: "{{ _deploy_git_conf_gh_hosts }}"
+      register: _deploy_git_conf_gh_helpers
+      changed_when: false
+      failed_when: _deploy_git_conf_gh_helpers.rc > 1
+
+    - name: Make gh the only GitHub credential helper
+      # git_config refuses an empty value, which the reset entry needs.
+      ansible.builtin.shell:  # noqa: command-instead-of-module
+        cmd: >-
+          git config --file "$CONF" --replace-all "$KEY" '' &&
+          git config --file "$CONF" --add "$KEY" "$HELPER"
+      environment:
+        CONF: "/home/{{ git_data.user }}/.gitconfig"
+        KEY: "credential.{{ item.item }}.helper"
+        HELPER: "{{ _deploy_git_conf_gh_helper }}"
+      loop: "{{ _deploy_git_conf_gh_helpers.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      changed_when: true
+      when: item.stdout_lines != ['', _deploy_git_conf_gh_helper]

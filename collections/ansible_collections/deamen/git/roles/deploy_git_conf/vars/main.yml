@@ -1,2 +1,6 @@
 ---
 # vars file for deploy_git_conf
+_deploy_git_conf_gh_helper: "!/usr/bin/gh auth git-credential"
+_deploy_git_conf_gh_hosts:
+  - https://github.com
+  - https://gist.github.com

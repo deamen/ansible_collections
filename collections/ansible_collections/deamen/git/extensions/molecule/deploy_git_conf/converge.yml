@@ -33,5 +33,3 @@
           email: 'testuser@example.com'
           username: 'Test User'
           signing_key: 'ABCDEF1234567890ABCDEF1234567890ABCDEF12'
-          github_username: 'testuser'
-          github_helper: '/usr/bin/gopass'
