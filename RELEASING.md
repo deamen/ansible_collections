@@ -32,6 +32,7 @@ bugfixes:
 
 - Valid sections are `major_changes`, `minor_changes`, `breaking_changes`, `deprecated_features`, `removed_features`, `security_fixes`, `bugfixes`, `known_issues` and `trivial`. Use `release_summary` only at release time.
 - Prefix each entry with the role or module name, end it with a full stop, and use double backticks for code.
+- Don't put `playbook` in the fragment filename. `ansible-lint` parses `*playbook*.yml` files as playbooks and fails. `.ansible-lint` maps fragments to plain YAML as a guard, but keep the names clear of it anyway.
 - `trivial` entries are accepted but left out of `CHANGELOG.md`; use them for refactors and cleanups.
 - New modules and roles are listed automatically when they set `version_added` (module `DOCUMENTATION`, role `meta/argument_specs.yml`). A role without `version_added` needs a fragment.
 

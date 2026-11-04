@@ -2,3 +2,6 @@ skip_list:
   - "var-naming[no-role-prefix]"  # Allow variables without role prefix, a lot of roles don't comply with this.
 exclude_paths:
   - helper_scripts/files/molecule_template/
+kinds:
+  # Changelog fragments are plain YAML; without this, names matching *playbook*.yml are parsed as playbooks
+  - yaml: "**/changelogs/fragments/*.yml"
