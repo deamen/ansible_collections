@@ -15,3 +15,12 @@
   become: true
   become_method: ansible.builtin.sudo
   become_user: '{{ config_gpg_user }}'
+
+# A running agent keeps its old settings until reloaded; with no agent running this is a no-op
+- name: Reload gpg-agent
+  ansible.builtin.command:
+    cmd: gpgconf --reload gpg-agent
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+  changed_when: true

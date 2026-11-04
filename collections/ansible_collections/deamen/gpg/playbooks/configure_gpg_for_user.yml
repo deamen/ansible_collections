@@ -1,0 +1,16 @@
+---
+# Unlike config_gpg, this targets inventory hosts (including localhost via -i localhost, -c local)
+- name: Install GPG, configure gpg-agent and optionally import a GPG key for a user
+  hosts: all
+  # config_gpg escalates to config_gpg_user for its own tasks
+  become: false
+
+  tasks:
+    - name: Install GPG packages
+      ansible.builtin.import_role:
+        name: deamen.gpg.install_gpg
+      become: true
+
+    - name: Configure GPG
+      ansible.builtin.import_role:
+        name: deamen.gpg.config_gpg

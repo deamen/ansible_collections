@@ -1,0 +1,47 @@
+---
+- name: Verify deamen.gpg.configure_gpg_for_user playbook
+  hosts: containers
+  gather_facts: false
+
+  tasks:
+    - name: Check gpg is installed
+      ansible.builtin.command: gpg --version
+      changed_when: false
+
+    - name: Gather gpg-agent.conf file info
+      ansible.builtin.stat:
+        path: '/home/{{ config_gpg_user }}/.gnupg/gpg-agent.conf'
+      register: _gpg_agent_conf
+
+    - name: Assert gpg-agent.conf exists with correct permissions
+      ansible.builtin.assert:
+        that:
+          - _gpg_agent_conf.stat.exists
+          - _gpg_agent_conf.stat.mode == '0600'
+          - _gpg_agent_conf.stat.pw_name == config_gpg_user
+
+    - name: Read gpg-agent.conf
+      ansible.builtin.slurp:
+        src: '/home/{{ config_gpg_user }}/.gnupg/gpg-agent.conf'
+      register: _gpg_agent_conf_content
+
+    - name: Assert default cache TTLs are 2 hours and 12 hours
+      ansible.builtin.assert:
+        that:
+          - "'default-cache-ttl 7200' in _gpg_agent_conf_content.content | b64decode"
+          - "'max-cache-ttl 43200' in _gpg_agent_conf_content.content | b64decode"
+
+    - name: Check secret key presence
+      ansible.builtin.command:
+        cmd: gpg --list-secret-keys --with-colons 7C694A119306CD575A5E129EF3D29D4FB47F0B00
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ config_gpg_user }}'
+      changed_when: false
+      failed_when: false
+      register: _gpg_secret_key
+
+    - name: Assert secret key is imported only when requested
+      ansible.builtin.assert:
+        that:
+          - (_gpg_secret_key.rc == 0) == (config_gpg_import_secret_key | default(false) | bool)

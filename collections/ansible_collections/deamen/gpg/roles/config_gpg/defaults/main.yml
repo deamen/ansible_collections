@@ -1,9 +1,9 @@
 ---
 # defaults file for config_gpg
-config_gpg_default_cache_ttl: 60
+config_gpg_default_cache_ttl: 7200
 config_gpg_import_public_key: false
 config_gpg_import_secret_key: false
-config_gpg_max_cache_ttl: 120
+config_gpg_max_cache_ttl: 43200
 config_gpg_secret_key_path: '/home/{{ config_gpg_user }}/.gnupg/private_gpg.key'
 config_gpg_fingerprint: ''
 config_gpg_public_key: ''

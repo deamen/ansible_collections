@@ -1,0 +1,16 @@
+# No explicit localhost: the playbook targets "all", and create/destroy use the implicit localhost
+molecule:
+  children:
+    containers:
+
+containers:
+  hosts:
+    # Remote-host case: import the secret key
+    test-container-with-key:
+      config_gpg_user: testuser
+      config_gpg_fingerprint: '7C694A119306CD575A5E129EF3D29D4FB47F0B00'
+      config_gpg_import_secret_key: true
+      config_gpg_secret_key_path: /tmp/private_gpg.key
+    # Image-build case: gpg-agent.conf only, no key
+    test-container-agent-only:
+      config_gpg_user: testuser

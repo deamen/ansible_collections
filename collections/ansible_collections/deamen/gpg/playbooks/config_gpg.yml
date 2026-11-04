@@ -13,6 +13,3 @@
     - name: Configure GPG
       ansible.builtin.import_role:
         name: deamen.gpg.config_gpg
-      vars:
-        config_gpg_default_cache_ttl: 7200
-        config_gpg_max_cache_ttl: 36000
