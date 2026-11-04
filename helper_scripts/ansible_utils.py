@@ -1,6 +1,7 @@
 """Shared utilities for Ansible collection and role management scripts."""
 
 import os
+import re
 import subprocess
 import sys
 
@@ -197,3 +198,80 @@ def run_ansible_galaxy(args, quiet=False):
         print(f"ansible-galaxy exited with code: {exit_code}")
 
     return exit_code
+
+
+# ---------------------------------------------------------------------------
+# Release helpers (prepare_release.py, release.py)
+# ---------------------------------------------------------------------------
+
+_VERSION_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
+
+
+def parse_version(version):
+    """Return *version* as a ``(major, minor, patch)`` tuple, or None if it is not x.y.z."""
+    match = _VERSION_RE.match(str(version).strip())
+    if not match:
+        return None
+    return tuple(int(part) for part in match.groups())
+
+
+def format_version(version_tuple):
+    """Return a ``(major, minor, patch)`` tuple as an ``x.y.z`` string."""
+    return ".".join(str(part) for part in version_tuple)
+
+
+def get_repo_root():
+    """Return the root of the repository that contains this script."""
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def resolve_collection_dir(collection):
+    """Return the absolute directory of *collection*, or exit with an error.
+
+    *collection* is a path to the collection root (absolute or relative to the
+    current directory), or a ``namespace.name`` looked up under
+    ``DEFAULT_COLLECTION_PATH`` in the repository.
+    """
+    candidates = [os.path.abspath(collection)]
+    if "." in collection and os.sep not in collection:
+        namespace, name = collection.split(".", 1)
+        candidates.append(
+            os.path.join(get_repo_root(), DEFAULT_COLLECTION_PATH, namespace, name)
+        )
+    for candidate in candidates:
+        if os.path.isfile(os.path.join(candidate, "galaxy.yml")):
+            return candidate
+    print(f"Error: no galaxy.yml found for collection '{collection}'.")
+    sys.exit(2)
+
+
+def load_galaxy(col_dir):
+    """Return the parsed galaxy.yml of the collection in *col_dir*."""
+    import yaml
+
+    with open(os.path.join(col_dir, "galaxy.yml"), encoding="utf-8") as fh:
+        return yaml.safe_load(fh) or {}
+
+
+def load_released_versions(col_dir):
+    """Return the version strings listed in changelogs/changelog.yaml."""
+    import yaml
+
+    path = os.path.join(col_dir, "changelogs", "changelog.yaml")
+    if not os.path.isfile(path):
+        return []
+    with open(path, encoding="utf-8") as fh:
+        data = yaml.safe_load(fh) or {}
+    return [str(v) for v in (data.get("releases") or {})]
+
+
+def list_fragments(col_dir):
+    """Return the paths of all files in changelogs/fragments/ except ``.keep``."""
+    fragments_dir = os.path.join(col_dir, "changelogs", "fragments")
+    if not os.path.isdir(fragments_dir):
+        return []
+    return sorted(
+        os.path.join(fragments_dir, f)
+        for f in os.listdir(fragments_dir)
+        if f != ".keep"
+    )

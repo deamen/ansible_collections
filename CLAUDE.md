@@ -5,7 +5,7 @@ Source repository for the `deamen.*` Ansible collections, released to Ansible Ga
 ## Layout
 
 - `collections/ansible_collections/deamen/<collection>/` — one directory per collection (`account`, `ai`, `ansible`, `certificate`, `general`, `git`, `gpg`, `podman`)
-- `helper_scripts/` — scaffolding scripts; `init_role.py` and `init_collection.py` apply lint fixes automatically, `ansible_utils.py` holds the shared helpers
+- `helper_scripts/` — scaffolding and release scripts; `init_role.py` and `init_collection.py` apply lint fixes automatically, `prepare_release.py` and `release.py` release a collection, `ansible_utils.py` holds the shared helpers
 - `helper_scripts/files/molecule_template/` — template copied by `init_molecule.py`, excluded from `ansible-lint`
 - `helper_scripts/files/changelogs/config.yaml` — antsibull-changelog config template used by `init_collection.py`
 - `.github/workflows/` — lint, sanity, molecule, and per-collection release workflows
@@ -49,7 +49,7 @@ See `RELEASING.md` for the full process. Each collection uses [antsibull-changel
 - `antsibull-changelog release` lists new modules and roles automatically when they set `version_added` (module `DOCUMENTATION`, role `meta/argument_specs.yml`); no fragment is needed just to announce them.
 - PRs that change `plugins/`, `roles/`, `playbooks/` or `meta/` in a collection must add a fragment to that collection, or release it in the same PR (`.github/workflows/check_changelog_fragment.yml`); label the PR `skip-changelog` when no entry is needed.
 - Validate fragments with `antsibull-changelog lint` from the collection root.
-- To release: bump `version` in `galaxy.yml`, run `antsibull-changelog release` from the collection root (consumes the fragments and regenerates `CHANGELOG.md`), commit, then push the `release_<namespace>.<collection>_v<version>` tag.
+- To release: `helper_scripts/prepare_release.py -c <namespace.collection>` bumps `version` in `galaxy.yml` from the fragments (or `--version x.y.z`) and runs `antsibull-changelog release`; commit and push, then `helper_scripts/release.py -c <namespace.collection>` pushes the `release_<namespace>.<collection>_v<version>` tag. Pushing a tag publishes to Galaxy, so only run `release.py` when asked.
 
 ## Secrets
 
