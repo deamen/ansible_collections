@@ -10,3 +10,22 @@ releases:
           name: deploy_git_conf
           namespace: null
     release_date: '2026-04-07'
+  2.0.0:
+    changes:
+      bugfixes:
+        - deploy_git_conf - make ``gh auth git-credential`` the only credential helper
+          for ``https://github.com`` and ``https://gist.github.com``, so inherited
+          helpers (such as the VS Code dev container helper) no longer answer first,
+          and remove the legacy ``credential.https://github.com/.username`` and gopass
+          helper settings that made ``gh`` refuse to supply a token.
+        - deploy_git_conf - run the ``git_config`` tasks as ``git_data.user`` so ``.gitconfig``
+          is no longer created owned by root when the play uses ``become``, and hand
+          an existing root-owned ``.gitconfig`` back to the user.
+      removed_features:
+        - deploy_git_conf - the ``git_data.github_username`` and ``git_data.github_helper``
+          options were removed; GitHub credentials now always come from the GitHub
+          CLI.
+    fragments:
+      - gh-credential-helper.yml
+      - gitconfig-owner.yml
+    release_date: '2026-11-04'

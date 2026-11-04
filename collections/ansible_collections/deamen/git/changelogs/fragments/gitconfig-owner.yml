@@ -1,3 +1,0 @@
----
-bugfixes:
-  - deploy_git_conf - run the ``git_config`` tasks as ``git_data.user`` so ``.gitconfig`` is no longer created owned by root when the play uses ``become``, and hand an existing root-owned ``.gitconfig`` back to the user.
