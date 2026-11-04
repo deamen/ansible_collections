@@ -32,6 +32,7 @@
     mode: '0600'
     owner: '{{ config_gpg_user }}'
     src: gpg-agent.conf.j2
+  notify: Reload gpg-agent
   become: true
   become_method: ansible.builtin.sudo
   become_user: '{{ config_gpg_user }}'
