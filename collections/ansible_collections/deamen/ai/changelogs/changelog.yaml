@@ -44,3 +44,16 @@ releases:
           name: install_linear_cli
           namespace: null
     release_date: '2026-11-03'
+  2.1.0:
+    changes:
+      minor_changes:
+        - Add the ``install_claude_code`` role to install the Claude Code CLI for
+          a user with the native installer.
+    fragments:
+      - install-claude-code.yml
+    objects:
+      role:
+        - description: Install the Claude Code CLI for a user with the native installer.
+          name: install_claude_code
+          namespace: null
+    release_date: '2026-11-05'

@@ -1,3 +1,0 @@
----
-minor_changes:
-  - Add the ``install_claude_code`` role to install the Claude Code CLI for a user with the native installer.
