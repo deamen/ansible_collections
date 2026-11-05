@@ -1,0 +1,11 @@
+---
+# vars file for install_claude_code
+
+# Architectures published by the Claude Code native installer, keyed by ansible_facts['architecture']
+__claude_code_supported_archs:
+  - x86_64
+  - aarch64
+# install.sh downloads the binary with curl and checks it against the sha256 in the release manifest
+__claude_code_dependency_packages:
+  - curl
+__claude_code_installer_url: https://claude.ai/install.sh

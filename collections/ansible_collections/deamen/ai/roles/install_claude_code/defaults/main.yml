@@ -1,0 +1,5 @@
+---
+# defaults file for install_claude_code
+
+# Release channel (stable or latest) or an exact version such as 2.1.0, passed to install.sh
+claude_code_version: stable

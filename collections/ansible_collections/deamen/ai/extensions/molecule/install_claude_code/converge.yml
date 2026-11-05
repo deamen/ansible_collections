@@ -1,0 +1,34 @@
+---
+- name: Test deamen.ai.install_claude_code
+  hosts: molecule:&containers
+  gather_facts: true
+
+  vars:
+    test_user: claude_test
+
+  pre_tasks:
+    - name: Install packages needed to become an unprivileged user
+      # Ansible becomes test_user with sudo and shares its temporary files with it through ACLs
+      ansible.builtin.package:
+        name:
+          - acl
+          - sudo
+        state: present
+
+    - name: Create the test user
+      ansible.builtin.user:
+        name: "{{ test_user }}"
+        state: present
+
+  tasks:
+    - name: Install Claude Code for the connecting user
+      ansible.builtin.include_role:
+        name: deamen.ai.install_claude_code
+      vars:
+        claude_code_user: root
+
+    - name: Install Claude Code for the test user
+      ansible.builtin.include_role:
+        name: deamen.ai.install_claude_code
+      vars:
+        claude_code_user: "{{ test_user }}"

@@ -1,0 +1,49 @@
+---
+- name: Verify deamen.ai.install_claude_code
+  hosts: molecule:&containers
+  gather_facts: false
+
+  vars:
+    test_users:
+      - home: /root
+        name: root
+      - home: /home/claude_test
+        name: claude_test
+
+  tasks:
+    - name: Get the claude launcher status
+      ansible.builtin.stat:
+        path: "{{ item.home }}/.local/bin/claude"
+      register: claude_launcher
+      loop: "{{ test_users }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Check the claude launcher is installed and owned by the user
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.pw_name == item.item.name
+        fail_msg: "{{ item.item.home }}/.local/bin/claude is missing or not owned by {{ item.item.name }}"
+      loop: "{{ claude_launcher.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"
+
+    - name: Get the Claude Code version as each user
+      ansible.builtin.command: "{{ item.home }}/.local/bin/claude --version"
+      become: "{{ item.name != 'root' }}"
+      become_user: "{{ item.name }}"
+      register: claude_version
+      changed_when: false
+      loop: "{{ test_users }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Check claude reports a Claude Code version
+      ansible.builtin.assert:
+        that:
+          - item.stdout is search('^[0-9]+\.[0-9]+\.[0-9]+.*Claude Code')
+        fail_msg: "Unexpected claude --version output for {{ item.item.name }}: {{ item.stdout }}"
+      loop: "{{ claude_version.results }}"
+      loop_control:
+        label: "{{ item.item.name }}"

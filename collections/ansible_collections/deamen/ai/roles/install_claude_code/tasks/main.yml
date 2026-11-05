@@ -1,0 +1,78 @@
+---
+# tasks file for install_claude_code
+
+- name: Check that Claude Code is published for this architecture
+  ansible.builtin.assert:
+    that: ansible_facts['architecture'] in __claude_code_supported_archs
+    fail_msg: "Claude Code is not available for {{ ansible_facts['architecture'] }}"
+    quiet: true
+
+- name: Check that claude_code_version is a channel or an exact version
+  ansible.builtin.assert:
+    that: claude_code_version is match('^(stable|latest|[0-9]+\.[0-9]+\.[0-9]+(-\S+)?)$')
+    fail_msg: "claude_code_version must be stable, latest or a version such as 2.1.0, got: {{ claude_code_version }}"
+    quiet: true
+
+- name: Get the account of {{ claude_code_user }}
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ claude_code_user }}"
+
+- name: Install Claude Code for {{ claude_code_user }}
+  # Everything runs as the target user: install.sh installs under $HOME
+  become: "{{ claude_code_user != ansible_facts['user_id'] }}"
+  become_user: "{{ claude_code_user }}"
+  vars:
+    __claude_code_home: "{{ ansible_facts['getent_passwd'][claude_code_user][4] }}"
+    __claude_code_bin: "{{ __claude_code_home }}/.local/bin/claude"
+  block:
+    - name: Get the installed Claude Code version
+      ansible.builtin.command: "{{ __claude_code_bin }} --version"
+      register: __claude_code_installed
+      changed_when: false
+      failed_when: false
+
+    - name: Install Claude Code {{ claude_code_version }}
+      # --version prints e.g. "2.1.0 (Claude Code)"; a channel only installs when claude is missing
+      when: >-
+        __claude_code_installed.rc != 0 or
+        (claude_code_version not in ['stable', 'latest'] and
+         claude_code_version not in __claude_code_installed.stdout)
+      block:
+        - name: Install packages needed by the installer
+          ansible.builtin.package:
+            name: "{{ __claude_code_dependency_packages }}"
+            state: present
+          become: true
+          become_user: root
+
+        - name: Create a temporary download directory
+          ansible.builtin.tempfile:
+            state: directory
+            suffix: claude-code
+          register: __claude_code_tmp
+
+        - name: Download the Claude Code installer
+          ansible.builtin.get_url:
+            url: "{{ __claude_code_installer_url }}"
+            dest: "{{ __claude_code_tmp.path }}/install.sh"
+            mode: "0755"
+
+        - name: Run the Claude Code installer
+          # CLAUDE_INSTALL_ALLOW_SUDO lets install.sh run when claude_code_user is root reached through sudo
+          ansible.builtin.command:
+            argv:
+              - bash
+              - "{{ __claude_code_tmp.path }}/install.sh"
+              - "{{ claude_code_version }}"
+          environment:
+            CLAUDE_INSTALL_ALLOW_SUDO: "1"
+            HOME: "{{ __claude_code_home }}"
+          changed_when: true
+
+      always:
+        - name: Remove the temporary download directory
+          ansible.builtin.file:
+            path: "{{ __claude_code_tmp.path }}"
+            state: absent
+          when: __claude_code_tmp.path is defined

@@ -1,0 +1,25 @@
+---
+argument_specs:
+  main:
+    short_description: Install the Claude Code CLI for a user with the native installer.
+    description:
+      - >-
+        Download U(https://claude.ai/install.sh) and run it as O(claude_code_user), which installs the
+        C(claude) launcher into C(~/.local/bin) of that user and the binary under C(~/.local/share/claude).
+      - >-
+        When O(claude_code_version) is a channel, the installer is skipped if C(claude) is already installed
+        for the user; when it is an exact version, it is skipped if the installed C(claude) reports that version.
+    version_added: 2.1.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      claude_code_user:
+        description:
+          - Existing user to install Claude Code for.
+          - The role becomes this user unless it is already the connecting user.
+        type: str
+        required: true
+      claude_code_version:
+        description: Release channel (C(stable) or C(latest)) or an exact version such as C(2.1.0).
+        type: str
+        default: stable
