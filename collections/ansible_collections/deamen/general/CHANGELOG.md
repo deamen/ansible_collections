@@ -2,12 +2,14 @@
 
 **Topics**
 
-- <a href="#v1-0-5">v1\.0\.5</a>
+- <a href="#v1-1-0">v1\.1\.0</a>
     - <a href="#minor-changes">Minor Changes</a>
-- <a href="#v1-0-4">v1\.0\.4</a>
+- <a href="#v1-0-5">v1\.0\.5</a>
     - <a href="#minor-changes-1">Minor Changes</a>
-- <a href="#v1-0-3">v1\.0\.3</a>
+- <a href="#v1-0-4">v1\.0\.4</a>
     - <a href="#minor-changes-2">Minor Changes</a>
+- <a href="#v1-0-3">v1\.0\.3</a>
+    - <a href="#minor-changes-3">Minor Changes</a>
     - <a href="#bugfixes">Bugfixes</a>
 - <a href="#v1-0-2">v1\.0\.2</a>
     - <a href="#new-roles">New Roles</a>
@@ -15,14 +17,23 @@
     - <a href="#bugfixes-1">Bugfixes</a>
 - <a href="#v1-0-0">v1\.0\.0</a>
     - <a href="#release-summary">Release Summary</a>
-    - <a href="#minor-changes-3">Minor Changes</a>
+    - <a href="#minor-changes-4">Minor Changes</a>
     - <a href="#new-modules">New Modules</a>
     - <a href="#new-roles-1">New Roles</a>
+
+<a id="v1-1-0"></a>
+## v1\.1\.0
+
+<a id="minor-changes"></a>
+### Minor Changes
+
+* config\_dev\_runtime\_env \- add <code>config\_dev\_runtime\_env\_force\_deploy\_aliases</code> to redeploy <code>aliases\.sh</code> when it already exists\.
+* config\_dev\_runtime\_env \- add <code>unlock\_gpg</code> to <code>aliases\.sh</code> to cache the GPG signing and decryption passphrases in <code>gpg\-agent</code>\, and export <code>GPG\_TTY</code> in interactive shells\.
 
 <a id="v1-0-5"></a>
 ## v1\.0\.5
 
-<a id="minor-changes"></a>
+<a id="minor-changes-1"></a>
 ### Minor Changes
 
 * config\_dev\_runtime\_env \- define <code>ansiblev</code> and <code>ansible\-playbookv</code> as bash functions instead of aliases wrapping functions\.
@@ -31,7 +42,7 @@
 <a id="v1-0-4"></a>
 ## v1\.0\.4
 
-<a id="minor-changes-1"></a>
+<a id="minor-changes-2"></a>
 ### Minor Changes
 
 * install\_dev\_packages \- add <code>gzip</code>\, <code>which</code> and <code>procps\-ng</code> to <code>essential\_packages</code> \(needed by VS Code server in minimal containers\)\.
@@ -40,7 +51,7 @@
 <a id="v1-0-3"></a>
 ## v1\.0\.3
 
-<a id="minor-changes-2"></a>
+<a id="minor-changes-3"></a>
 ### Minor Changes
 
 * Move molecule scenarios under <code>extensions/</code>\.
@@ -78,7 +89,7 @@
 
 Initial release of the <code>deamen\.general</code> collection\.
 
-<a id="minor-changes-3"></a>
+<a id="minor-changes-4"></a>
 ### Minor Changes
 
 * config\_dev\_runtime\_env \- install pre\-commit and detect\-secrets\.
