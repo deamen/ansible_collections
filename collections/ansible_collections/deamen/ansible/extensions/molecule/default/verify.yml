@@ -24,3 +24,9 @@
       failed_when: molecule_cli.rc != 0
       changed_when: false
       when: ansible_user_id != 'root'
+
+    - name: Check that `antsibull-changelog` CLI is installed
+      ansible.builtin.command: antsibull-changelog --version
+      register: antsibull_changelog_cli
+      failed_when: antsibull_changelog_cli.rc != 0
+      changed_when: false

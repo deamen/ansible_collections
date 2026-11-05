@@ -46,6 +46,15 @@
   become: true
   when: install_molecule_via_pip | bool
 
+# helper_scripts/prepare_release.py in ansible_collections runs antsibull-changelog
+- name: Install antsibull-changelog via pip
+  ansible.builtin.pip:
+    name: antsibull-changelog
+    executable: "{{ ansible_pip_executable }}"
+    state: present
+  become: true
+  when: install_antsibull_changelog_via_pip | bool
+
 - name: Check if ansible vault file exists
   ansible.builtin.stat:
     path: "{{ ansible_user_dir }}/.ansible_vault.yml"
