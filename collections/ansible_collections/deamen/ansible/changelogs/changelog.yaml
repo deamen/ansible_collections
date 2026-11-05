@@ -67,3 +67,20 @@ releases:
     fragments:
       - add-configure-ansible-development-env.yml
     release_date: '2026-11-03'
+  1.2.0:
+    changes:
+      minor_changes:
+        - config_ansible_runtime_env - install ``/usr/local/bin/gpg_cat.sh``, a generic
+          GPG decrypt script that reads the file from ``--gpg_file`` or the ``GPG_FILE``
+          environment variable.
+        - config_ansible_runtime_env - install ``antsibull-changelog`` with pip, used
+          to release collections; set ``install_antsibull_changelog_via_pip=false``
+          to skip it.
+        - configure_ansible_development_env - install Claude Code for the connecting
+          user with ``deamen.ai.install_claude_code``; ``deamen.ai`` is now required
+          at ``>=2.1.0``.
+    fragments:
+      - antsibull_changelog.yml
+      - gpg_cat.yml
+      - install-claude-code.yml
+    release_date: '2026-11-05'

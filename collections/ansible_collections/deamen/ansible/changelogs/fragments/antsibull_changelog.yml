@@ -1,3 +1,0 @@
----
-minor_changes:
-  - config_ansible_runtime_env - install ``antsibull-changelog`` with pip, used to release collections; set ``install_antsibull_changelog_via_pip=false`` to skip it.

@@ -1,3 +1,0 @@
----
-minor_changes:
-  - configure_ansible_development_env - install Claude Code for the connecting user with ``deamen.ai.install_claude_code``; ``deamen.ai`` is now required at ``>=2.1.0``.
