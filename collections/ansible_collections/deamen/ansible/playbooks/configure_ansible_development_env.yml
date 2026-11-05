@@ -37,3 +37,10 @@
     - name: Install linear-cli
       ansible.builtin.include_role:
         name: deamen.ai.install_linear_cli
+
+    - name: Install Claude Code
+      # Installs into ~/.local/bin of the connecting user
+      ansible.builtin.include_role:
+        name: deamen.ai.install_claude_code
+      vars:
+        claude_code_user: "{{ ansible_facts['user_id'] }}"
