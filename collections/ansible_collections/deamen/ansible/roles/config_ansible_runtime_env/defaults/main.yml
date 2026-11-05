@@ -6,6 +6,8 @@ ansible_galaxy_executable: "/usr/bin/ansible-galaxy"
 ansible_pip_executable: "/usr/bin/pip3"
 # Set to false where molecule is installed by other means, e.g. pipx in container images
 install_molecule_via_pip: true
+# Set to false where antsibull-changelog is installed by other means, e.g. pipx in container images
+install_antsibull_changelog_via_pip: true
 # Provides /usr/bin/python for the "#!/usr/bin/env python" shebang of setup_ansible_vault_gpg.py
 unversioned_python_packages:
   - python-unversioned-command

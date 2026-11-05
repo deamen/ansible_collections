@@ -15,6 +15,7 @@ Role Variables
 | ansible_galaxy_executable | Path to ansible-galaxy executable.                                 | /usr/bin/ansible-galaxy   |
 | ansible_pip_executable    | Path to pip executable for installing molecule and requirements.   | /usr/bin/pip3             |
 | install_molecule_via_pip  | Install molecule with pip. Set to false when installed otherwise.  | true                      |
+| install_antsibull_changelog_via_pip | Install antsibull-changelog with pip. Set to false when installed otherwise. | true |
 | unversioned_python_packages | Packages providing `/usr/bin/python` for `setup_ansible_vault_gpg.py`. | [python-unversioned-command] |
 
 The role also installs `/usr/local/bin/ansible_vault_pass_gpg.sh`, which decrypts `~/.ansible_vault_pass.gpg`
