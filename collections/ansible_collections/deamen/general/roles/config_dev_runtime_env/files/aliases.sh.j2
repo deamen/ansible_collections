@@ -24,3 +24,22 @@ ansible-playbookv() {
   # shellcheck disable=SC2046
   ansible-playbook -e "@$HOME/.ansible_vault.yml" $(_ansible_vault_args) "$@"
 }
+
+# pinentry-curses (gpg-agent.conf from deamen.gpg.config_gpg) reads GPG_TTY.
+# Guarded with [ -t 0 ] because config_ansible_runtime_env sources this file from a
+# non-interactive shell task, where tty prints "not a tty"
+if [ -t 0 ]; then
+  GPG_TTY=$(tty)
+  export GPG_TTY
+fi
+
+# Prompt for the GPG passphrase now so gpg-agent caches the signing and decryption
+# subkeys, e.g. before ansible_vault_pass_gpg.sh runs gpg --batch.
+# A function rather than an alias because of the pipeline; uses the default key.
+unlock_gpg() {
+  # updatestartuptty points pinentry at this terminal when the agent was started from another one
+  gpg-connect-agent updatestartuptty /bye >/dev/null &&
+    echo | gpg --clearsign >/dev/null &&
+    echo | gpg --encrypt --default-recipient-self | gpg --decrypt --quiet >/dev/null &&
+    echo "gpg-agent unlocked"
+}

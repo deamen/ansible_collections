@@ -30,3 +30,20 @@
       register: antsibull_changelog_cli
       failed_when: antsibull_changelog_cli.rc != 0
       changed_when: false
+
+    - name: Read deployed aliases.sh
+      ansible.builtin.slurp:
+        src: "{{ ansible_env.HOME }}/.bashrc.d/aliases.sh"
+      register: aliases_sh
+
+    - name: Check that aliases.sh defines unlock_gpg
+      ansible.builtin.assert:
+        that:
+          - "'unlock_gpg()' in (aliases_sh.content | b64decode)"
+        fail_msg: "unlock_gpg is missing from ~/.bashrc.d/aliases.sh"
+
+    - name: Check that aliases.sh sources cleanly in a non-tty shell
+      ansible.builtin.command: bash -c 'source ~/.bashrc.d/aliases.sh && type unlock_gpg'
+      register: unlock_gpg_type
+      failed_when: unlock_gpg_type.rc != 0 or 'not a tty' in unlock_gpg_type.stderr
+      changed_when: false

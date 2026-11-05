@@ -20,12 +20,14 @@
 
   # Deploy once-off aliases.sh file
   # This allows user to customise their aliases without affecting the ansible playbook
+  # Set config_dev_runtime_env_force_deploy_aliases to redeploy it; the old file is backed up
 - name: Deploy aliases.sh to set up bash aliases for dev environment
   ansible.builtin.template:
     src: "files/aliases.sh.j2"
     dest: "{{ ansible_user_dir }}/.bashrc.d/aliases.sh"
     mode: "0600"
-  when: not aliases_stat.stat.exists
+    backup: true
+  when: not aliases_stat.stat.exists or config_dev_runtime_env_force_deploy_aliases | bool
 
 - name: Create ~/Ref directory to hold reference git repositories
   ansible.builtin.file:
