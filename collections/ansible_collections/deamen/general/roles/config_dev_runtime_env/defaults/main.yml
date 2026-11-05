@@ -1,2 +1,5 @@
 ---
 # defaults file for config_dev_runtime_env
+
+# Redeploy aliases.sh even if it exists; overwrites local edits (a backup is kept)
+config_dev_runtime_env_force_deploy_aliases: false

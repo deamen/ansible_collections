@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - config_dev_runtime_env - add ``unlock_gpg`` to ``aliases.sh`` to cache the GPG signing and decryption passphrases in ``gpg-agent``, and export ``GPG_TTY`` in interactive shells.
+  - config_dev_runtime_env - add ``config_dev_runtime_env_force_deploy_aliases`` to redeploy ``aliases.sh`` when it already exists.
