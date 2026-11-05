@@ -63,3 +63,14 @@ releases:
     fragments:
       - config_dev_runtime_env-aliases.yml
     release_date: '2026-11-03'
+  1.1.0:
+    changes:
+      minor_changes:
+        - config_dev_runtime_env - add ``config_dev_runtime_env_force_deploy_aliases``
+          to redeploy ``aliases.sh`` when it already exists.
+        - config_dev_runtime_env - add ``unlock_gpg`` to ``aliases.sh`` to cache the
+          GPG signing and decryption passphrases in ``gpg-agent``, and export ``GPG_TTY``
+          in interactive shells.
+    fragments:
+      - unlock-gpg-alias.yml
+    release_date: '2026-11-05'
