@@ -2,24 +2,36 @@
 
 **Topics**
 
-- <a href="#v1-1-0">v1\.1\.0</a>
+- <a href="#v1-2-0">v1\.2\.0</a>
     - <a href="#minor-changes">Minor Changes</a>
-- <a href="#v1-0-3">v1\.0\.3</a>
+- <a href="#v1-1-0">v1\.1\.0</a>
     - <a href="#minor-changes-1">Minor Changes</a>
-- <a href="#v1-0-2">v1\.0\.2</a>
+- <a href="#v1-0-3">v1\.0\.3</a>
     - <a href="#minor-changes-2">Minor Changes</a>
+- <a href="#v1-0-2">v1\.0\.2</a>
+    - <a href="#minor-changes-3">Minor Changes</a>
     - <a href="#bugfixes">Bugfixes</a>
 - <a href="#v1-0-1">v1\.0\.1</a>
-    - <a href="#minor-changes-3">Minor Changes</a>
+    - <a href="#minor-changes-4">Minor Changes</a>
     - <a href="#bugfixes-1">Bugfixes</a>
 - <a href="#v1-0-0">v1\.0\.0</a>
     - <a href="#release-summary">Release Summary</a>
     - <a href="#new-roles">New Roles</a>
 
+<a id="v1-2-0"></a>
+## v1\.2\.0
+
+<a id="minor-changes"></a>
+### Minor Changes
+
+* config\_ansible\_runtime\_env \- install <code>/usr/local/bin/gpg\_cat\.sh</code>\, a generic GPG decrypt script that reads the file from <code>\-\-gpg\_file</code> or the <code>GPG\_FILE</code> environment variable\.
+* config\_ansible\_runtime\_env \- install <code>antsibull\-changelog</code> with pip\, used to release collections\; set <code>install\_antsibull\_changelog\_via\_pip\=false</code> to skip it\.
+* configure\_ansible\_development\_env \- install Claude Code for the connecting user with <code>deamen\.ai\.install\_claude\_code</code>\; <code>deamen\.ai</code> is now required at <code>\>\=2\.1\.0</code>\.
+
 <a id="v1-1-0"></a>
 ## v1\.1\.0
 
-<a id="minor-changes"></a>
+<a id="minor-changes-1"></a>
 ### Minor Changes
 
 * Add <code>configure\_ansible\_development\_env\.yml</code> playbook to install and configure a full Ansible development environment \(system Ansible\, dev packages\, runtime env\, Copilot CLI\, podman and linear\-cli\)\.
@@ -28,7 +40,7 @@
 <a id="v1-0-3"></a>
 ## v1\.0\.3
 
-<a id="minor-changes-1"></a>
+<a id="minor-changes-2"></a>
 ### Minor Changes
 
 * Declare dependency on <code>deamen\.gpg</code> \(playbooks used by <code>setup\_ansible\_vault\_gpg\.py</code>\)\.
@@ -40,7 +52,7 @@
 <a id="v1-0-2"></a>
 ## v1\.0\.2
 
-<a id="minor-changes-2"></a>
+<a id="minor-changes-3"></a>
 ### Minor Changes
 
 * Declare dependency on <code>deamen\.general</code> \(used by <code>configure\_system\_ansible\_runtime\_env\.yml</code>\)\.
@@ -60,7 +72,7 @@
 <a id="v1-0-1"></a>
 ## v1\.0\.1
 
-<a id="minor-changes-3"></a>
+<a id="minor-changes-4"></a>
 ### Minor Changes
 
 * install\_system\_ansible \- remove role\-level tests\.
