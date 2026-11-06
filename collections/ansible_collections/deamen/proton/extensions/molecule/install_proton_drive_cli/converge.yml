@@ -1,0 +1,9 @@
+---
+- name: Test deamen.proton.install_proton_drive_cli
+  hosts: molecule:&containers
+  gather_facts: true
+
+  tasks:
+    - name: Install the Proton Drive CLI for the connecting user
+      ansible.builtin.include_role:
+        name: deamen.proton.install_proton_drive_cli

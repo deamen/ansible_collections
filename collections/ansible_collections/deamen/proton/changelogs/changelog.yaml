@@ -1,0 +1,7 @@
+---
+ancestor: null
+releases:
+  1.0.0:
+    changes:
+      release_summary: Initial release of the ``deamen.proton`` collection.
+    release_date: '2026-11-06'

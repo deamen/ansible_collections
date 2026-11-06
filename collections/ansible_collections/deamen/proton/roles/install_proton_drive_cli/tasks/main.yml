@@ -1,0 +1,57 @@
+---
+# tasks file for install_proton_drive_cli
+# Everything runs as the connecting user: the CLI and its environment live under $HOME
+
+- name: Create the Proton Drive CLI directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ __proton_drive_cli_bin_dir }}"
+    - "{{ __proton_drive_cli_bashrc_dir }}"
+  become: false
+
+- name: Get the Proton Drive CLI release manifest
+  ansible.builtin.uri:
+    url: "{{ __proton_drive_cli_manifest_url }}"
+    return_content: true
+  register: __proton_drive_cli_manifest
+  become: false
+
+- name: Select the Proton Drive CLI download
+  vars:
+    # The manifest lists the latest release of each channel first
+    files: >-
+      {{ (releases[0]['Files'] if releases else [])
+         | selectattr('Platform', 'equalto', proton_drive_cli_platform) | list }}
+    releases: >-
+      {{ (__proton_drive_cli_manifest.content | from_json)['Releases']
+         | selectattr('CategoryName', 'equalto', proton_drive_cli_release_channel) | list }}
+  ansible.builtin.set_fact:
+    __proton_drive_cli_download: "{{ files[0] if files else {} }}"
+    __proton_drive_cli_version: "{{ releases[0]['Version'] if releases else '' }}"
+
+- name: Check that the release manifest has the platform
+  ansible.builtin.assert:
+    that:
+      - __proton_drive_cli_download | length > 0
+    fail_msg: >-
+      No {{ proton_drive_cli_release_channel }} release for platform {{ proton_drive_cli_platform }}
+      in {{ __proton_drive_cli_manifest_url }}
+    quiet: true
+
+- name: Install the Proton Drive CLI {{ __proton_drive_cli_version }}
+  ansible.builtin.get_url:
+    url: "{{ __proton_drive_cli_download['Url'] }}"
+    dest: "{{ __proton_drive_cli_bin_dir }}/proton-drive"
+    checksum: "sha512:{{ __proton_drive_cli_download['Sha512CheckSum'] }}"
+    mode: "0755"
+  become: false
+
+- name: Deploy the Proton Drive CLI environment
+  ansible.builtin.template:
+    src: proton_drive_cli.sh.j2
+    dest: "{{ __proton_drive_cli_bashrc_dir }}/proton_drive_cli.sh"
+    mode: "0644"
+  become: false

@@ -1,0 +1,37 @@
+---
+argument_specs:
+  main:
+    short_description: Install the Proton Drive CLI for the connecting user.
+    description:
+      - >-
+        Read the Proton Drive CLI release manifest, download the C(proton-drive) binary for
+        O(proton_drive_cli_platform) to C(~/.local/bin/proton-drive) and verify its SHA-512 checksum.
+        A rerun replaces the binary when a newer release is published.
+      - >-
+        Deploy C(~/.bashrc.d/proton_drive_cli.sh), which exports C(PROTON_DRIVE_CREDENTIALS_STORE).
+      - Every task runs as the connecting user without privilege escalation.
+    version_added: 1.0.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      proton_drive_cli_credentials_store:
+        description:
+          - Where the CLI keeps the authenticated session, exported as C(PROTON_DRIVE_CREDENTIALS_STORE).
+          - C(keychain) needs an OS secret store such as libsecret, C(pass) needs password-store.
+          - C(unsafe_file) stores the session in plaintext C(~/.local/share/proton-drive-cli/auth-session.json).
+        type: str
+        choices:
+          - keychain
+          - pass
+          - unsafe_file
+        default: unsafe_file
+      proton_drive_cli_platform:
+        description:
+          - Platform to download, as named in the release manifest, for example C(linux/x64-musl).
+          - The default is C(linux/x64) or C(linux/arm64), derived from the host architecture.
+        type: str
+        default: linux/<architecture>
+      proton_drive_cli_release_channel:
+        description: Release category in the manifest to install the latest release from.
+        type: str
+        default: Stable

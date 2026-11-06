@@ -1,0 +1,11 @@
+---
+# vars file for install_proton_drive_cli
+
+# Map ansible_facts['architecture'] to the architecture names in the release manifest
+__proton_drive_cli_architectures:
+  aarch64: arm64
+  x86_64: x64
+__proton_drive_cli_bashrc_dir: "{{ ansible_facts['env']['HOME'] }}/.bashrc.d"
+__proton_drive_cli_bin_dir: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
+# Lists the releases with a download URL and SHA-512 checksum per platform
+__proton_drive_cli_manifest_url: https://proton.me/download/drive/cli/version.json
