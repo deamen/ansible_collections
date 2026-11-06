@@ -1,0 +1,7 @@
+---
+# defaults file for install_proton_pass_cli
+
+# keyring uses the kernel keyring, which containers cannot reach;
+# fs keeps the encryption key in local.key next to the session in ~/.local/share/proton-pass-cli
+proton_pass_cli_key_provider: fs
+proton_pass_cli_release_channel: stable

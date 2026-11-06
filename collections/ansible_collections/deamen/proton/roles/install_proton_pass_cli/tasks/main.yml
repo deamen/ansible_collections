@@ -1,0 +1,51 @@
+---
+# tasks file for install_proton_pass_cli
+# Everything runs as the connecting user: the CLI and its environment live under $HOME
+
+- name: Create the Proton Pass CLI directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ __proton_pass_cli_bin_dir }}"
+    - "{{ __proton_pass_cli_bashrc_dir }}"
+  become: false
+
+- name: Get the Proton Pass CLI release manifest
+  ansible.builtin.uri:
+    url: "{{ __proton_pass_cli_manifest_url }}"
+    return_content: true
+  register: __proton_pass_cli_manifest
+  become: false
+
+- name: Select the Proton Pass CLI download
+  vars:
+    release: "{{ (__proton_pass_cli_manifest.content | from_json)['passCliVersions'] }}"
+  ansible.builtin.set_fact:
+    __proton_pass_cli_download: "{{ release['urls']['linux'][ansible_facts['architecture']] | default({}) }}"
+    __proton_pass_cli_version: "{{ release['version'] }}"
+
+- name: Check that the release manifest has the architecture
+  ansible.builtin.assert:
+    that:
+      - __proton_pass_cli_download | length > 0
+    fail_msg: >-
+      No Linux {{ ansible_facts['architecture'] }} build of Proton Pass CLI {{ __proton_pass_cli_version }}
+      in {{ __proton_pass_cli_manifest_url }}
+    quiet: true
+
+- name: Install the Proton Pass CLI {{ __proton_pass_cli_version }}
+  ansible.builtin.get_url:
+    url: "{{ __proton_pass_cli_download['url'] }}"
+    dest: "{{ __proton_pass_cli_bin_dir }}/pass-cli"
+    checksum: "sha256:{{ __proton_pass_cli_download['hash'] }}"
+    mode: "0755"
+  become: false
+
+- name: Deploy the Proton Pass CLI environment
+  ansible.builtin.template:
+    src: proton_pass_cli.sh.j2
+    dest: "{{ __proton_pass_cli_bashrc_dir }}/proton_pass_cli.sh"
+    mode: "0644"
+  become: false

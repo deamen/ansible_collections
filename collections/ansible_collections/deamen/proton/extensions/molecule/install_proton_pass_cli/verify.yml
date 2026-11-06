@@ -1,0 +1,56 @@
+---
+- name: Verify deamen.proton.install_proton_pass_cli
+  hosts: molecule:&containers
+  gather_facts: true
+
+  vars:
+    home: "{{ ansible_facts['env']['HOME'] }}"
+
+  tasks:
+    - name: Get the pass-cli binary
+      ansible.builtin.stat:
+        path: "{{ home }}/.local/bin/pass-cli"
+      register: binary
+
+    - name: Check the pass-cli binary
+      ansible.builtin.assert:
+        that:
+          - binary.stat.exists
+          - binary.stat.mode == '0755'
+        quiet: true
+
+    - name: Get the pass-cli version
+      ansible.builtin.command: "{{ home }}/.local/bin/pass-cli --version"
+      register: pass_cli_version
+      changed_when: false
+
+    - name: Show the pass-cli version
+      ansible.builtin.debug:
+        var: pass_cli_version.stdout_lines
+
+    - name: Get the Proton Pass CLI environment file
+      ansible.builtin.stat:
+        path: "{{ home }}/.bashrc.d/proton_pass_cli.sh"
+      register: env_file
+
+    - name: Check the Proton Pass CLI environment file
+      ansible.builtin.assert:
+        that:
+          - env_file.stat.exists
+          - env_file.stat.mode == '0644'
+        quiet: true
+
+    - name: Get the key provider from the environment file
+      ansible.builtin.command:
+        argv:
+          - bash
+          - -c
+          - source ~/.bashrc.d/proton_pass_cli.sh && echo "$PROTON_PASS_KEY_PROVIDER"
+      register: key_provider
+      changed_when: false
+
+    - name: Check the key provider
+      ansible.builtin.assert:
+        that: key_provider.stdout == 'fs'
+        fail_msg: "Unexpected PROTON_PASS_KEY_PROVIDER: {{ key_provider.stdout }}"
+        quiet: true
