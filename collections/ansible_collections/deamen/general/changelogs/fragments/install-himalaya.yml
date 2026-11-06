@@ -1,3 +1,0 @@
----
-minor_changes:
-  - Add the ``install_himalaya`` role to install the himalaya email CLI for the connecting user and deploy a minimal configuration.
