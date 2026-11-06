@@ -1,0 +1,47 @@
+---
+# tasks file for install_himalaya
+# Everything runs as the connecting user: himalaya and its configuration live under $HOME
+
+- name: Check the commands needed by the installer
+  ansible.builtin.command:
+    argv:
+      - "{{ item }}"
+      - --version
+  loop: "{{ __himalaya_dependency_commands }}"
+  changed_when: false
+  become: false
+
+- name: Create the himalaya directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ __himalaya_bin_dir }}"
+      mode: "0755"
+    # config.toml names the password file, keep it private
+    - path: "{{ __himalaya_config_dir }}"
+      mode: "0700"
+  loop_control:
+    label: "{{ item.path }}"
+  become: false
+
+- name: Deploy the himalaya installer script
+  ansible.builtin.template:
+    src: install_himalaya.sh.j2
+    dest: "{{ __himalaya_bin_dir }}/install_himalaya.sh"
+    mode: "0755"
+  become: false
+
+- name: Install himalaya
+  ansible.builtin.command: "{{ __himalaya_bin_dir }}/install_himalaya.sh"
+  args:
+    creates: "{{ __himalaya_bin_dir }}/himalaya"
+  become: false
+
+- name: Deploy the himalaya configuration
+  ansible.builtin.template:
+    src: config.toml.j2
+    dest: "{{ __himalaya_config_dir }}/config.toml"
+    mode: "0600"
+  become: false

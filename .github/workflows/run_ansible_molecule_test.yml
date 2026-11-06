@@ -20,6 +20,7 @@ jobs:
           - "2.20"
         collection:
           - "deamen/ai"
+          - "deamen/general"
           - "deamen/git"
           - "deamen/gpg"
           - "deamen/podman"

@@ -1,0 +1,19 @@
+---
+# defaults file for install_himalaya
+
+# Name of the account section in config.toml, also used for the default GPG password file name
+himalaya_account_name: selfhosted
+himalaya_display_name: Your Name
+himalaya_email: you@mail.example.com
+# imaps:// for implicit TLS on 993, or imap:// on 143 together with himalaya_imap_starttls
+himalaya_imap_server: imaps://mail.example.com:993
+himalaya_imap_starttls: false
+himalaya_imap_username: "{{ himalaya_email }}"
+himalaya_mailbox_aliases:
+  drafts: Drafts
+  inbox: INBOX
+  sent: Sent
+  trash: Trash
+# gpg_cat.sh is installed by deamen.ansible.config_ansible_runtime_env and prints the decrypted file
+himalaya_password_command: /usr/local/bin/gpg_cat.sh --gpg_file {{ himalaya_password_gpg_file }}
+himalaya_password_gpg_file: "{{ ansible_facts['env']['HOME'] }}/.config/himalaya/{{ himalaya_account_name }}.gpg"

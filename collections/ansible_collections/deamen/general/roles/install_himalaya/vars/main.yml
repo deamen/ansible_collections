@@ -1,0 +1,11 @@
+---
+# vars file for install_himalaya
+
+__himalaya_bin_dir: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
+__himalaya_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/himalaya"
+# install.sh downloads the release tarball with curl and extracts it with tar
+__himalaya_dependency_commands:
+  - curl
+  - gzip
+  - tar
+__himalaya_installer_url: https://raw.githubusercontent.com/pimalaya/himalaya/master/install.sh
