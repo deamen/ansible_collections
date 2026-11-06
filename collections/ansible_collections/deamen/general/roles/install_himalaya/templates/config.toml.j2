@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+
+[accounts.{{ himalaya_account_name | to_json }}]
+
+email = {{ himalaya_email | to_json }}
+display-name = {{ himalaya_display_name | to_json }}
+
+imap.server = {{ himalaya_imap_server | to_json }}
+{% if himalaya_imap_starttls | bool %}
+imap.starttls = true
+{% endif %}
+
+imap.sasl.plain.username = {{ himalaya_imap_username | to_json }}
+
+# Runs at connect time and must print the password to stdout
+imap.sasl.plain.password.command = {{ himalaya_password_command | to_json }}
+
+{% for alias, mailbox in himalaya_mailbox_aliases | dictsort %}
+mailbox.alias.{{ alias }} = {{ mailbox | to_json }}
+{% endfor %}

@@ -1,0 +1,62 @@
+---
+argument_specs:
+  main:
+    short_description: Install the himalaya email CLI for the connecting user.
+    description:
+      - >-
+        Deploy C(~/.local/bin/install_himalaya.sh), which runs the upstream himalaya C(install.sh) with
+        C(PREFIX=~/.local), and run it unless C(~/.local/bin/himalaya) already exists.
+      - >-
+        Deploy a minimal C(~/.config/himalaya/config.toml) with one IMAP account whose password is read
+        by O(himalaya_password_command) at connect time.
+      - Every task runs as the connecting user without privilege escalation.
+    version_added: 1.2.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      himalaya_account_name:
+        description: Name of the account in C(config.toml).
+        type: str
+        default: selfhosted
+      himalaya_display_name:
+        description: Display name used when sending mail.
+        type: str
+        default: Your Name
+      himalaya_email:
+        description: Email address of the account.
+        type: str
+        default: you@mail.example.com
+      himalaya_imap_server:
+        description:
+          - IMAP server URL, C(imaps://host:993) for implicit TLS or C(imap://host:143) for STARTTLS.
+        type: str
+        default: imaps://mail.example.com:993
+      himalaya_imap_starttls:
+        description: Upgrade the IMAP connection with STARTTLS, set it with an C(imap://) server URL.
+        type: bool
+        default: false
+      himalaya_imap_username:
+        description: IMAP login name.
+        type: str
+        default: "{{ himalaya_email }}"
+      himalaya_mailbox_aliases:
+        description: Map of himalaya mailbox aliases to IMAP folder names.
+        type: dict
+        default:
+          drafts: Drafts
+          inbox: INBOX
+          sent: Sent
+          trash: Trash
+      himalaya_password_command:
+        description:
+          - Command that prints the IMAP password to stdout.
+          - The default decrypts O(himalaya_password_gpg_file) with C(/usr/local/bin/gpg_cat.sh) from
+            C(deamen.ansible.config_ansible_runtime_env).
+        type: str
+        default: /usr/local/bin/gpg_cat.sh --gpg_file {{ himalaya_password_gpg_file }}
+      himalaya_password_gpg_file:
+        description:
+          - GPG encrypted file holding the IMAP password, used by the default O(himalaya_password_command).
+          - The role does not create this file.
+        type: path
+        default: "{{ ansible_facts['env']['HOME'] }}/.config/himalaya/{{ himalaya_account_name }}.gpg"

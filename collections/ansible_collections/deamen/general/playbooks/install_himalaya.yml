@@ -1,0 +1,12 @@
+---
+- name: Install himalaya
+  hosts: localhost
+  connection: local
+  # himalaya is installed and configured for the user running the playbook
+  become: false
+  gather_facts: true
+
+  tasks:
+    - name: Install himalaya
+      ansible.builtin.include_role:
+        name: deamen.general.install_himalaya

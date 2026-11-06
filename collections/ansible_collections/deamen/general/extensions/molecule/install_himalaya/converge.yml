@@ -1,0 +1,22 @@
+---
+- name: Test deamen.general.install_himalaya
+  hosts: molecule:&containers
+  gather_facts: true
+
+  pre_tasks:
+    - name: Install packages needed by the himalaya installer
+      ansible.builtin.package:
+        name:
+          - curl
+          - gzip
+          - tar
+        state: present
+
+  tasks:
+    - name: Install himalaya for the connecting user
+      ansible.builtin.include_role:
+        name: deamen.general.install_himalaya
+      vars:
+        himalaya_email: test@example.org
+        himalaya_imap_server: imap://mail.example.org:143
+        himalaya_imap_starttls: true

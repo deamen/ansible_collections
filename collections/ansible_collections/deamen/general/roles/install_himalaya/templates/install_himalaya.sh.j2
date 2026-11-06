@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+# Install the latest himalaya release into ~/.local/bin of the user running this script
+set -euo pipefail
+
+curl -fsSL {{ __himalaya_installer_url }} | PREFIX="${HOME}/.local" sh
