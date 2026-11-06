@@ -3,5 +3,19 @@ ancestor: null
 releases:
   1.0.0:
     changes:
-      release_summary: Initial release of the ``deamen.proton`` collection.
+      minor_changes:
+        - Add the ``install_proton_drive_cli`` playbook, which runs the ``install_proton_drive_cli``
+          role against localhost.
+        - install_proton_drive_cli - export ``PROTON_DRIVE_CREDENTIALS_STORE`` from
+          ``~/.bashrc.d/proton_drive_cli.sh``, set to ``unsafe_file`` by default for
+          hosts without an OS secret store.
+      release_summary: Initial release of the ``deamen.proton`` collection, which
+        holds roles and playbooks for Proton tools.
+    fragments:
+      - initial-release.yml
+    objects:
+      role:
+        - description: Install the Proton Drive CLI for the connecting user.
+          name: install_proton_drive_cli
+          namespace: null
     release_date: '2026-11-06'
