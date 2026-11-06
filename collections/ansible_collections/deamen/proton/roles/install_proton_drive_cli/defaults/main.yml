@@ -1,0 +1,10 @@
+---
+# defaults file for install_proton_drive_cli
+
+# keychain needs an OS secret store (libsecret), which containers and headless hosts lack;
+# unsafe_file keeps the session in plaintext under ~/.local/share/proton-drive-cli
+proton_drive_cli_credentials_store: unsafe_file
+# Platform name in the release manifest, e.g. linux/x64, linux/arm64, linux/x64-musl
+proton_drive_cli_platform: >-
+  linux/{{ __proton_drive_cli_architectures[ansible_facts['architecture']] | default(ansible_facts['architecture']) }}
+proton_drive_cli_release_channel: Stable

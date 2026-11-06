@@ -1,0 +1,12 @@
+---
+- name: Install the Proton Drive CLI
+  hosts: localhost
+  connection: local
+  # The CLI is installed for the user running the playbook
+  become: false
+  gather_facts: true
+
+  tasks:
+    - name: Install the Proton Drive CLI
+      ansible.builtin.include_role:
+        name: deamen.proton.install_proton_drive_cli

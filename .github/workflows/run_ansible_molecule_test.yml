@@ -24,6 +24,7 @@ jobs:
           - "deamen/git"
           - "deamen/gpg"
           - "deamen/podman"
+          - "deamen/proton"
 
     steps:
       - uses: actions/checkout@v7
