@@ -19,3 +19,18 @@ releases:
           name: install_proton_drive_cli
           namespace: null
     release_date: '2026-11-06'
+  1.1.0:
+    changes:
+      minor_changes:
+        - Add the ``install_proton_pass_cli`` playbook, which runs the ``install_proton_pass_cli``
+          role against localhost.
+        - install_proton_pass_cli - export ``PROTON_PASS_KEY_PROVIDER`` from ``~/.bashrc.d/proton_pass_cli.sh``,
+          set to ``fs`` by default because containers cannot reach the kernel keyring.
+    fragments:
+      - install-proton-pass-cli.yml
+    objects:
+      role:
+        - description: Install the Proton Pass CLI for the connecting user.
+          name: install_proton_pass_cli
+          namespace: null
+    release_date: '2026-11-06'
