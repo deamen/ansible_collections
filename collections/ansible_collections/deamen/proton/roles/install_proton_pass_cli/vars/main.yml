@@ -1,0 +1,10 @@
+---
+# vars file for install_proton_pass_cli
+
+__proton_pass_cli_bashrc_dir: "{{ ansible_facts['env']['HOME'] }}/.bashrc.d"
+__proton_pass_cli_bin_dir: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
+# Lists the latest release with a download URL and SHA-256 hash per OS and architecture;
+# other channels use versions.<channel>.json, as in the upstream install.sh
+__proton_pass_cli_manifest_url: >-
+  https://proton.me/download/pass-cli/versions{{ '' if proton_pass_cli_release_channel == 'stable'
+  else '.' ~ proton_pass_cli_release_channel }}.json

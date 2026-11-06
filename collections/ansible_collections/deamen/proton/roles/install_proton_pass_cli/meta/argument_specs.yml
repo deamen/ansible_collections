@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Install the Proton Pass CLI for the connecting user.
+    description:
+      - >-
+        Read the Proton Pass CLI release manifest for O(proton_pass_cli_release_channel), download the
+        C(pass-cli) binary for the host architecture to C(~/.local/bin/pass-cli) and verify its SHA-256 hash.
+        A rerun replaces the binary when a newer release is published.
+      - >-
+        Deploy C(~/.bashrc.d/proton_pass_cli.sh), which exports C(PROTON_PASS_KEY_PROVIDER).
+      - Every task runs as the connecting user without privilege escalation.
+    version_added: 1.1.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      proton_pass_cli_key_provider:
+        description:
+          - Where the CLI keeps the key that encrypts its session, exported as C(PROTON_PASS_KEY_PROVIDER).
+          - C(keyring) uses the kernel keyring, which containers cannot reach.
+          - >-
+            C(fs) stores the key in plaintext C(local.key), next to the encrypted session in
+            C(~/.local/share/proton-pass-cli/.session).
+        type: str
+        choices:
+          - fs
+          - keyring
+        default: fs
+      proton_pass_cli_release_channel:
+        description: Release channel to install the latest release from.
+        type: str
+        choices:
+          - beta
+          - stable
+        default: stable

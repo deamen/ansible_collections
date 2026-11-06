@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - Add the ``install_proton_pass_cli`` playbook, which runs the ``install_proton_pass_cli`` role against localhost.
+  - install_proton_pass_cli - export ``PROTON_PASS_KEY_PROVIDER`` from ``~/.bashrc.d/proton_pass_cli.sh``, set to ``fs`` by default because containers cannot reach the kernel keyring.
