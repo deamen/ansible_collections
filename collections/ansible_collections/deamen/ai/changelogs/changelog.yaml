@@ -57,3 +57,14 @@ releases:
           name: install_claude_code
           namespace: null
     release_date: '2026-11-05'
+  2.2.0:
+    changes:
+      minor_changes:
+        - install_linear_cli - deploy ``install-linear-cli-skill`` into ``linear_cli_install_dir``,
+          which installs the skill for other AI agents on demand with ``npx skills
+          add`` (``linear_cli_skills_installer``).
+        - install_linear_cli - install the linear-cli skill into Claude Code for the
+          connecting user when Claude Code is installed (``linear_cli_claude_code_skill``).
+    fragments:
+      - install-linear-cli-skill.yml
+    release_date: '2026-11-07'

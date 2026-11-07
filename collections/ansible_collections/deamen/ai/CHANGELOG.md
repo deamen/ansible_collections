@@ -2,24 +2,35 @@
 
 **Topics**
 
-- <a href="#v2-1-0">v2\.1\.0</a>
+- <a href="#v2-2-0">v2\.2\.0</a>
     - <a href="#minor-changes">Minor Changes</a>
+- <a href="#v2-1-0">v2\.1\.0</a>
+    - <a href="#minor-changes-1">Minor Changes</a>
     - <a href="#new-roles">New Roles</a>
 - <a href="#v2-0-0">v2\.0\.0</a>
-    - <a href="#minor-changes-1">Minor Changes</a>
+    - <a href="#minor-changes-2">Minor Changes</a>
     - <a href="#breaking-changes--porting-guide">Breaking Changes / Porting Guide</a>
     - <a href="#new-roles-1">New Roles</a>
 - <a href="#v1-0-1">v1\.0\.1</a>
     - <a href="#new-roles-2">New Roles</a>
 - <a href="#v1-0-0">v1\.0\.0</a>
     - <a href="#release-summary">Release Summary</a>
-    - <a href="#minor-changes-2">Minor Changes</a>
+    - <a href="#minor-changes-3">Minor Changes</a>
     - <a href="#new-roles-3">New Roles</a>
+
+<a id="v2-2-0"></a>
+## v2\.2\.0
+
+<a id="minor-changes"></a>
+### Minor Changes
+
+* install\_linear\_cli \- deploy <code>install\-linear\-cli\-skill</code> into <code>linear\_cli\_install\_dir</code>\, which installs the skill for other AI agents on demand with <code>npx skills add</code> \(<code>linear\_cli\_skills\_installer</code>\)\.
+* install\_linear\_cli \- install the linear\-cli skill into Claude Code for the connecting user when Claude Code is installed \(<code>linear\_cli\_claude\_code\_skill</code>\)\.
 
 <a id="v2-1-0"></a>
 ## v2\.1\.0
 
-<a id="minor-changes"></a>
+<a id="minor-changes-1"></a>
 ### Minor Changes
 
 * Add the <code>install\_claude\_code</code> role to install the Claude Code CLI for a user with the native installer\.
@@ -32,7 +43,7 @@
 <a id="v2-0-0"></a>
 ## v2\.0\.0
 
-<a id="minor-changes-1"></a>
+<a id="minor-changes-2"></a>
 ### Minor Changes
 
 * Add <code>buildah\_alpine\_llamacpp\.yml</code> playbook to build statically linked <code>llama\-cli</code> and <code>llama\-server</code> with OpenBLAS on Alpine Linux\.
@@ -64,7 +75,7 @@
 
 Initial release of the <code>deamen\.ai</code> collection\.
 
-<a id="minor-changes-2"></a>
+<a id="minor-changes-3"></a>
 ### Minor Changes
 
 * Add <code>buildah\_fedora\-llamacpp\.yml</code> playbook\.
