@@ -1,0 +1,17 @@
+---
+- name: Test deamen.general.configure_keyring
+  hosts: molecule:&containers
+  gather_facts: true
+
+  pre_tasks:
+    - name: Create the keyring user
+      ansible.builtin.user:
+        name: keyring_test
+        state: present
+
+  tasks:
+    - name: Configure the keyring for the test user
+      ansible.builtin.include_role:
+        name: deamen.general.configure_keyring
+      vars:
+        keyring_user: keyring_test
