@@ -1,0 +1,125 @@
+---
+- name: Verify deamen.general.configure_keyring
+  hosts: molecule:&containers
+  gather_facts: true
+
+  vars:
+    as_user:
+      - runuser
+      - -u
+      - keyring_test
+      - --
+    bus_env:
+      DBUS_SESSION_BUS_ADDRESS: unix:path=/run/user/{{ uid }}/bus
+    uid: "{{ ansible_facts['getent_passwd']['keyring_test'][1] }}"
+
+  tasks:
+    - name: Look up the keyring user
+      ansible.builtin.getent:
+        database: passwd
+        key: keyring_test
+
+    - name: Get the deployed files
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /usr/local/bin/keyring-unlock
+        - /etc/profile.d/keyring-bus.sh
+        - /etc/tmpfiles.d/keyring.conf
+        - /run/user/{{ uid }}
+      register: deployed
+
+    - name: Check the deployed files
+      ansible.builtin.assert:
+        that:
+          - deployed.results[0].stat.mode == '0755'
+          - deployed.results[1].stat.mode == '0644'
+          - deployed.results[2].stat.mode == '0644'
+          - deployed.results[3].stat.isdir
+          - deployed.results[3].stat.mode == '0700'
+          - deployed.results[3].stat.pw_name == 'keyring_test'
+        quiet: true
+
+    - name: Read the tmpfiles.d configuration
+      ansible.builtin.slurp:
+        src: /etc/tmpfiles.d/keyring.conf
+      register: tmpfiles_conf
+
+    - name: Check the tmpfiles.d configuration
+      ansible.builtin.assert:
+        that: >-
+          ('d /run/user/' ~ uid ~ ' 0700 ' ~ uid ~ ' ' ~ ansible_facts['getent_passwd']['keyring_test'][2] ~ ' -')
+          in (tmpfiles_conf.content | b64decode)
+        quiet: true
+
+    - name: Unlock the keyring
+      ansible.builtin.command:
+        argv: "{{ as_user + ['/usr/local/bin/keyring-unlock'] }}"
+        stdin: molecule-password
+      register: unlock
+      changed_when: false
+
+    - name: Check that the keyring was unlocked
+      ansible.builtin.assert:
+        that: "'keyring unlocked' in unlock.stdout"
+        quiet: true
+
+    - name: Store and look up a secret from a login shell
+      # The login shell finds the bus through /etc/profile.d/keyring-bus.sh
+      ansible.builtin.command:
+        argv: >-
+          {{ as_user + ['bash', '-lc',
+          'printf molecule-secret | secret-tool store --label molecule service molecule
+          && secret-tool lookup service molecule'] }}
+      register: stored_secret
+      changed_when: false
+
+    - name: Check the secret
+      ansible.builtin.assert:
+        that: stored_secret.stdout == 'molecule-secret'
+        quiet: true
+
+    - name: Rerun keyring-unlock on an unlocked keyring
+      ansible.builtin.command:
+        argv: "{{ as_user + ['/usr/local/bin/keyring-unlock'] }}"
+      register: rerun
+      changed_when: false
+
+    - name: Check that the rerun does not prompt
+      ansible.builtin.assert:
+        that: "'keyring already unlocked' in rerun.stdout"
+        quiet: true
+
+    - name: Lock the login keyring
+      ansible.builtin.command:
+        argv: >-
+          {{ as_user + ['gdbus', 'call', '--session', '-d', 'org.freedesktop.secrets',
+          '-o', '/org/freedesktop/secrets', '-m', 'org.freedesktop.Secret.Service.Lock',
+          "['/org/freedesktop/secrets/collection/login']"] }}
+      environment: "{{ bus_env }}"
+      changed_when: false
+
+    - name: Unlock with a wrong password
+      ansible.builtin.command:
+        argv: "{{ as_user + ['/usr/local/bin/keyring-unlock'] }}"
+        stdin: wrong-password
+      register: wrong
+      changed_when: false
+      failed_when: wrong.rc != 1 or 'wrong password' not in wrong.stderr
+
+    - name: Unlock with the right password
+      ansible.builtin.command:
+        argv: "{{ as_user + ['/usr/local/bin/keyring-unlock'] }}"
+        stdin: molecule-password
+      changed_when: false
+
+    - name: Look up the secret again
+      ansible.builtin.command:
+        argv: "{{ as_user + ['bash', '-lc', 'secret-tool lookup service molecule'] }}"
+      register: relocked_secret
+      changed_when: false
+
+    - name: Check that the secret survived the relock
+      ansible.builtin.assert:
+        that: relocked_secret.stdout == 'molecule-secret'
+        quiet: true

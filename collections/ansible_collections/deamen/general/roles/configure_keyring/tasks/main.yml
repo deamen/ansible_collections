@@ -1,0 +1,65 @@
+---
+# tasks file for configure_keyring
+
+- name: Check that the keyring user is not root
+  ansible.builtin.assert:
+    that: keyring_user != 'root'
+    fail_msg: keyring-unlock runs as a non-root user; set keyring_user
+    quiet: true
+
+- name: Look up the keyring user
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ keyring_user }}"
+
+- name: Install the keyring packages
+  ansible.builtin.package:
+    name: "{{ __keyring_packages }}"
+    state: present
+  become: true
+
+- name: Deploy keyring-unlock
+  ansible.builtin.template:
+    src: keyring-unlock.j2
+    dest: /usr/local/bin/keyring-unlock
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Deploy the session bus profile snippet
+  ansible.builtin.copy:
+    src: keyring-bus.sh
+    dest: /etc/profile.d/keyring-bus.sh
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
+- name: Configure the runtime directory at boot
+  ansible.builtin.template:
+    src: keyring.conf.j2
+    dest: "{{ __keyring_tmpfiles_conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: keyring_create_runtime_dir | bool
+  become: true
+
+- name: Remove the runtime directory configuration
+  ansible.builtin.file:
+    path: "{{ __keyring_tmpfiles_conf }}"
+    state: absent
+  when: not keyring_create_runtime_dir | bool
+  become: true
+
+- name: Create the runtime directory
+  # Makes the keyring usable before the next boot; tmpfiles.d recreates it on every boot after that
+  ansible.builtin.file:
+    path: /run/user/{{ __keyring_uid }}
+    state: directory
+    owner: "{{ __keyring_uid }}"
+    group: "{{ __keyring_gid }}"
+    mode: "0700"
+  when: keyring_create_runtime_dir | bool
+  become: true

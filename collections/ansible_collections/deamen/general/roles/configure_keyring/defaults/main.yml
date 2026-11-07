@@ -1,0 +1,9 @@
+---
+# defaults file for configure_keyring
+
+# Create /run/user/<uid> at boot through tmpfiles.d. Needed where nothing else creates it, such as
+# a container running systemd without login sessions; logind creates it on regular hosts
+keyring_create_runtime_dir: true
+# Keep the login keyring in ~/.local/share/keyrings instead of discarding it with /run
+keyring_persistent: false
+keyring_user: "{{ ansible_facts['user_id'] }}"
