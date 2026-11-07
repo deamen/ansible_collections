@@ -1,3 +1,0 @@
----
-minor_changes:
-  - Add the ``configure_keyring`` role to install a GNOME Keyring Secret Service that a user unlocks on demand with ``keyring-unlock``, for containers and headless hosts.

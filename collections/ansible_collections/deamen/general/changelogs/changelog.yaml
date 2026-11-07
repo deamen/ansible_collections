@@ -87,3 +87,18 @@ releases:
           name: install_himalaya
           namespace: null
     release_date: '2026-11-06'
+  1.3.0:
+    changes:
+      minor_changes:
+        - Add the ``configure_keyring`` role to install a GNOME Keyring Secret Service
+          that a user unlocks on demand with ``keyring-unlock``, for containers and
+          headless hosts.
+    fragments:
+      - configure-keyring.yml
+    objects:
+      role:
+        - description: Install a GNOME Keyring Secret Service that a user unlocks
+            on demand.
+          name: configure_keyring
+          namespace: null
+    release_date: '2026-11-07'
