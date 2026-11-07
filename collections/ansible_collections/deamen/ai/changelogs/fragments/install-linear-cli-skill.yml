@@ -1,4 +1,0 @@
----
-minor_changes:
-  - install_linear_cli - install the linear-cli skill into Claude Code for the connecting user when Claude Code is installed (``linear_cli_claude_code_skill``).
-  - install_linear_cli - deploy ``install-linear-cli-skill`` into ``linear_cli_install_dir``, which installs the skill for other AI agents on demand with ``npx skills add`` (``linear_cli_skills_installer``).
