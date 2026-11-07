@@ -76,6 +76,13 @@
       # Claude Code must be installed first; without it there is nothing to install the skill into
       when: __linear_cli_claude_code.stat.exists
       block:
+        - name: Install packages needed to add the marketplace
+          # claude plugin marketplace add clones the marketplace with git
+          ansible.builtin.package:
+            name: "{{ __linear_cli_claude_code_skill_packages }}"
+            state: present
+          become: true
+
         - name: List the Claude Code marketplaces
           ansible.builtin.command:
             argv: ["{{ linear_cli_claude_code_bin }}", plugin, marketplace, list, --json]

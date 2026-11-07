@@ -15,4 +15,7 @@ __linear_cli_dependency_packages:
 __linear_cli_skill_source: schpet/linear-cli
 __linear_cli_claude_code_marketplace: linear-cli
 __linear_cli_claude_code_plugin: linear-cli@linear-cli
+# claude plugin marketplace add clones the marketplace repository with git
+__linear_cli_claude_code_skill_packages:
+  - git
 __linear_cli_skills_installer_name: install-linear-cli-skill

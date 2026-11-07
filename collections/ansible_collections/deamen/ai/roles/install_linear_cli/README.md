@@ -29,7 +29,7 @@ Role Variables
 Dependencies
 ------------
 
-None. The role installs `tar` and `xz`, which the installer needs to unpack the archive.
+None. The role installs `tar` and `xz`, which the installer needs to unpack the archive, and `git`, which Claude Code needs to add the marketplace.
 
 Example Playbook
 ----------------
