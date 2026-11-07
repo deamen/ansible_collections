@@ -1,0 +1,14 @@
+---
+# vars file for configure_keyring
+
+# dbus-daemon and gnome-keyring run the session bus and the Secret Service, gdbus (glib2) is used by
+# keyring-unlock, and libsecret provides secret-tool and the client library CLIs link against
+__keyring_packages:
+  - dbus-daemon
+  - dbus-tools
+  - glib2
+  - gnome-keyring
+  - libsecret
+__keyring_tmpfiles_conf: /etc/tmpfiles.d/keyring.conf
+__keyring_uid: "{{ ansible_facts['getent_passwd'][keyring_user][1] }}"
+__keyring_gid: "{{ ansible_facts['getent_passwd'][keyring_user][2] }}"

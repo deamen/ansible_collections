@@ -1,0 +1,4 @@
+# {{ ansible_managed }}
+# Runtime directory for {{ keyring_user }}'s session bus and keyring, created at boot because the
+# unprivileged user cannot create it under /run
+d /run/user/{{ __keyring_uid }} 0700 {{ __keyring_uid }} {{ __keyring_gid }} -

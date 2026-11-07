@@ -1,0 +1,12 @@
+---
+- name: Configure the keyring
+  hosts: localhost
+  connection: local
+  # The keyring is configured for the user running the playbook; system tasks escalate in the role
+  become: false
+  gather_facts: true
+
+  tasks:
+    - name: Configure the keyring
+      ansible.builtin.include_role:
+        name: deamen.general.configure_keyring

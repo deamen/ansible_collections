@@ -1,0 +1,39 @@
+---
+argument_specs:
+  main:
+    short_description: Install a GNOME Keyring Secret Service that a user unlocks on demand.
+    description:
+      - >-
+        Install the D-Bus session bus, gnome-keyring and libsecret, and deploy C(/usr/local/bin/keyring-unlock),
+        which starts a session bus and gnome-keyring for the calling user and unlocks the login keyring with a
+        password typed at the prompt.
+      - >-
+        Deploy C(/etc/profile.d/keyring-bus.sh), which exports C(DBUS_SESSION_BUS_ADDRESS) in login shells once
+        the bus is running, so CLIs that store credentials through libsecret find the keyring.
+      - >-
+        Meant for containers and headless hosts without a desktop session. Package names target the Red Hat
+        family.
+    version_added: 1.3.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      keyring_create_runtime_dir:
+        description:
+          - Create C(/run/user/<uid>) for O(keyring_user) now and at every boot through
+            C(/etc/tmpfiles.d/keyring.conf).
+          - Needed where nothing else creates it, such as a container running systemd without login sessions.
+            On regular hosts logind creates it.
+          - When V(false), C(/etc/tmpfiles.d/keyring.conf) is removed.
+        type: bool
+        default: true
+      keyring_persistent:
+        description:
+          - Keep the login keyring in C(~/.local/share/keyrings).
+          - When V(false), keyring-unlock keeps the keyring under C(/run/user/<uid>), so it is discarded on
+            shutdown and created again by the next keyring-unlock.
+        type: bool
+        default: false
+      keyring_user:
+        description: Non-root user the runtime directory is created for.
+        type: str
+        default: "{{ ansible_facts['user_id'] }}"
