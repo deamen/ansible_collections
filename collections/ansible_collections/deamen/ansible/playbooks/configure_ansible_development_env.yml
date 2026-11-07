@@ -34,13 +34,14 @@
         apply:
           become: true
 
-    - name: Install linear-cli
-      ansible.builtin.include_role:
-        name: deamen.ai.install_linear_cli
-
     - name: Install Claude Code
       # Installs into ~/.local/bin of the connecting user
       ansible.builtin.include_role:
         name: deamen.ai.install_claude_code
       vars:
         claude_code_user: "{{ ansible_facts['user_id'] }}"
+
+    - name: Install linear-cli
+      # After Claude Code, so the role can install the linear-cli skill into it
+      ansible.builtin.include_role:
+        name: deamen.ai.install_linear_cli

@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - configure_ansible_development_env - install linear-cli after Claude Code, so ``deamen.ai.install_linear_cli`` installs the linear-cli skill into Claude Code. Requires ``deamen.ai`` 2.2.0 or later.

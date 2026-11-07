@@ -1,0 +1,12 @@
+#!/bin/sh
+# {{ ansible_managed }}
+# Install the linear-cli skill for AI agents other than Claude Code with skills.sh (https://skills.sh/).
+# Arguments are passed on to "skills add", e.g. to choose the agents or the scope.
+set -eu
+
+if ! command -v npx >/dev/null 2>&1; then
+    echo "$(basename "$0"): npx not found; install Node.js and npm first" >&2
+    exit 1
+fi
+
+exec npx --yes skills add {{ __linear_cli_skill_source }} "$@"
