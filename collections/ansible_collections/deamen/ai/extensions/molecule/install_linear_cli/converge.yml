@@ -4,6 +4,12 @@
   gather_facts: true
 
   tasks:
+    - name: Install Claude Code, so the role installs the linear-cli skill into it
+      ansible.builtin.import_role:
+        name: deamen.ai.install_claude_code
+      vars:
+        claude_code_user: root
+
     - name: Install linear-cli
       ansible.builtin.import_role:
         name: deamen.ai.install_linear_cli

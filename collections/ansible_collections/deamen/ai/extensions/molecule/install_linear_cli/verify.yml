@@ -40,3 +40,29 @@
         that:
           - not linear_env_script.stat.exists
         fail_msg: "The installer wrote /usr/local/bin/env; LINEAR_UNMANAGED_INSTALL was not honoured"
+
+    - name: Get the skill installer status
+      ansible.builtin.stat:
+        path: /usr/local/bin/install-linear-cli-skill
+      register: linear_skill_installer
+
+    - name: Check the skill installer is deployed and executable
+      ansible.builtin.assert:
+        that:
+          - linear_skill_installer.stat.exists
+          - linear_skill_installer.stat.mode == '0755'
+        fail_msg: "/usr/local/bin/install-linear-cli-skill is missing or has the wrong mode"
+
+    - name: List the Claude Code plugins
+      ansible.builtin.command: /root/.local/bin/claude plugin list --json
+      register: claude_plugins
+      changed_when: false
+
+    - name: Check the linear-cli plugin is installed and enabled in Claude Code
+      ansible.builtin.assert:
+        that:
+          - linear_plugin | length == 1
+          - linear_plugin[0].enabled
+        fail_msg: "linear-cli@linear-cli is not installed and enabled: {{ claude_plugins.stdout }}"
+      vars:
+        linear_plugin: "{{ claude_plugins.stdout | from_json | selectattr('id', 'equalto', 'linear-cli@linear-cli') | list }}"

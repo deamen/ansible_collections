@@ -53,3 +53,53 @@
         path: "{{ __linear_cli_tmp.path }}"
         state: absent
       when: __linear_cli_tmp.path is defined
+
+- name: Deploy the linear-cli skill installer for other agents
+  # Run on demand: other agents need Node.js, which this role does not install
+  ansible.builtin.template:
+    src: install-linear-cli-skill.sh.j2
+    dest: "{{ linear_cli_install_dir }}/{{ __linear_cli_skills_installer_name }}"
+    mode: "0755"
+  become: true
+  when: linear_cli_skills_installer
+
+- name: Install the linear-cli skill into Claude Code
+  # Runs as the connecting user, whose Claude Code configuration holds the plugin
+  when: linear_cli_claude_code_skill
+  block:
+    - name: Get the Claude Code binary status
+      ansible.builtin.stat:
+        path: "{{ linear_cli_claude_code_bin }}"
+      register: __linear_cli_claude_code
+
+    - name: Install the linear-cli Claude Code plugin
+      # Claude Code must be installed first; without it there is nothing to install the skill into
+      when: __linear_cli_claude_code.stat.exists
+      block:
+        - name: List the Claude Code marketplaces
+          ansible.builtin.command:
+            argv: ["{{ linear_cli_claude_code_bin }}", plugin, marketplace, list, --json]
+          register: __linear_cli_marketplaces
+          changed_when: false
+
+        - name: Add the linear-cli marketplace
+          ansible.builtin.command:
+            argv: ["{{ linear_cli_claude_code_bin }}", plugin, marketplace, add, "{{ __linear_cli_skill_source }}"]
+          when: >-
+            __linear_cli_claude_code_marketplace not in
+            (__linear_cli_marketplaces.stdout | from_json | map(attribute='name'))
+          changed_when: true
+
+        - name: List the installed Claude Code plugins
+          ansible.builtin.command:
+            argv: ["{{ linear_cli_claude_code_bin }}", plugin, list, --json]
+          register: __linear_cli_plugins
+          changed_when: false
+
+        - name: Install the linear-cli plugin
+          ansible.builtin.command:
+            argv: ["{{ linear_cli_claude_code_bin }}", plugin, install, "{{ __linear_cli_claude_code_plugin }}"]
+          when: >-
+            __linear_cli_claude_code_plugin not in
+            (__linear_cli_plugins.stdout | from_json | map(attribute='id'))
+          changed_when: true

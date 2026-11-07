@@ -4,3 +4,9 @@
 # Release tag from https://github.com/schpet/linear-cli/releases
 linear_cli_version: v3.1.0
 linear_cli_install_dir: /usr/local/bin
+# Install the linear-cli skill into Claude Code for the connecting user, when Claude Code is installed
+linear_cli_claude_code_skill: true
+# Claude Code binary used to install the skill; the native installer puts it in ~/.local/bin
+linear_cli_claude_code_bin: "{{ ansible_facts['user_dir'] }}/.local/bin/claude"
+# Deploy a script into linear_cli_install_dir that installs the skill for other agents on demand
+linear_cli_skills_installer: true

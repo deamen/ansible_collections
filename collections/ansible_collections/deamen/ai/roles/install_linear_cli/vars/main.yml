@@ -11,3 +11,8 @@ __linear_cli_installer_url: "https://github.com/schpet/linear-cli/releases/downl
 __linear_cli_dependency_packages:
   - tar
   - xz
+# GitHub repository that publishes the skill, as a Claude Code marketplace and for skills.sh
+__linear_cli_skill_source: schpet/linear-cli
+__linear_cli_claude_code_marketplace: linear-cli
+__linear_cli_claude_code_plugin: linear-cli@linear-cli
+__linear_cli_skills_installer_name: install-linear-cli-skill

@@ -7,6 +7,9 @@ argument_specs:
         Run the C(linear-installer.sh) published with the release, which verifies the tarball checksum
         and installs the C(linear) binary without editing C(PATH).
       - The download is skipped when the installed binary already reports O(linear_cli_version).
+      - >-
+        Install the linear-cli skill into Claude Code for the connecting user, and deploy C(install-linear-cli-skill),
+        which installs it for other AI agents on demand.
     version_added: 2.0.0
     author:
       - Song Tang <stang@mmz.au>
@@ -16,6 +19,29 @@ argument_specs:
         type: str
         default: v3.1.0
       linear_cli_install_dir:
-        description: Directory the C(linear) binary is installed into.
+        description: Directory the C(linear) binary and C(install-linear-cli-skill) are installed into.
         type: path
         default: /usr/local/bin
+      linear_cli_claude_code_skill:
+        description:
+          - >-
+            Install the linear-cli skill into Claude Code for the connecting user by adding the C(schpet/linear-cli)
+            marketplace and installing the C(linear-cli@linear-cli) plugin.
+          - Skipped when O(linear_cli_claude_code_bin) does not exist, so install Claude Code first.
+        type: bool
+        default: true
+        version_added: 2.2.0
+      linear_cli_claude_code_bin:
+        description: Claude Code binary used to install the skill.
+        type: path
+        default: "~/.local/bin/claude of the connecting user"
+        version_added: 2.2.0
+      linear_cli_skills_installer:
+        description:
+          - >-
+            Deploy C(install-linear-cli-skill) into O(linear_cli_install_dir). It installs the skill for other
+            AI agents on demand with C(npx skills add schpet/linear-cli), passing on its arguments.
+          - The script needs Node.js and npm, which the role does not install.
+        type: bool
+        default: true
+        version_added: 2.2.0
