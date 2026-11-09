@@ -1,3 +1,0 @@
----
-bugfixes:
-  - install_linear_cli - cast ``linear_cli_skills_installer`` and ``linear_cli_claude_code_skill`` to a boolean with ``| bool``, so ``-e linear_cli_claude_code_skill=false`` skips the Claude Code install instead of failing on a string conditional.
