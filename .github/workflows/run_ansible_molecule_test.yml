@@ -1,12 +1,6 @@
 name: Run Ansible Molecule Test
 on:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'collections/ansible_collections/**'
-      - 'requirements.yml'
-      - '.github/workflows/run_ansible_molecule_test.yml'
+  workflow_call:
 
 jobs:
   run_molecule_test:

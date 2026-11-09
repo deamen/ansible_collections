@@ -1,16 +1,6 @@
 name: Check changelog fragment
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - labeled
-      - unlabeled
-    branches:
-      - master
-    paths:
-      - 'collections/ansible_collections/**'
+  workflow_call:
 
 jobs:
   check_changelog_fragment:
