@@ -2,6 +2,8 @@
 
 **Topics**
 
+- <a href="#v2-3-1">v2\.3\.1</a>
+    - <a href="#bugfixes">Bugfixes</a>
 - <a href="#v2-3-0">v2\.3\.0</a>
     - <a href="#minor-changes">Minor Changes</a>
 - <a href="#v2-2-0">v2\.2\.0</a>
@@ -19,6 +21,14 @@
     - <a href="#release-summary">Release Summary</a>
     - <a href="#minor-changes-4">Minor Changes</a>
     - <a href="#new-roles-3">New Roles</a>
+
+<a id="v2-3-1"></a>
+## v2\.3\.1
+
+<a id="bugfixes"></a>
+### Bugfixes
+
+* install\_linear\_cli \- cast <code>linear\_cli\_skills\_installer</code> and <code>linear\_cli\_claude\_code\_skill</code> to a boolean with <code>\| bool</code>\, so <code>\-e linear\_cli\_claude\_code\_skill\=false</code> skips the Claude Code install instead of failing on a string conditional\.
 
 <a id="v2-3-0"></a>
 ## v2\.3\.0

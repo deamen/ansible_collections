@@ -77,3 +77,12 @@ releases:
     fragments:
       - MMZ-22-install-linear-cli-localhost.yml
     release_date: '2026-11-09'
+  2.3.1:
+    changes:
+      bugfixes:
+        - install_linear_cli - cast ``linear_cli_skills_installer`` and ``linear_cli_claude_code_skill``
+          to a boolean with ``| bool``, so ``-e linear_cli_claude_code_skill=false``
+          skips the Claude Code install instead of failing on a string conditional.
+    fragments:
+      - MMZ-22-install-linear-cli-bool-when.yml
+    release_date: '2026-11-09'
