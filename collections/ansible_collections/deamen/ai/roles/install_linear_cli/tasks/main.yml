@@ -61,11 +61,11 @@
     dest: "{{ linear_cli_install_dir }}/{{ __linear_cli_skills_installer_name }}"
     mode: "0755"
   become: true
-  when: linear_cli_skills_installer
+  when: linear_cli_skills_installer | bool
 
 - name: Install the linear-cli skill into Claude Code
   # Runs as the connecting user, whose Claude Code configuration holds the plugin
-  when: linear_cli_claude_code_skill
+  when: linear_cli_claude_code_skill | bool
   block:
     - name: Get the Claude Code binary status
       ansible.builtin.stat:
