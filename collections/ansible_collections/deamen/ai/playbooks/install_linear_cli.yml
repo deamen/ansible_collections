@@ -1,5 +1,5 @@
 - name: Install linear-cli
-  hosts: all:!localhost
+  hosts: all
 
   tasks:
     - name: Install linear-cli
