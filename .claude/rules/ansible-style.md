@@ -84,6 +84,7 @@ paths:
 - Use `ansible-playbook --check --diff` to perform a dry-run of playbook execution
 - Use `pre-commit` to automatically run linters and syntax checks before committing changes to version control
 - Use `ansible-test sanity` to run sanity tests for ansible modules and plugins
+- Before committing any Ansible change, run the `ansible-code-review` skill (`.claude/skills/ansible-code-review/SKILL.md`) on the changed files and fix its findings first. Its checks cover the rules above that are easy to miss, such as `| bool` on flags and empty defaults
 
 <!--
 These guidelines were based on, or copied from, the following sources:
