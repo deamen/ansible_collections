@@ -1,10 +1,6 @@
 name: Run Ansible lint
 on:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'collections/ansible_collections/**'
+  workflow_call:
 
 jobs:
   build:

@@ -1,12 +1,6 @@
 name: Run Ansible Sanity test
 on:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'collections/ansible_collections/**'
-      - 'requirements.yml'
-      - '.github/workflows/run_ansible_sanity_test.yml'
+  workflow_call:
 
 jobs:
   run_sanity_test:

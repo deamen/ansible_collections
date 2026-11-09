@@ -1,11 +1,6 @@
 name: Run changelog lint
 on:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'collections/ansible_collections/**/changelogs/**'
-      - '.github/workflows/run_changelog_lint.yml'
+  workflow_call:
   push:
     branches:
       - master

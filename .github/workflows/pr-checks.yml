@@ -1,0 +1,61 @@
+name: PR checks
+
+# Runs every PR check on pull requests to master. The checks are reusable
+# workflows, so the gate job can wait on all of them with `needs`. Only the
+# gate job needs to be a required status check in the master ruleset.
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
+
+jobs:
+  pre-commit-lite:
+    uses: ./.github/workflows/pre-commit-lite.yml
+
+  ansible-lint:
+    uses: ./.github/workflows/run_ansible_lint.yml
+
+  sanity:
+    uses: ./.github/workflows/run_ansible_sanity_test.yml
+
+  molecule:
+    uses: ./.github/workflows/run_ansible_molecule_test.yml
+
+  changelog-fragment:
+    uses: ./.github/workflows/check_changelog_fragment.yml
+
+  changelog-lint:
+    uses: ./.github/workflows/run_changelog_lint.yml
+
+  # The single required check. Fails if any job it needs failed or was cancelled;
+  # skipped jobs (e.g. a PR labeled skip-changelog) count as passing.
+  pr-checks:
+    if: always()
+    needs:
+      - pre-commit-lite
+      - ansible-lint
+      - sanity
+      - molecule
+      - changelog-fragment
+      - changelog-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check job results
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Job results: $RESULTS"
+          for result in $RESULTS; do
+            case "$result" in
+              success|skipped) ;;
+              *) echo "::error::A required job finished with: $result"; exit 1 ;;
+            esac
+          done
