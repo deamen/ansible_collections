@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - install_linear_cli - the playbook now targets ``all`` instead of ``all:!localhost`` so it can run against localhost, which the ``buildah_fedora-codespace`` image build needs (https://github.com/deamen/ansible_collections/pull/112).
