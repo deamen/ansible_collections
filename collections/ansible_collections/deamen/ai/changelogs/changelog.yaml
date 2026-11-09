@@ -68,3 +68,12 @@ releases:
     fragments:
       - install-linear-cli-skill.yml
     release_date: '2026-11-07'
+  2.3.0:
+    changes:
+      minor_changes:
+        - install_linear_cli - the playbook now targets ``all`` instead of ``all:!localhost``
+          so it can run against localhost, which the ``buildah_fedora-codespace``
+          image build needs (https://github.com/deamen/ansible_collections/pull/112).
+    fragments:
+      - MMZ-22-install-linear-cli-localhost.yml
+    release_date: '2026-11-09'
