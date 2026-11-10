@@ -1,3 +1,0 @@
----
-trivial:
-  - install_system_updates - add ``patching_report_only`` to list pending updates without changing the host, and ``patching_skip`` to skip a host and record the reason in the run summary.

@@ -1,3 +1,0 @@
----
-trivial:
-  - patching_fleet_report - add the fleet report role, a rolling patching example and the "Patching at scale" README section.
