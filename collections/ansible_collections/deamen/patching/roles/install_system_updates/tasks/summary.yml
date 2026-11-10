@@ -1,0 +1,43 @@
+---
+- name: Summary - Build the run summary
+  ansible.builtin.set_fact:
+    patching_summary:
+      excludes: "{{ patching_effective_excludes }}"
+      failed_step: "{{ patching_failed_step }}"
+      finished: "{{ now(utc=true).isoformat() }}"
+      host: "{{ inventory_hostname }}"
+      kernel_after: "{{ ansible_facts.kernel | default('unknown') }}"
+      kernel_before: "{{ patching_kernel_before }}"
+      mode: update
+      # No install task ran when the run failed earlier, so no packages were updated
+      packages: "{{ patching_update_result.results | default([]) }}"
+      reboot_required: "{{ patching_reboot_required | bool }}"
+      rebooted: "{{ patching_rebooted | bool }}"
+      started: "{{ patching_started }}"
+      status: >-
+        {{ 'failed' if patching_failed_step != 'none'
+        else ('ok' if patching_updates_installed | bool else 'no_updates') }}
+      update_failed: "{{ patching_update_failed | bool }}"
+
+- name: Summary - Show the run summary
+  ansible.builtin.debug:
+    var: patching_summary
+
+- name: Summary - Write the run summary on the controller
+  when: patching_summary_write | bool
+  delegate_to: localhost
+  become: false
+  block:
+    - name: Summary - Create the summary directory
+      ansible.builtin.file:
+        path: "{{ patching_summary_dir }}"
+        state: directory
+        mode: "0755"
+
+    # The file is a report of this run, not managed state, so rewriting it is not a change
+    - name: Summary - Write the summary file
+      ansible.builtin.copy:
+        content: "{{ patching_summary | to_nice_json }}\n"
+        dest: "{{ patching_summary_dir }}/{{ inventory_hostname }}.json"
+        mode: "0644"
+      changed_when: false

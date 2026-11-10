@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: Song Tang <stang@mmz.au>
+  description: Apply OS updates to RHEL and Fedora hosts in fixed phases, with reboot handling and extension points.
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.15.0"
+
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "10"
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - patching
+    - updates
+    - dnf
+    - linux
+
+dependencies: []

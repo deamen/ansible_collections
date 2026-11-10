@@ -1,0 +1,21 @@
+---
+- name: Test deamen.patching.install_system_updates role
+  hosts: containers
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Install system updates
+      ansible.builtin.include_role:
+        name: deamen.patching.install_system_updates
+      vars:
+        patching_post_reboot_hooks:
+          - "{{ playbook_dir }}/hooks/post_reboot.yml"
+          - "{{ playbook_dir }}/hooks/post_reboot_second.yml"
+        patching_post_update_hooks:
+          - "{{ playbook_dir }}/hooks/post_update.yml"
+        patching_pre_update_hooks:
+          - "{{ playbook_dir }}/hooks/pre_update.yml"
+        # Containers cannot reboot
+        patching_reboot: never
+        patching_summary_dir: "{{ (lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') or '/tmp/molecule-patching') }}/reports"
+        patching_summary_write: true

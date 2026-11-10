@@ -1,0 +1,19 @@
+---
+- name: Pre-update - Set the current step
+  ansible.builtin.set_fact:
+    patching_kernel_before: "{{ ansible_facts.kernel }}"
+    patching_step: pre_update
+
+# Stale metadata can make dnf miss updates or fail mid-transaction
+- name: Pre-update - Clean package metadata
+  ansible.builtin.command:
+    argv:
+      - "{{ patching_dnf_command }}"
+      - clean
+      - all
+  changed_when: false
+
+- name: Pre-update - Run pre_update extensions
+  ansible.builtin.include_tasks: run_extensions.yml
+  vars:
+    patching_phase: pre_update

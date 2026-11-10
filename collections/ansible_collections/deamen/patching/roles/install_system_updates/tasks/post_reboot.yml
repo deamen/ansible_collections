@@ -1,0 +1,101 @@
+---
+- name: Post-reboot - Set the current step
+  ansible.builtin.set_fact:
+    patching_step: post_reboot
+
+- name: Post-reboot - Gather the running kernel
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - min
+  when: patching_rebooted | bool
+
+- name: Post-reboot - Show the kernel before and after patching
+  ansible.builtin.debug:
+    msg: "Kernel before: {{ patching_kernel_before }}, after: {{ ansible_facts.kernel }}"
+
+- name: Post-reboot - Verify the running kernel
+  when:
+    - patching_rebooted | bool
+    - patching_verify_kernel | bool
+  block:
+    - name: Post-reboot - Get the default boot kernel
+      ansible.builtin.command:
+        argv:
+          - grubby
+          - --default-kernel
+      changed_when: false
+      register: patching_default_kernel
+
+    - name: Post-reboot - Get the installed kernels
+      ansible.builtin.command:
+        argv:
+          - rpm
+          - -q
+          - kernel-core
+          - --queryformat
+          - "%{BUILDTIME} %{VERSION}-%{RELEASE}.%{ARCH}\n"
+      changed_when: false
+      register: patching_installed_kernels
+
+    # Build times are fixed-width epoch seconds, so a plain sort finds the newest kernel
+    - name: Post-reboot - Compare the running kernel with the default and newest kernels
+      ansible.builtin.set_fact:
+        patching_kernel_default: "{{ patching_default_kernel.stdout | regex_replace('^.*/vmlinuz-', '') }}"
+        patching_kernel_newest: "{{ (patching_installed_kernels.stdout_lines | sort | last).split()[1] }}"
+
+# Extensions run before the kernel check fails the host, so their cleanup still happens
+- name: Post-reboot - Run post_reboot extensions
+  ansible.builtin.include_tasks: run_extensions.yml
+  vars:
+    patching_phase: post_reboot
+
+- name: Post-reboot - Assert the newest kernel is running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.kernel == patching_kernel_default
+      - ansible_facts.kernel == patching_kernel_newest
+    fail_msg: >-
+      Running kernel {{ ansible_facts.kernel }} is not the default boot kernel ({{ patching_kernel_default }})
+      or the newest installed kernel ({{ patching_kernel_newest }}).
+    quiet: true
+  when:
+    - patching_rebooted | bool
+    - patching_verify_kernel | bool
+
+# Checks run after extensions because extensions may start the services being checked
+- name: Post-reboot - Check services are active
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+  loop: "{{ patching_post_reboot_services }}"
+  register: patching_service_status
+  until: patching_service_status.status.ActiveState == 'active'
+  retries: "{{ patching_service_check_retries }}"
+  delay: "{{ patching_service_check_delay }}"
+
+- name: Post-reboot - Check ports accept connections
+  ansible.builtin.wait_for:
+    host: "{{ item.host | default('127.0.0.1') }}"
+    port: "{{ item.port }}"
+    state: started
+    timeout: "{{ item.timeout | default(120) }}"
+  loop: "{{ patching_post_reboot_ports }}"
+  loop_control:
+    label: "{{ item.host | default('127.0.0.1') }}:{{ item.port }}"
+
+- name: Post-reboot - Check URLs respond
+  ansible.builtin.uri:
+    url: "{{ item.url }}"
+    return_content: "{{ item.content is defined }}"
+    status_code: "{{ item.status | default(200) }}"
+    validate_certs: "{{ item.validate_certs | default(true) }}"
+  loop: "{{ patching_post_reboot_urls }}"
+  loop_control:
+    label: "{{ item.url }}"
+  register: patching_url_status
+  # The body is only returned when content is checked, so an empty default means no body to search
+  until: >-
+    patching_url_status.status == (item.status | default(200) | int) and
+    (item.content is not defined or item.content in (patching_url_status.content | default('')))
+  retries: "{{ patching_service_check_retries }}"
+  delay: "{{ patching_service_check_delay }}"

@@ -1,0 +1,61 @@
+---
+- name: Preflight - Set the current step
+  ansible.builtin.set_fact:
+    patching_step: preflight
+
+- name: Preflight - Measure free space
+  ansible.builtin.command:
+    argv:
+      - df
+      - -P
+      - -m
+      - "{{ item.key }}"
+  loop: "{{ patching_preflight_min_free_mb | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  changed_when: false
+  # A path that does not exist on this host (e.g. /boot in a container) is skipped below
+  failed_when: false
+  register: patching_preflight_df
+
+- name: Preflight - Assert enough free space
+  ansible.builtin.assert:
+    that:
+      - (item.stdout_lines[1].split()[3] | int) >= (item.item.value | int)
+    fail_msg: >-
+      {{ item.item.key }} has {{ item.stdout_lines[1].split()[3] }} MiB free,
+      less than the {{ item.item.value }} MiB required by patching_preflight_min_free_mb.
+    quiet: true
+  loop: "{{ patching_preflight_df.results | selectattr('rc', 'equalto', 0) }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+
+- name: Preflight - Wait for other package transactions to finish
+  ansible.builtin.command:
+    argv:
+      - pgrep
+      - -x
+      - dnf|dnf5|yum|rpm
+  changed_when: false
+  # pgrep returns 1 when nothing matches; the assert below reports a lock that never cleared
+  failed_when: false
+  register: patching_preflight_lock
+  until: patching_preflight_lock.rc == 1
+  retries: "{{ (patching_preflight_lock_timeout | int / 10) | round(0, 'ceil') | int }}"
+  delay: 10
+
+- name: Preflight - Assert no package transaction is running
+  ansible.builtin.assert:
+    that:
+      - patching_preflight_lock.rc == 1
+    fail_msg: >-
+      Another package transaction (PID {{ patching_preflight_lock.stdout_lines | join(', ') }})
+      was still running after {{ patching_preflight_lock_timeout }} seconds.
+    quiet: true
+
+- name: Preflight - Check the RPM database for problems
+  ansible.builtin.command:
+    argv:
+      - "{{ patching_dnf_command }}"
+      - check
+  changed_when: false

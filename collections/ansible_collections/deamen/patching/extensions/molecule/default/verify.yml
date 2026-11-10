@@ -1,0 +1,42 @@
+---
+- name: Verify the hosts were patched
+  hosts: containers
+  gather_facts: false
+  tasks:
+    - name: Read the hook log
+      ansible.builtin.slurp:
+        src: /tmp/patching_hooks.log
+      register: hook_log
+
+    - name: Assert the hooks ran once each, in phase and list order
+      ansible.builtin.assert:
+        that:
+          - (hook_log.content | b64decode).splitlines() == ['pre_update', 'post_update', 'post_reboot', 'post_reboot_second']
+        fail_msg: "Unexpected hook order: {{ (hook_log.content | b64decode).splitlines() }}"
+
+    # check-update returns 100 when updates are pending
+    - name: Check no updates are pending
+      ansible.builtin.command:
+        argv:
+          - dnf
+          - check-update
+      changed_when: false
+
+- name: Verify the run summaries
+  hosts: localhost
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Assert each host wrote a successful summary
+      ansible.builtin.assert:
+        that:
+          - summary.host == item
+          - summary.mode == 'update'
+          - summary.status in ['ok', 'no_updates']
+          - summary.failed_step == 'none'
+          - not summary.rebooted
+          - not summary.update_failed
+        fail_msg: "Unexpected summary for {{ item }}: {{ summary }}"
+      vars:
+        summary: "{{ lookup('ansible.builtin.file', (lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') or '/tmp/molecule-patching') ~ '/reports/' ~ item ~ '.json') | from_json }}"
+      loop: "{{ groups['containers'] }}"

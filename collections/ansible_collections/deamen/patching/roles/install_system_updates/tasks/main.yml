@@ -1,0 +1,56 @@
+---
+- name: Fail in check mode
+  ansible.builtin.fail:
+    msg: >-
+      install_system_updates does not support check mode, because needs-restarting, dnf check and grubby
+      cannot run in it. Set patching_report_only to true to see pending updates without changing anything.
+  when: ansible_check_mode | bool
+
+- name: Initialise run state
+  ansible.builtin.set_fact:
+    patching_effective_excludes: "{{ patching_exclude_packages | unique }}"
+    patching_failed_step: none
+    patching_kernel_before: unknown
+    patching_reboot_required: false
+    patching_rebooted: false
+    patching_started: "{{ now(utc=true).isoformat() }}"
+    patching_step: platform
+    patching_update_failed: false
+    patching_updates_installed: false
+
+- name: Patch the host
+  block:
+    - name: Include platform tasks
+      ansible.builtin.include_tasks: platform.yml
+
+    - name: Include preflight tasks
+      ansible.builtin.include_tasks: preflight.yml
+      when: patching_preflight | bool
+
+    - name: Include pre_update tasks
+      ansible.builtin.include_tasks: pre_update.yml
+
+    - name: Include update tasks
+      ansible.builtin.include_tasks: update.yml
+
+    - name: Include post_update tasks
+      ansible.builtin.include_tasks: post_update.yml
+
+    - name: Include reboot tasks
+      ansible.builtin.include_tasks: reboot.yml
+
+    - name: Include post_reboot tasks
+      ansible.builtin.include_tasks: post_reboot.yml
+
+  rescue:
+    - name: Record the failed step
+      ansible.builtin.set_fact:
+        patching_failed_step: "{{ patching_step }}"
+
+    - name: Fail the host
+      ansible.builtin.fail:
+        msg: "Patching failed in step {{ patching_step }}: {{ ansible_failed_result.msg | default('see the task output above') }}"
+
+  always:
+    - name: Include summary tasks
+      ansible.builtin.include_tasks: summary.yml

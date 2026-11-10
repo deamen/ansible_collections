@@ -1,0 +1,27 @@
+---
+- name: Platform - Gather minimal facts
+  ansible.builtin.setup:
+    gather_subset:
+      - "!all"
+      - min
+
+- name: Platform - Assert the host uses dnf or dnf5
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.pkg_mgr in ['dnf', 'dnf5']
+    fail_msg: >-
+      install_system_updates supports RHEL and Fedora hosts using dnf or dnf5 only;
+      {{ inventory_hostname }} uses {{ ansible_facts.pkg_mgr }}.
+    quiet: true
+
+- name: Platform - Set the package manager command
+  ansible.builtin.set_fact:
+    patching_dnf_command: "{{ ansible_facts.pkg_mgr }}"
+
+# needs-restarting comes from the dnf plugins package; pgrep is used by the preflight lock check
+- name: Platform - Install the tools the role needs
+  ansible.builtin.dnf:
+    name:
+      - "{{ 'dnf5-plugins' if patching_dnf_command == 'dnf5' else 'dnf-plugins-core' }}"
+      - procps-ng
+    state: present

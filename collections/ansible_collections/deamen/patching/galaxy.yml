@@ -1,0 +1,26 @@
+---
+namespace: deamen
+name: patching
+version: 1.0.0
+readme: README.md
+authors:
+  - Song Tang <stang@mmz.au>
+description: >
+  Patch RHEL and Fedora hosts in fixed phases (pre-update, download, update,
+  post-update, reboot, post-reboot) with preflight checks, reboot handling,
+  run summaries and extension points for service-specific work.
+license:
+  - GPL-3.0-or-later
+tags:
+  - linux
+  - patching
+  - updates
+  - dnf
+dependencies: {}
+repository: https://github.com/deamen/ansible_collections
+documentation: https://github.com/deamen/ansible_collections/blob/master/collections/ansible_collections/deamen/patching/README.md
+homepage: https://github.com/deamen/ansible_collections/tree/master/collections/ansible_collections/deamen/patching
+issues: https://github.com/deamen/ansible_collections/issues
+build_ignore:
+  - .gitignore
+  - changelogs/.plugin-cache.yaml

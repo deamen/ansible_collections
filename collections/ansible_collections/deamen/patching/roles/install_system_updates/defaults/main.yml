@@ -1,0 +1,51 @@
+---
+# Run a download-only pass before installing, so repository problems fail the run before anything changes
+patching_download_first: true
+
+# Package globs never updated by this role; empty means nothing is excluded
+patching_exclude_packages: []
+
+# Task files run in the post_reboot phase; empty means no hooks
+patching_post_reboot_hooks: []
+
+# Ports that must accept connections after patching, as {host, port, timeout}; empty means no port checks
+patching_post_reboot_ports: []
+
+# Systemd units that must be active after patching; empty means no service checks
+patching_post_reboot_services: []
+
+# URLs that must respond after patching, as {url, status, content, validate_certs}; empty means no URL checks
+patching_post_reboot_urls: []
+
+# Task files run in the post_update phase; empty means no hooks
+patching_post_update_hooks: []
+
+# Task files run in the pre_update phase; empty means no hooks
+patching_pre_update_hooks: []
+
+patching_preflight: true
+
+patching_preflight_lock_timeout: 300
+
+# Minimum free space in MiB for the filesystem holding each path
+patching_preflight_min_free_mb:
+  /: 1024
+  /boot: 200
+  /var/cache: 1024
+
+# auto: reboot only when updates were installed and needs-restarting says so; always; never
+patching_reboot: auto
+
+patching_reboot_timeout: 600
+
+patching_security_only: false
+
+patching_service_check_delay: 10
+
+patching_service_check_retries: 3
+
+patching_summary_dir: "{{ playbook_dir }}/patching_reports"
+
+patching_summary_write: false
+
+patching_verify_kernel: true
