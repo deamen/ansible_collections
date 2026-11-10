@@ -13,3 +13,5 @@ containers:
       container_image: quay.io/deamen/fedora-molecule:latest
     patching-el9:
       container_image: quay.io/rockylinux/rockylinux:9
+      # The image has no sudo and its containers already run as root
+      ansible_become: false
