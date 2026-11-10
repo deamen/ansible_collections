@@ -1,0 +1,102 @@
+---
+- name: Initialise the fleet report
+  ansible.builtin.set_fact:
+    # Starts empty; the next task appends one entry per host
+    patching_fleet_report_entries: []
+    patching_fleet_report_stamp: "{{ now(utc=true).strftime('%Y%m%dT%H%M%SZ') }}"
+
+- name: Collect the result of each host
+  ansible.builtin.set_fact:
+    patching_fleet_report_entries: "{{ patching_fleet_report_entries + [patching_fleet_report_entry] }}"
+  vars:
+    patching_fleet_report_entry:
+      failed_step: "{{ patching_fleet_report_summary.failed_step | default('none') }}"
+      finished: "{{ patching_fleet_report_summary.finished | default('unknown') }}"
+      host: "{{ item }}"
+      kernel_after: "{{ patching_fleet_report_summary.kernel_after | default('unknown') }}"
+      kernel_before: "{{ patching_fleet_report_summary.kernel_before | default('unknown') }}"
+      mode: "{{ patching_fleet_report_summary.mode | default('none') }}"
+      # Updated packages, or pending packages in report-only mode; none for a host without a summary
+      package_count: "{{ patching_fleet_report_summary.packages | default([]) | length }}"
+      # Summaries from runs without profiles have no profiles key
+      profiles: "{{ patching_fleet_report_summary.profiles | default([]) }}"
+      rebooted: "{{ patching_fleet_report_summary.rebooted | default(false) | bool }}"
+      skip_reason: "{{ patching_fleet_report_summary.skip_reason | default('none') }}"
+      started: "{{ patching_fleet_report_summary.started | default('unknown') }}"
+      # Failed and skipped come first because a report-only run can also fail or be skipped
+      status: >-
+        {{ 'unreachable' if patching_fleet_report_summary.status is not defined
+        else 'skipped' if patching_fleet_report_summary.status == 'skipped'
+        else 'failed' if patching_fleet_report_summary.status == 'failed'
+        else 'report_only' if patching_fleet_report_summary.mode | default('update') == 'report_only'
+        else 'updated' if patching_fleet_report_summary.status == 'ok'
+        else 'no_updates' }}
+    # A host with no summary never reached the summary step; the empty dict marks it unreachable
+    patching_fleet_report_summary: "{{ hostvars[item].patching_summary | default({}) }}"
+  loop: "{{ patching_fleet_report_hosts }}"
+  loop_control:
+    label: "{{ item }}"
+
+- name: Build the fleet report
+  ansible.builtin.set_fact:
+    patching_fleet_report:
+      counts:
+        failed: "{{ patching_fleet_report_entries | selectattr('status', 'equalto', 'failed') | list | length }}"
+        no_updates: "{{ patching_fleet_report_entries | selectattr('status', 'equalto', 'no_updates') | list | length }}"
+        rebooted: "{{ patching_fleet_report_entries | selectattr('rebooted') | list | length }}"
+        report_only: "{{ patching_fleet_report_entries | selectattr('status', 'equalto', 'report_only') | list | length }}"
+        skipped: "{{ patching_fleet_report_entries | selectattr('status', 'equalto', 'skipped') | list | length }}"
+        total: "{{ patching_fleet_report_entries | length }}"
+        unreachable: "{{ patching_fleet_report_entries | selectattr('status', 'equalto', 'unreachable') | list | length }}"
+        updated: "{{ patching_fleet_report_entries | selectattr('status', 'equalto', 'updated') | list | length }}"
+      generated: "{{ now(utc=true).isoformat() }}"
+      hosts: "{{ patching_fleet_report_entries }}"
+
+- name: Show the fleet counts
+  ansible.builtin.debug:
+    msg: "{{ patching_fleet_report_counts_msg }}"
+  vars:
+    patching_fleet_report_counts_msg:
+      - "Total: {{ patching_fleet_report.counts.total }}"
+      - "Updated: {{ patching_fleet_report.counts.updated }} (rebooted: {{ patching_fleet_report.counts.rebooted }})"
+      - "No updates: {{ patching_fleet_report.counts.no_updates }}"
+      - "Report only: {{ patching_fleet_report.counts.report_only }}"
+      - >-
+        Skipped: {{ patching_fleet_report.counts.skipped }}
+        {{ patching_fleet_report.hosts | selectattr('status', 'equalto', 'skipped')
+        | map(attribute='host') | zip(patching_fleet_report.hosts | selectattr('status', 'equalto', 'skipped')
+        | map(attribute='skip_reason')) | map('join', ': ') | list }}
+      - >-
+        Failed: {{ patching_fleet_report.counts.failed }}
+        {{ patching_fleet_report.hosts | selectattr('status', 'equalto', 'failed')
+        | map(attribute='host') | zip(patching_fleet_report.hosts | selectattr('status', 'equalto', 'failed')
+        | map(attribute='failed_step')) | map('join', ': ') | list }}
+      - >-
+        Unreachable: {{ patching_fleet_report.counts.unreachable }}
+        {{ patching_fleet_report.hosts | selectattr('status', 'equalto', 'unreachable') | map(attribute='host') | list }}
+
+- name: Show the per-host table
+  ansible.builtin.debug:
+    msg: "{{ lookup('ansible.builtin.template', 'fleet_report.md.j2').splitlines() }}"
+
+- name: Create the report directory
+  ansible.builtin.file:
+    path: "{{ patching_summary_dir }}"
+    state: directory
+    mode: "0755"
+
+# The reports record this run, they are not managed state, and their names change every run,
+# so writing them is not a change
+- name: Write the JSON report
+  ansible.builtin.copy:
+    content: "{{ patching_fleet_report | to_nice_json }}\n"
+    dest: "{{ patching_summary_dir }}/fleet-{{ patching_fleet_report_stamp }}.json"
+    mode: "0644"
+  changed_when: false
+
+- name: Write the markdown report
+  ansible.builtin.template:
+    src: fleet_report.md.j2
+    dest: "{{ patching_summary_dir }}/fleet-{{ patching_fleet_report_stamp }}.md"
+    mode: "0644"
+  changed_when: false

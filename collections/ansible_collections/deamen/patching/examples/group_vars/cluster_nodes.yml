@@ -1,0 +1,6 @@
+---
+# example.infra.patching_profile_db is a placeholder: write the profile for your service in your own
+# collection. Service-level work such as draining the node, failing over, or setting monitoring
+# downtime belongs in the profile, which can delegate_to another host (a load balancer or the leader).
+patching_profiles:
+  - example.infra.patching_profile_db

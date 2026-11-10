@@ -1,0 +1,26 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+molecule:
+  children:
+    containers:
+
+containers:
+  hosts:
+    patching-fedora:
+      container_image: quay.io/deamen/fedora-molecule:latest
+
+# Hosts the fleet report covers. The fleet-* hosts only hold facts set by converge.yml; nothing connects to them.
+fleet:
+  children:
+    containers:
+  hosts:
+    fleet-failed:
+    fleet-report-only:
+    fleet-skipped:
+    fleet-unreachable:
+    fleet-updated:
+  vars:
+    ansible_connection: local

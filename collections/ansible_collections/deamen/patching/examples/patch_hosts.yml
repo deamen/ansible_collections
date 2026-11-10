@@ -1,0 +1,90 @@
+---
+# Rolling patching with deamen.patching, described in the collection README under "Patching at scale".
+#
+#   ansible-playbook -i examples/inventory.yml examples/patch_hosts.yml
+#
+# Groups (see inventory.yml):
+#   patch_targets  every host this playbook may patch
+#   cluster_nodes  members of a replicated cluster, each with a cluster_role host var (leader or replica)
+#
+# Shared settings live in group_vars/: the hooks for every host, and a profile for the cluster nodes.
+#
+# A failed host does not abort the playbook. tasks/patch_host.yml rescues the failure, every host
+# after it is skipped, and the last play writes the fleet report and then fails the run. Aborting
+# instead (max_fail_percentage exceeded, any_errors_fatal, or a whole batch failing) would end the
+# playbook before the report play, so the report would be missing exactly when it is needed.
+
+- name: Patch standalone hosts, one canary first and then in batches
+  hosts: patch_targets:!cluster_nodes
+  become: true
+  gather_facts: false
+  # Patching failures are rescued in tasks/patch_host.yml, so this only stops the run for a failure
+  # outside it; Ansible then ends the playbook without the report play
+  max_fail_percentage: 0
+  order: sorted
+  serial:
+    - 1
+    - 25%
+  tasks:
+    - name: Patch the host
+      ansible.builtin.include_tasks: tasks/patch_host.yml
+
+- name: Sort cluster nodes into replica and leader groups
+  hosts: cluster_nodes
+  become: false
+  gather_facts: false
+  tasks:
+    # cluster_role is a host var here; a real setup can ask the service which node leads,
+    # register the answer and group by that instead
+    - name: Check the cluster role is known
+      ansible.builtin.assert:
+        that:
+          - cluster_role in ['leader', 'replica']
+        fail_msg: "Set cluster_role to leader or replica for {{ inventory_hostname }}"
+
+    - name: Group the node by its cluster role
+      ansible.builtin.group_by:
+        key: cluster_{{ cluster_role }}
+
+# The cluster plays patch one node at a time. tasks/patch_host.yml already stops at the first failed
+# host, so the leader is never patched after a replica failed. any_errors_fatal is left out: with
+# serial 1 it has no other host to stop, and it would end the playbook before the report play.
+- name: Patch cluster replicas one at a time
+  hosts: cluster_replica
+  become: true
+  gather_facts: false
+  order: sorted
+  serial: 1
+  tasks:
+    - name: Patch the replica
+      ansible.builtin.include_tasks: tasks/patch_host.yml
+
+- name: Patch the cluster leader after its replicas
+  hosts: cluster_leader
+  become: true
+  gather_facts: false
+  serial: 1
+  tasks:
+    - name: Patch the leader
+      ansible.builtin.include_tasks: tasks/patch_host.yml
+
+- name: Report on the patching run
+  hosts: localhost
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Write the fleet report
+      ansible.builtin.include_role:
+        name: deamen.patching.patching_fleet_report
+      vars:
+        patching_fleet_report_hosts: "{{ groups['patch_targets'] }}"
+
+    - name: Fail the run when a host failed or was unreachable
+      ansible.builtin.assert:
+        that:
+          - patching_fleet_report.counts.failed | int == 0
+          - patching_fleet_report.counts.unreachable | int == 0
+        fail_msg: >-
+          Patching did not finish: {{ patching_fleet_report.counts.failed }} failed,
+          {{ patching_fleet_report.counts.unreachable }} unreachable. See the fleet report above.
+        success_msg: All hosts were patched, skipped on request or had no updates
