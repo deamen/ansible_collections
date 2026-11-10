@@ -1,0 +1,7 @@
+---
+# Expects patching_phase to be set by the caller
+- name: Extensions - Run hooks for {{ patching_phase }}
+  ansible.builtin.include_tasks: "{{ patching_hook }}"
+  loop: "{{ lookup('ansible.builtin.vars', 'patching_' + patching_phase + '_hooks') }}"
+  loop_control:
+    loop_var: patching_hook

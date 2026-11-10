@@ -1,0 +1,55 @@
+---
+- name: Update - Download and install updates
+  block:
+    - name: Update - Set the current step
+      ansible.builtin.set_fact:
+        patching_step: download
+
+    - name: Update - Download updates
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest # noqa: package-latest
+        download_only: true
+        exclude: "{{ patching_effective_excludes }}"
+        security: "{{ patching_security_only | bool }}"
+        update_cache: true
+      when: patching_download_first | bool
+
+    - name: Update - Set the current step
+      ansible.builtin.set_fact:
+        patching_step: update
+
+    - name: Update - Install updates
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest # noqa: package-latest
+        exclude: "{{ patching_effective_excludes }}"
+        security: "{{ patching_security_only | bool }}"
+        update_cache: true
+      register: patching_update_result
+
+    - name: Update - Record whether updates were installed
+      ansible.builtin.set_fact:
+        patching_updates_installed: "{{ patching_update_result is changed }}"
+
+  # Extensions may have changed state in pre_update (stopped services, versionlocks), so give them the
+  # post_update and post_reboot phases to undo it before the host fails
+  rescue:
+    - name: Update - Record the failed update
+      ansible.builtin.set_fact:
+        patching_update_error: "{{ ansible_failed_result.msg | default('unknown error') }}"
+        patching_update_failed: true
+
+    - name: Update - Run post_update extensions for cleanup
+      ansible.builtin.include_tasks: run_extensions.yml
+      vars:
+        patching_phase: post_update
+
+    - name: Update - Run post_reboot extensions for cleanup
+      ansible.builtin.include_tasks: run_extensions.yml
+      vars:
+        patching_phase: post_reboot
+
+    - name: Update - Fail after cleanup
+      ansible.builtin.fail:
+        msg: "{{ patching_update_error }}"

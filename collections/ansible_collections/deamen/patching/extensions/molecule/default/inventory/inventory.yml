@@ -1,0 +1,15 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+molecule:
+  children:
+    containers:
+
+containers:
+  hosts:
+    patching-fedora:
+      container_image: quay.io/deamen/fedora-molecule:latest
+    patching-el9:
+      container_image: quay.io/rockylinux/rockylinux:9

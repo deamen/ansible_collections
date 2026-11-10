@@ -1,0 +1,8 @@
+---
+- name: Record the pre_update hook
+  ansible.builtin.lineinfile:
+    path: /tmp/patching_hooks.log
+    line: pre_update
+    create: true
+    state: present
+    mode: "0644"

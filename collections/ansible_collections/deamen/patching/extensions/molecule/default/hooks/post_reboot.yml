@@ -1,0 +1,16 @@
+---
+- name: Record the post_reboot hook
+  ansible.builtin.lineinfile:
+    path: /tmp/patching_hooks.log
+    line: post_reboot
+    create: true
+    state: present
+    mode: "0644"
+
+- name: Check the facts hooks can read
+  ansible.builtin.assert:
+    that:
+      - patching_kernel_before is string
+      - not (patching_update_failed | bool)
+      - not (patching_rebooted | bool)
+    quiet: true

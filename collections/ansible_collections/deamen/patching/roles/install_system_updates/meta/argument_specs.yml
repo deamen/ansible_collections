@@ -1,0 +1,118 @@
+---
+argument_specs:
+  main:
+    short_description: Apply OS updates to RHEL and Fedora hosts in fixed phases.
+    description:
+      - >-
+        Run preflight checks, download and install updates with C(dnf) or C(dnf5), reboot when needed,
+        verify the running kernel and run post-reboot health checks, then record a run summary in the
+        C(patching_summary) fact.
+      - >-
+        Service-specific work plugs in through hooks, lists of task files run in the C(pre_update),
+        C(post_update) and C(post_reboot) phases.
+      - >-
+        Most tasks need root, so run the role with C(become=true). Check mode is not supported.
+    version_added: 1.0.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      patching_download_first:
+        description: Run a download-only pass before installing, so repository problems fail the run before anything changes.
+        type: bool
+        default: true
+      patching_exclude_packages:
+        description: Package globs never updated by this role.
+        type: list
+        elements: str
+        default: []
+      patching_post_reboot_hooks:
+        description: Task files included, in order, in the C(post_reboot) phase.
+        type: list
+        elements: str
+        default: []
+      patching_post_reboot_ports:
+        description:
+          - Ports that must accept connections at the end of the C(post_reboot) phase.
+          - Each item is a dictionary with C(port) and optional C(host) (default C(127.0.0.1)) and C(timeout) in seconds (default C(120)).
+        type: list
+        elements: dict
+        default: []
+      patching_post_reboot_services:
+        description: Systemd units that must be active at the end of the C(post_reboot) phase.
+        type: list
+        elements: str
+        default: []
+      patching_post_reboot_urls:
+        description:
+          - URLs that must respond at the end of the C(post_reboot) phase.
+          - >-
+            Each item is a dictionary with C(url) and optional C(status) (default C(200)), C(content)
+            (text the response body must contain) and C(validate_certs) (default C(true)).
+        type: list
+        elements: dict
+        default: []
+      patching_post_update_hooks:
+        description: Task files included, in order, in the C(post_update) phase.
+        type: list
+        elements: str
+        default: []
+      patching_pre_update_hooks:
+        description: Task files included, in order, in the C(pre_update) phase.
+        type: list
+        elements: str
+        default: []
+      patching_preflight:
+        description: Run the preflight checks (free space, package lock, C(dnf check)) before changing anything.
+        type: bool
+        default: true
+      patching_preflight_lock_timeout:
+        description: Seconds to wait for another package transaction to finish before failing.
+        type: int
+        default: 300
+      patching_preflight_min_free_mb:
+        description:
+          - Minimum free space in MiB for the filesystem holding each path.
+          - Paths that do not exist on the host are skipped.
+        type: dict
+        default:
+          /: 1024
+          /boot: 200
+          /var/cache: 1024
+      patching_reboot:
+        description:
+          - When to reboot.
+          - C(auto) reboots only when updates were installed and C(needs-restarting -r) reports a reboot is needed.
+        type: str
+        choices:
+          - auto
+          - always
+          - never
+        default: auto
+      patching_reboot_timeout:
+        description: Seconds to wait for the host to come back after a reboot.
+        type: int
+        default: 600
+      patching_security_only:
+        description: Install security updates only.
+        type: bool
+        default: false
+      patching_service_check_delay:
+        description: Seconds between retries of the post-reboot service and URL checks.
+        type: int
+        default: 10
+      patching_service_check_retries:
+        description: Retries for the post-reboot service and URL checks.
+        type: int
+        default: 3
+      patching_summary_dir:
+        description: Directory on the controller that O(patching_summary_write) writes C(<inventory_hostname>.json) to.
+        type: path
+        default: "{{ playbook_dir }}/patching_reports"
+      patching_summary_write:
+        description: Write the run summary as JSON on the controller.
+        type: bool
+        default: false
+      patching_verify_kernel:
+        description: After a reboot, fail unless the running kernel is both the default boot kernel and the newest installed kernel.
+        type: bool
+        default: true

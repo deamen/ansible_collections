@@ -4,7 +4,7 @@ Source repository for the `deamen.*` Ansible collections, released to Ansible Ga
 
 ## Layout
 
-- `collections/ansible_collections/deamen/<collection>/` — one directory per collection (`account`, `ai`, `ansible`, `certificate`, `general`, `git`, `gpg`, `podman`, `proton`)
+- `collections/ansible_collections/deamen/<collection>/` — one directory per collection (`account`, `ai`, `ansible`, `certificate`, `general`, `git`, `gpg`, `patching`, `podman`, `proton`)
 - `helper_scripts/` — scaffolding and release scripts; `init_role.py` and `init_collection.py` apply lint fixes automatically, `prepare_release.py` and `release.py` release a collection, `ansible_utils.py` holds the shared helpers
 - `helper_scripts/files/molecule_template/` — template copied by `init_molecule.py`, excluded from `ansible-lint`
 - `helper_scripts/files/changelogs/config.yaml` — antsibull-changelog config template used by `init_collection.py`

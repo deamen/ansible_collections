@@ -1,0 +1,14 @@
+---
+- name: Verify nothing ran after the failed preflight
+  hosts: containers
+  gather_facts: false
+  tasks:
+    - name: Look for the pre_update hook log
+      ansible.builtin.stat:
+        path: /tmp/patching_hooks.log
+      register: hook_log
+
+    - name: Assert the pre_update hook did not run
+      ansible.builtin.assert:
+        that:
+          - not hook_log.stat.exists

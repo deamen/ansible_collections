@@ -1,0 +1,33 @@
+---
+- name: Reboot - Set the current step
+  ansible.builtin.set_fact:
+    patching_step: reboot
+
+# needs-restarting -r returns 1 when a reboot is needed
+- name: Reboot - Check whether a reboot is required
+  ansible.builtin.command:
+    argv:
+      - "{{ patching_dnf_command }}"
+      - needs-restarting
+      - -r
+  changed_when: false
+  failed_when: patching_needs_restarting.rc not in [0, 1]
+  register: patching_needs_restarting
+  when: patching_updates_installed | bool
+
+- name: Reboot - Record whether a reboot is required
+  ansible.builtin.set_fact:
+    patching_reboot_required: "{{ patching_needs_restarting.rc | default(0) == 1 }}"
+
+- name: Reboot - Reboot the host
+  ansible.builtin.reboot:
+    msg: Rebooting to finish installing updates
+    reboot_timeout: "{{ patching_reboot_timeout }}"
+  register: patching_reboot_result
+  when: >-
+    patching_reboot == 'always' or
+    (patching_reboot == 'auto' and patching_reboot_required | bool)
+
+- name: Reboot - Record whether the host rebooted
+  ansible.builtin.set_fact:
+    patching_rebooted: "{{ patching_reboot_result is changed }}"

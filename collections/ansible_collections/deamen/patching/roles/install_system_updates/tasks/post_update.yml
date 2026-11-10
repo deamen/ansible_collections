@@ -1,0 +1,9 @@
+---
+- name: Post-update - Set the current step
+  ansible.builtin.set_fact:
+    patching_step: post_update
+
+- name: Post-update - Run post_update extensions
+  ansible.builtin.include_tasks: run_extensions.yml
+  vars:
+    patching_phase: post_update

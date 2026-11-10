@@ -17,6 +17,7 @@ jobs:
           - "deamen/general"
           - "deamen/git"
           - "deamen/gpg"
+          - "deamen/patching"
           - "deamen/podman"
           - "deamen/proton"
 
