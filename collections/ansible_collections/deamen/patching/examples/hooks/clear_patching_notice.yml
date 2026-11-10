@@ -1,0 +1,7 @@
+---
+# post_reboot hook: remove the notice set_patching_notice.yml added. post_reboot hooks also run
+# after a failed update, so the notice is removed either way.
+- name: Remove the patching login notice
+  ansible.builtin.file:
+    path: /etc/motd.d/patching
+    state: absent

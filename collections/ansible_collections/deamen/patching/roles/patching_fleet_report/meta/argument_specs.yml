@@ -1,0 +1,28 @@
+---
+argument_specs:
+  main:
+    short_description: Aggregate the per-host patching summaries of a run into a fleet report.
+    description:
+      - >-
+        Read the C(patching_summary) fact that C(deamen.patching.install_system_updates) sets on each host,
+        count the hosts per outcome, print the counts and a per-host table, set the C(patching_fleet_report)
+        fact and write the report as JSON and as a markdown table on the controller.
+      - >-
+        Run it as the last play of the patching playbook, on C(localhost) with C(become=false) and
+        C(gather_facts=false). Hosts that failed keep the summary they set before failing; hosts with no
+        summary are reported as C(unreachable).
+    version_added: 1.0.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      patching_fleet_report_hosts:
+        description:
+          - Inventory hostnames to report on, usually the group the patching plays targeted.
+          - Hosts with no C(patching_summary) fact, including names that are not in the inventory, are reported as C(unreachable).
+        type: list
+        elements: str
+        required: true
+      patching_summary_dir:
+        description: Directory on the controller that C(fleet-<timestamp>.json) and C(fleet-<timestamp>.md) are written to.
+        type: path
+        default: "{{ playbook_dir }}/patching_reports"

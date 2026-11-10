@@ -1,0 +1,55 @@
+---
+- name: Verify the fleet report files
+  hosts: localhost
+  become: false
+  gather_facts: false
+  vars:
+    fleet_report_dir: "{{ (lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') or '/tmp/molecule-patching') }}/fleet_reports"
+    # Timestamped names sort by time, so the last one is from the latest converge
+    fleet_report_json: "{{ query('ansible.builtin.fileglob', fleet_report_dir ~ '/fleet-*.json') | sort | last }}"
+  tasks:
+    - name: Read the latest JSON report
+      ansible.builtin.set_fact:
+        fleet_report: "{{ lookup('ansible.builtin.file', fleet_report_json) | from_json }}"
+
+    - name: Assert the counts
+      ansible.builtin.assert:
+        that:
+          - fleet_report.counts.failed | int == 1
+          - fleet_report.counts.no_updates | int == 1
+          - fleet_report.counts.rebooted | int == 1
+          - fleet_report.counts.report_only | int == 1
+          - fleet_report.counts.skipped | int == 1
+          - fleet_report.counts.total | int == 6
+          - fleet_report.counts.unreachable | int == 1
+          - fleet_report.counts.updated | int == 1
+        fail_msg: "Unexpected counts: {{ fleet_report.counts }}"
+
+    - name: Assert the status of each host
+      ansible.builtin.assert:
+        that:
+          - (fleet_report.hosts | items2dict(key_name='host', value_name='status')) == expected_status
+          - (fleet_report.hosts | selectattr('host', 'equalto', 'fleet-failed') | first).failed_step == 'update'
+          - (fleet_report.hosts | selectattr('host', 'equalto', 'fleet-report-only') | first).package_count | int == 2
+          - (fleet_report.hosts | selectattr('host', 'equalto', 'fleet-skipped') | first).skip_reason == 'change freeze'
+          - (fleet_report.hosts | selectattr('host', 'equalto', 'fleet-updated') | first).rebooted | bool
+        fail_msg: "Unexpected hosts: {{ fleet_report.hosts }}"
+      vars:
+        expected_status:
+          fleet-failed: failed
+          fleet-report-only: report_only
+          fleet-skipped: skipped
+          fleet-unreachable: unreachable
+          fleet-updated: updated
+          patching-fedora: no_updates
+
+    - name: Check the markdown report was written next to the JSON report
+      ansible.builtin.stat:
+        path: "{{ fleet_report_json | regex_replace('\\.json$', '.md') }}"
+      register: fleet_report_md
+
+    - name: Assert the markdown report exists
+      ansible.builtin.assert:
+        that:
+          - fleet_report_md.stat.exists
+          - "'| fleet-skipped | skipped |' in lookup('ansible.builtin.file', fleet_report_md.stat.path)"

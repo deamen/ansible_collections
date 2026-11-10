@@ -1,0 +1,7 @@
+---
+# Settings for every host patch_hosts.yml patches
+patching_post_reboot_hooks:
+  - "{{ playbook_dir }}/hooks/clear_patching_notice.yml"
+patching_pre_update_hooks:
+  - "{{ playbook_dir }}/hooks/set_patching_notice.yml"
+patching_summary_write: true

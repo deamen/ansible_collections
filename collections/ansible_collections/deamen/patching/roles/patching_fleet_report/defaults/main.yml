@@ -1,0 +1,3 @@
+---
+# Same directory install_system_updates writes the per-host summaries to
+patching_summary_dir: "{{ playbook_dir }}/patching_reports"

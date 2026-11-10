@@ -1,0 +1,73 @@
+---
+# The fleet report only reads facts, so the hosts get the summaries install_system_updates would have
+# set instead of running it. fleet-unreachable gets none, like a host that was never reached.
+- name: Set run summaries on the fleet hosts
+  hosts: fleet
+  gather_facts: false
+  vars:
+    fleet_test_summaries:
+      fleet-failed:
+        failed_step: update
+        host: fleet-failed
+        mode: update
+        packages: []
+        rebooted: false
+        status: failed
+        update_failed: true
+      fleet-report-only:
+        failed_step: none
+        host: fleet-report-only
+        mode: report_only
+        packages:
+          - bash-5.2.37-1.fc41.x86_64
+          - kernel-core-6.12.9-200.fc41.x86_64
+        rebooted: false
+        status: ok
+      fleet-skipped:
+        host: fleet-skipped
+        mode: update
+        skip_reason: change freeze
+        status: skipped
+      fleet-updated:
+        failed_step: none
+        host: fleet-updated
+        kernel_after: 6.12.9-200.fc41.x86_64
+        kernel_before: 6.11.4-301.fc41.x86_64
+        mode: update
+        packages:
+          - "Installed: kernel-core-6.12.9-200.fc41.x86_64"
+        profiles:
+          - example.test.patching_profile_app
+        rebooted: true
+        status: ok
+      patching-fedora:
+        failed_step: none
+        host: patching-fedora
+        mode: update
+        packages: []
+        rebooted: false
+        status: no_updates
+  tasks:
+    - name: Set the run summary
+      ansible.builtin.set_fact:
+        patching_summary: "{{ fleet_test_summaries[inventory_hostname] }}"
+      when: inventory_hostname in fleet_test_summaries
+
+- name: Report on the fleet
+  hosts: localhost
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Run the fleet report
+      ansible.builtin.include_role:
+        name: deamen.patching.patching_fleet_report
+      vars:
+        patching_fleet_report_hosts: "{{ groups['fleet'] }}"
+        patching_summary_dir: "{{ (lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') or '/tmp/molecule-patching') }}/fleet_reports"
+
+    - name: Check the fleet report fact
+      ansible.builtin.assert:
+        that:
+          - patching_fleet_report.counts.total | int == 6
+          - patching_fleet_report.counts.unreachable | int == 1
+        fail_msg: "Unexpected fleet report: {{ patching_fleet_report }}"

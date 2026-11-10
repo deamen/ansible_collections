@@ -1,0 +1,20 @@
+# Patching fleet report
+
+Generated: {{ patching_fleet_report.generated }}
+
+| Outcome | Hosts |
+| --- | --- |
+| Updated | {{ patching_fleet_report.counts.updated }} |
+| Rebooted | {{ patching_fleet_report.counts.rebooted }} |
+| No updates | {{ patching_fleet_report.counts.no_updates }} |
+| Report only | {{ patching_fleet_report.counts.report_only }} |
+| Skipped | {{ patching_fleet_report.counts.skipped }} |
+| Failed | {{ patching_fleet_report.counts.failed }} |
+| Unreachable | {{ patching_fleet_report.counts.unreachable }} |
+| Total | {{ patching_fleet_report.counts.total }} |
+
+| Host | Status | Mode | Rebooted | Packages | Kernel before | Kernel after | Failed step | Skip reason |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+{% for entry in patching_fleet_report.hosts -%}
+| {{ entry.host }} | {{ entry.status }} | {{ entry.mode }} | {{ 'yes' if entry.rebooted | bool else 'no' }} | {{ entry.package_count }} | {{ entry.kernel_before }} | {{ entry.kernel_after }} | {{ entry.failed_step }} | {{ entry.skip_reason | replace('|', '&#124;') }} |
+{% endfor -%}

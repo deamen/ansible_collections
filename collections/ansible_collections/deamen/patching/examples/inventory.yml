@@ -1,0 +1,20 @@
+---
+# Example inventory for patch_hosts.yml; the host names are placeholders
+patch_targets:
+  children:
+    cluster_nodes:
+      hosts:
+        db1.example.com:
+          cluster_role: leader
+        db2.example.com:
+          cluster_role: replica
+        db3.example.com:
+          cluster_role: replica
+    standalone:
+      hosts:
+        app1.example.com:
+        app2.example.com:
+        app3.example.com:
+        app4.example.com:
+        web1.example.com:
+        web2.example.com:

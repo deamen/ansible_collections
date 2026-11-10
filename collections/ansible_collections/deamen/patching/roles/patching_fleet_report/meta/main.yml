@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: Song Tang <stang@mmz.au>
+  description: Aggregate the per-host patching summaries of a run into a fleet report on the controller.
+  license: GPL-3.0-or-later
+  min_ansible_version: "2.15.0"
+
+  platforms:
+    - name: EL
+      versions:
+        - "9"
+        - "10"
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - patching
+    - reporting
+    - linux
+
+dependencies: []

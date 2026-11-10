@@ -1,0 +1,8 @@
+---
+# pre_update hook: tell people who log in that the host is being patched
+- name: Set the patching login notice
+  ansible.builtin.copy:
+    content: |
+      This host is being patched and may reboot. Started {{ patching_started }}.
+    dest: /etc/motd.d/patching
+    mode: "0644"
