@@ -1,0 +1,48 @@
+name: Clean Up Merged Owner PRs
+
+# Deletes the head branch of owner PRs that auto-merge (see auto-merge.yml) has
+# merged to master.
+#
+# Runs on a schedule rather than waiting for each merge, so nothing depends on a
+# job staying alive until the merge. A PR is picked up only while its head branch
+# still exists, so each branch is deleted once.
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      OWNER: ${{ github.repository_owner }}
+    steps:
+      - name: Delete head branches of merged owner PRs
+        run: |
+          since=$(date -u -d '-2 days' +%F)
+          gh pr list --state merged --base master --limit 50 \
+            --search "merged:>=$since" \
+            --json number,headRefName,author \
+            --jq '.[] | select(.author.login == env.OWNER) | @base64' |
+          while read -r row; do
+            pr=$(echo "$row" | base64 -d)
+            number=$(echo "$pr" | jq -r .number)
+            head=$(echo "$pr" | jq -r .headRefName)
+
+            # Already deleted on an earlier run
+            if ! gh api "repos/$GH_REPO/git/ref/heads/$head" --silent 2>/dev/null; then
+              continue
+            fi
+
+            gh api -X DELETE "repos/$GH_REPO/git/refs/heads/$head" --silent \
+              && echo "PR #$number: deleted $head" \
+              || echo "PR #$number: could not delete $head"
+          done
