@@ -1,0 +1,6 @@
+---
+- name: Record the pre_update hook
+  ansible.builtin.copy:
+    content: "pre_update\n"
+    dest: /tmp/patching_hook_ran
+    mode: "0644"

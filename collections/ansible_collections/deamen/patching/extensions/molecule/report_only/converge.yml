@@ -1,0 +1,22 @@
+---
+- name: Test report-only mode
+  hosts: containers
+  gather_facts: false
+  become: true
+  tasks:
+    # Recorded once, so a second converge compares against the list from before the first run
+    - name: Record the installed packages
+      ansible.builtin.shell:
+        cmd: set -o pipefail && rpm -qa | sort > /tmp/rpm_before.txt
+        creates: /tmp/rpm_before.txt
+        executable: /bin/bash
+
+    - name: Report pending updates
+      ansible.builtin.include_role:
+        name: deamen.patching.install_system_updates
+      vars:
+        patching_pre_update_hooks:
+          - "{{ playbook_dir }}/hooks/pre_update.yml"
+        patching_report_only: true
+        patching_summary_dir: "{{ (lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') or '/tmp/molecule-patching') }}/reports"
+        patching_summary_write: true

@@ -25,3 +25,5 @@
       - "{{ 'dnf5-plugins' if patching_dnf_command == 'dnf5' else 'dnf-plugins-core' }}"
       - procps-ng
     state: present
+  # Report-only mode must not change the host
+  when: not (patching_report_only | bool)

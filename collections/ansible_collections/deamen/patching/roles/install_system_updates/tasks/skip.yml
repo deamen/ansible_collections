@@ -1,0 +1,11 @@
+---
+- name: Skip - Show why the host is skipped
+  ansible.builtin.debug:
+    msg: "Skipping {{ inventory_hostname }}: {{ patching_skip_reason }}"
+
+- name: Skip - Include summary tasks
+  ansible.builtin.include_tasks: summary.yml
+
+# Ending the host is not a failure; the play carries on for the other hosts
+- name: Skip - End the run for this host
+  ansible.builtin.meta: end_host

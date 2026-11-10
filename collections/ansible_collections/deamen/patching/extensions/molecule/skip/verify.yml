@@ -1,0 +1,47 @@
+---
+- name: Verify the hooks ran only on the patched host
+  hosts: containers
+  gather_facts: false
+  tasks:
+    - name: Look for the pre_update hook marker
+      ansible.builtin.stat:
+        path: /tmp/patching_hook_ran
+      register: hook_marker
+
+    - name: Assert the pre_update hook ran only when the host was not skipped
+      ansible.builtin.assert:
+        that:
+          - hook_marker.stat.exists != (patching_skip | default(false) | bool)
+        fail_msg: "pre_update hook marker present: {{ hook_marker.stat.exists }}"
+
+- name: Verify the run summaries
+  hosts: localhost
+  become: false
+  gather_facts: false
+  vars:
+    report_dir: "{{ (lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') or '/tmp/molecule-patching') }}/reports"
+  tasks:
+    - name: Assert the skipped host recorded its reason and was not failed
+      ansible.builtin.assert:
+        that:
+          - summary.mode == 'update'
+          - summary.status == 'skipped'
+          - summary.skip_reason == 'Change freeze for this host'
+          - summary.failed_step == 'none'
+          - summary.packages == []
+          - not summary.rebooted
+          - not summary.update_failed
+        fail_msg: "Unexpected summary: {{ summary }}"
+      vars:
+        summary: "{{ lookup('ansible.builtin.file', report_dir ~ '/patching-skip-skipped.json') | from_json }}"
+
+    - name: Assert the other host was patched
+      ansible.builtin.assert:
+        that:
+          - summary.mode == 'update'
+          - summary.status in ['ok', 'no_updates']
+          - summary.skip_reason == 'none'
+          - summary.failed_step == 'none'
+        fail_msg: "Unexpected summary: {{ summary }}"
+      vars:
+        summary: "{{ lookup('ansible.builtin.file', report_dir ~ '/patching-skip-patched.json') | from_json }}"

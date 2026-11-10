@@ -8,16 +8,24 @@
       host: "{{ inventory_hostname }}"
       kernel_after: "{{ ansible_facts.kernel | default('unknown') }}"
       kernel_before: "{{ patching_kernel_before }}"
-      mode: update
-      # No install task ran when the run failed earlier, so no packages were updated
-      packages: "{{ patching_update_result.results | default([]) }}"
+      mode: "{{ 'report_only' if patching_report_only | bool else 'update' }}"
+      packages: "{{ patching_summary_packages }}"
       reboot_required: "{{ patching_reboot_required | bool }}"
       rebooted: "{{ patching_rebooted | bool }}"
+      skip_reason: "{{ patching_skip_reason if patching_skip | bool else 'none' }}"
       started: "{{ patching_started }}"
       status: >-
-        {{ 'failed' if patching_failed_step != 'none'
-        else ('ok' if patching_updates_installed | bool else 'no_updates') }}
+        {{ 'skipped' if patching_skip | bool
+        else 'failed' if patching_failed_step != 'none'
+        else 'ok' if (patching_summary_packages | length > 0 if patching_report_only | bool else patching_updates_installed | bool)
+        else 'no_updates' }}
       update_failed: "{{ patching_update_failed | bool }}"
+  vars:
+    # Pending packages in report-only mode, else updated packages. The empty defaults cover runs
+    # that stopped before the list was built, so no packages were listed or updated.
+    patching_summary_packages: >-
+      {{ (patching_pending_packages | default([])) if patching_report_only | bool
+      else (patching_update_result.results | default([])) }}
 
 - name: Summary - Show the run summary
   ansible.builtin.debug:

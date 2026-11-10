@@ -1,0 +1,13 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+molecule:
+  children:
+    containers:
+
+containers:
+  hosts:
+    patching-report-fedora:
+      container_image: quay.io/deamen/fedora-molecule:latest
