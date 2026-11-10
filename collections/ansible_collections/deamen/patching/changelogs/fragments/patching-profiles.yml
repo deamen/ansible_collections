@@ -1,4 +1,0 @@
----
-trivial:
-  - install_system_updates - add ``patching_profiles``, an ``excludes`` phase that merges profile package excludes into ``patching_effective_excludes``, and ``profiles`` in the run summary.
-  - patching_profile_example - add a starter profile role that documents the profile contract.

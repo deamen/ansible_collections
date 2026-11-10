@@ -1,3 +1,24 @@
 ---
 ancestor: null
-releases: {}
+releases:
+  1.0.0:
+    changes:
+      release_summary: Initial release of the ``deamen.patching`` collection.
+    fragments:
+      - 1.0.0.yml
+      - patching-fleet-report.yml
+      - patching-profiles.yml
+      - patching-report-only-and-skip.yml
+    objects:
+      role:
+        - description: Apply OS updates to RHEL and Fedora hosts in fixed phases.
+          name: install_system_updates
+          namespace: null
+        - description: Aggregate the per\-host patching summaries of a run into a
+            fleet report.
+          name: patching_fleet_report
+          namespace: null
+        - description: Starter patching profile showing the profile contract.
+          name: patching_profile_example
+          namespace: null
+    release_date: '2026-11-10'
