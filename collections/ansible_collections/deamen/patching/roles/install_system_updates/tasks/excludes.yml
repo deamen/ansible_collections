@@ -1,0 +1,20 @@
+---
+# Starts empty because profiles append their package globs to it in the excludes phase
+- name: Excludes - Set the current step
+  ansible.builtin.set_fact:
+    patching_profile_excludes: []
+    patching_step: excludes
+
+# Only profiles take part in this phase; hooks do not, so this does not use run_extensions.yml
+- name: Excludes - Collect package excludes from profiles
+  ansible.builtin.include_role:
+    name: "{{ patching_profile }}"
+  loop: "{{ patching_profiles }}"
+  loop_control:
+    loop_var: patching_profile
+  vars:
+    patching_phase: excludes
+
+- name: Excludes - Build the effective package excludes
+  ansible.builtin.set_fact:
+    patching_effective_excludes: "{{ (patching_exclude_packages + patching_profile_excludes) | unique }}"

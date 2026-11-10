@@ -1,0 +1,41 @@
+---
+- name: Verify the profile and hooks ran in order
+  hosts: containers
+  gather_facts: false
+  tasks:
+    - name: Read the extension log
+      ansible.builtin.slurp:
+        src: /tmp/patching_hooks.log
+      register: extension_log
+
+    # test_profile has no post_update.yml, so only the hook writes a post_update line
+    - name: Assert profiles ran before hooks in each phase and missing phases were skipped
+      ansible.builtin.assert:
+        that:
+          - >-
+            (extension_log.content | b64decode).splitlines() == [
+              'test_profile excludes',
+              'test_profile pre_update',
+              'hook pre_update',
+              'hook post_update',
+              'test_profile post_reboot update_failed=False',
+              'hook post_reboot'
+            ]
+        fail_msg: "Unexpected extension order: {{ (extension_log.content | b64decode).splitlines() }}"
+
+- name: Verify the run summary
+  hosts: localhost
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Assert the summary records the profile and the merged excludes
+      ansible.builtin.assert:
+        that:
+          - summary.status in ['ok', 'no_updates']
+          - summary.failed_step == 'none'
+          - summary.profiles == ['test_profile']
+          - summary.excludes == ['another-nonexistent-package*', 'nonexistent-test-package*']
+        fail_msg: "Unexpected summary for {{ item }}: {{ summary }}"
+      vars:
+        summary: "{{ lookup('ansible.builtin.file', (lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') or '/tmp/molecule-patching') ~ '/reports/' ~ item ~ '.json') | from_json }}"
+      loop: "{{ groups['containers'] }}"

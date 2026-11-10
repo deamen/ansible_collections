@@ -33,6 +33,9 @@ patching_preflight_min_free_mb:
   /boot: 200
   /var/cache: 1024
 
+# Profile roles (FQCNs) run in every extension phase; empty because service profiles are site-specific
+patching_profiles: []
+
 # auto: reboot only when updates were installed and needs-restarting says so; always; never
 patching_reboot: auto
 

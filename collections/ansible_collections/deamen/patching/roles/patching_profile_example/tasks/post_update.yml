@@ -1,0 +1,15 @@
+---
+# post_update phase: runs after the update and before the reboot decision.
+#
+# Use it for work that must happen before a reboot, for example: stop a service that must stay down
+# until post_reboot, or restore file capabilities that an updated package reset.
+#
+# Available facts:
+#   patching_kernel_before  kernel running before the update
+#   patching_update_result  result of the install task (undefined when the download or update failed)
+#   patching_update_failed  true when the download or update failed; the host will not reboot and
+#                           post_reboot runs next as cleanup, so do not leave a service down waiting for it
+
+- name: Show the post_update phase
+  ansible.builtin.debug:
+    msg: "patching_profile_example: post_update phase, update failed: {{ patching_update_failed | bool }}"

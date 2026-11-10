@@ -7,7 +7,7 @@ This repository contains the `deamen.patching` Ansible Collection.
 
 ## What this collection does
 
-Patch RHEL 9/10 (dnf) and Fedora 41+ (dnf5) hosts in fixed phases: preflight checks, pre-update, download, update, post-update, reboot and post-reboot, followed by a run summary. Service-specific work plugs in through hooks, so the collection itself stays generic.
+Patch RHEL 9/10 (dnf) and Fedora 41+ (dnf5) hosts in fixed phases: preflight checks, pre-update, download, update, post-update, reboot and post-reboot, followed by a run summary. Service-specific work plugs in through profiles (roles you write in your own collections) and hooks (task files), so the collection itself stays generic.
 
 ## Included content
 
@@ -17,6 +17,7 @@ Patch RHEL 9/10 (dnf) and Fedora 41+ (dnf5) hosts in fixed phases: preflight che
 | Name | Description |
 | --- | --- |
 | [deamen.patching.install_system_updates](roles/install_system_updates/README.md) | Apply OS updates in fixed phases, reboot when needed, verify the host and record a run summary. |
+| [deamen.patching.patching_profile_example](roles/patching_profile_example/README.md) | Starter patching profile that documents the profile contract; copy it to write profiles for your services. |
 <!--end collection content-->
 
 ## Using this collection

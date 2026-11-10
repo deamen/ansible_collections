@@ -8,8 +8,9 @@ argument_specs:
         verify the running kernel and run post-reboot health checks, then record a run summary in the
         C(patching_summary) fact.
       - >-
-        Service-specific work plugs in through hooks, lists of task files run in the C(pre_update),
-        C(post_update) and C(post_reboot) phases.
+        Service-specific work plugs in through profiles (roles listed in O(patching_profiles)) and hooks
+        (lists of task files), run in the C(pre_update), C(post_update) and C(post_reboot) phases. Profiles
+        can also add package excludes in an C(excludes) phase.
       - >-
         Most tasks need root, so run the role with C(become=true). Check mode is not supported.
     version_added: 1.0.0
@@ -78,6 +79,16 @@ argument_specs:
           /: 1024
           /boot: 200
           /var/cache: 1024
+      patching_profiles:
+        description:
+          - Profile roles, as FQCNs, run with C(include_role) in list order in every extension phase, before the hooks.
+          - >-
+            Each profile is called with C(patching_phase) set to C(excludes), C(pre_update), C(post_update) or
+            C(post_reboot) and runs C(tasks/<patching_phase>.yml) when it has one.
+          - See the C(deamen.patching.patching_profile_example) role for the contract.
+        type: list
+        elements: str
+        default: []
       patching_reboot:
         description:
           - When to reboot.

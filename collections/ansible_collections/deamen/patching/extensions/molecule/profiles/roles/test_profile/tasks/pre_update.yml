@@ -1,0 +1,8 @@
+---
+- name: Record the test_profile pre_update phase
+  ansible.builtin.lineinfile:
+    path: /tmp/patching_hooks.log
+    line: test_profile pre_update
+    create: true
+    state: present
+    mode: "0644"

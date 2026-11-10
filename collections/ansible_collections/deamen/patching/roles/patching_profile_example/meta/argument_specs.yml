@@ -1,0 +1,27 @@
+---
+argument_specs:
+  main:
+    short_description: Starter patching profile showing the profile contract.
+    description:
+      - >-
+        A template for profiles run by C(deamen.patching.install_system_updates) through its
+        C(patching_profiles) list. Copy it into your own collection as C(patching_profile_<service>) and
+        fill in the phases the service needs.
+      - >-
+        C(tasks/main.yml) includes C(tasks/<patching_phase>.yml) when the file exists and does nothing
+        otherwise, so a profile only implements the phases it needs.
+      - This example only prints debug messages.
+    version_added: 1.0.0
+    author:
+      - Song Tang <stang@mmz.au>
+    options:
+      patching_phase:
+        description:
+          - The phase the core role is running. Set by C(install_system_updates); do not set it yourself.
+        type: str
+        required: true
+        choices:
+          - excludes
+          - pre_update
+          - post_update
+          - post_reboot

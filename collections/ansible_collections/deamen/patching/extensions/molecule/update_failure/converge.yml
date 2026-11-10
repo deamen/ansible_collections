@@ -1,0 +1,35 @@
+---
+- name: Test that a failed update still runs the profile cleanup
+  hosts: containers
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Run the role with a repository that cannot be loaded
+      block:
+        - name: Install system updates
+          ansible.builtin.include_role:
+            name: deamen.patching.install_system_updates
+          vars:
+            patching_post_reboot_hooks:
+              - "{{ playbook_dir }}/hooks/post_reboot.yml"
+            patching_pre_update_hooks:
+              - "{{ playbook_dir }}/hooks/pre_update.yml"
+            # Shared with the profiles scenario, so it is referenced by path
+            patching_profiles:
+              - "{{ playbook_dir }}/../profiles/roles/test_profile"
+            # Containers cannot reboot
+            patching_reboot: never
+
+        - name: Fail when the role did not fail
+          ansible.builtin.fail:
+            msg: The role should have failed in the download or update step
+
+      rescue:
+        - name: Assert the role failed in the download or update step
+          ansible.builtin.assert:
+            that:
+              - patching_summary.status == 'failed'
+              - patching_summary.failed_step in ['download', 'update']
+              - patching_summary.update_failed | bool
+              - not (patching_summary.rebooted | bool)
+            fail_msg: "Unexpected summary: {{ patching_summary | default('not set') }}"

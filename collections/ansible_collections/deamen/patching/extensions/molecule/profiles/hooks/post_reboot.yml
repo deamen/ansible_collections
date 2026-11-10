@@ -1,0 +1,8 @@
+---
+- name: Record the post_reboot hook
+  ansible.builtin.lineinfile:
+    path: /tmp/patching_hooks.log
+    line: hook post_reboot
+    create: true
+    state: present
+    mode: "0644"
