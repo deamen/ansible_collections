@@ -1,0 +1,17 @@
+---
+# excludes phase: runs after preflight and before anything changes. Only profiles take part; hooks do not.
+#
+# Append the package globs install_system_updates must not update on this host to the
+# patching_profile_excludes fact. The core role merges them with patching_exclude_packages into
+# patching_effective_excludes, uses that list for the download and the update, and records it in the
+# summary. Keep variables the profile owns prefixed with the profile name, for example:
+#
+#   - name: Exclude the example server packages
+#     ansible.builtin.set_fact:
+#       patching_profile_excludes: "{{ patching_profile_excludes + patching_profile_example_excludes }}"
+#
+# with patching_profile_example_excludes (e.g. ['example-server*']) set in the profile's defaults/main.yml.
+
+- name: Show the excludes phase
+  ansible.builtin.debug:
+    msg: "patching_profile_example: excludes phase, profile excludes so far: {{ patching_profile_excludes }}"

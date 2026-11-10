@@ -1,0 +1,16 @@
+---
+# The repository is added after the platform step, which needs working repositories to install its tools,
+# and points at a path that does not exist, so the download fails. The post_reboot hook removes it again;
+# it only exists during the run, so adding and removing it is not reported as a change.
+- name: Add a repository that cannot be loaded
+  ansible.builtin.copy:
+    content: |
+      [patching-broken]
+      name=Repository that cannot be loaded
+      baseurl=file:///nonexistent/patching-broken
+      enabled=1
+      gpgcheck=0
+      skip_if_unavailable=False
+    dest: /etc/yum.repos.d/patching-broken.repo
+    mode: "0644"
+  changed_when: false

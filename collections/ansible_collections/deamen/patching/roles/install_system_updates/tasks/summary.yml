@@ -10,6 +10,7 @@
       kernel_before: "{{ patching_kernel_before }}"
       mode: "{{ 'report_only' if patching_report_only | bool else 'update' }}"
       packages: "{{ patching_summary_packages }}"
+      profiles: "{{ patching_profiles }}"
       reboot_required: "{{ patching_reboot_required | bool }}"
       rebooted: "{{ patching_rebooted | bool }}"
       skip_reason: "{{ patching_skip_reason if patching_skip | bool else 'none' }}"

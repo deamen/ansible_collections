@@ -1,0 +1,15 @@
+---
+# Profile contract: include tasks/<patching_phase>.yml when this role has one, otherwise do nothing.
+# skip: true makes the lookup return an empty list for phases the profile does not implement.
+- name: Include the tasks for the current patching phase
+  ansible.builtin.include_tasks: "{{ patching_profile_example_phase_file }}"
+  loop: "{{ query('ansible.builtin.first_found', patching_profile_example_phase_files) }}"
+  loop_control:
+    loop_var: patching_profile_example_phase_file
+  vars:
+    patching_profile_example_phase_files:
+      files:
+        - "{{ patching_phase }}.yml"
+      paths:
+        - "{{ role_path }}/tasks"
+      skip: true

@@ -1,0 +1,15 @@
+---
+# pre_update phase: runs after the package metadata is cleaned and before the download and the update.
+#
+# Prepare the service for patching, for example: stop it, put it into maintenance mode, drain it from a
+# load balancer (with delegate_to another host), or add version locks.
+#
+# Available facts:
+#   patching_kernel_before  kernel running before the update
+#
+# Undo anything changed here in post_update or post_reboot. Both phases also run when the download or
+# the update fails, so the cleanup always happens.
+
+- name: Show the pre_update phase
+  ansible.builtin.debug:
+    msg: "patching_profile_example: pre_update phase, kernel before the update: {{ patching_kernel_before }}"

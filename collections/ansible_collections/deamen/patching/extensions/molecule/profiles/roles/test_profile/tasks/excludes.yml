@@ -1,0 +1,12 @@
+---
+- name: Record the test_profile excludes phase
+  ansible.builtin.lineinfile:
+    path: /tmp/patching_hooks.log
+    line: test_profile excludes
+    create: true
+    state: present
+    mode: "0644"
+
+- name: Add the test_profile package excludes
+  ansible.builtin.set_fact:
+    patching_profile_excludes: "{{ patching_profile_excludes + ['nonexistent-test-package*'] }}"

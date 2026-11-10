@@ -1,0 +1,19 @@
+---
+# post_reboot phase: runs whether or not the host rebooted, and also as cleanup after a failed download
+# or update. It runs before the generic service, port and URL checks, so start the services here that
+# those checks verify.
+#
+# Undo what pre_update changed, for example: start the service, leave maintenance mode, put the host back
+# into the load balancer, or remove version locks.
+#
+# Available facts:
+#   patching_kernel_before  kernel running before the update
+#   patching_update_result  result of the install task (undefined when the download or update failed)
+#   patching_update_failed  true when the download or update failed
+#   patching_rebooted       true when the host rebooted
+
+- name: Show the post_reboot phase
+  ansible.builtin.debug:
+    msg: >-
+      patching_profile_example: post_reboot phase, rebooted: {{ patching_rebooted | bool }},
+      update failed: {{ patching_update_failed | bool }}

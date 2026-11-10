@@ -1,0 +1,9 @@
+---
+# The line records patching_update_failed, so the update_failure scenario can check this ran as cleanup
+- name: Record the test_profile post_reboot phase
+  ansible.builtin.lineinfile:
+    path: /tmp/patching_hooks.log
+    line: "test_profile post_reboot update_failed={{ patching_update_failed | bool }}"
+    create: true
+    state: present
+    mode: "0644"

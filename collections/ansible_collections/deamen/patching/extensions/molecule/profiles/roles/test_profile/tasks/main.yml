@@ -1,0 +1,15 @@
+---
+# Test profile for the profiles and update_failure scenarios. It implements only the excludes, pre_update
+# and post_reboot phases, so the post_update phase checks that a missing phase file is skipped.
+- name: Include the tasks for the current patching phase
+  ansible.builtin.include_tasks: "{{ test_profile_phase_file }}"
+  loop: "{{ query('ansible.builtin.first_found', test_profile_phase_files) }}"
+  loop_control:
+    loop_var: test_profile_phase_file
+  vars:
+    test_profile_phase_files:
+      files:
+        - "{{ patching_phase }}.yml"
+      paths:
+        - "{{ role_path }}/tasks"
+      skip: true

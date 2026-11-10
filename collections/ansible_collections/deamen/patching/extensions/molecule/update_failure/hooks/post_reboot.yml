@@ -1,0 +1,14 @@
+---
+- name: Remove the repository that cannot be loaded
+  ansible.builtin.file:
+    path: /etc/yum.repos.d/patching-broken.repo
+    state: absent
+  changed_when: false
+
+- name: Record the post_reboot hook
+  ansible.builtin.lineinfile:
+    path: /tmp/patching_hooks.log
+    line: "hook post_reboot update_failed={{ patching_update_failed | bool }}"
+    create: true
+    state: present
+    mode: "0644"

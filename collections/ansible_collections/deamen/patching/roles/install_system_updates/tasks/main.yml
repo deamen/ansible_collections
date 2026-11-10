@@ -31,6 +31,9 @@
       ansible.builtin.include_tasks: preflight.yml
       when: patching_preflight | bool
 
+    - name: Include excludes tasks
+      ansible.builtin.include_tasks: excludes.yml
+
     # Report-only stops the host here, after preflight and excludes and before anything changes
     - name: Include report tasks
       ansible.builtin.include_tasks: report.yml

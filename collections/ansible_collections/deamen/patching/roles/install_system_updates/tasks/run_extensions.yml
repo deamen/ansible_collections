@@ -1,5 +1,14 @@
 ---
-# Expects patching_phase to be set by the caller
+# Expects patching_phase to be set by the caller. Profiles run first, then hooks, each in list order.
+# Profiles inherit patching_phase from the caller's include vars; passing it again here would make it
+# refer to itself.
+- name: Extensions - Run profiles for {{ patching_phase }}
+  ansible.builtin.include_role:
+    name: "{{ patching_profile }}"
+  loop: "{{ patching_profiles }}"
+  loop_control:
+    loop_var: patching_profile
+
 - name: Extensions - Run hooks for {{ patching_phase }}
   ansible.builtin.include_tasks: "{{ patching_hook }}"
   loop: "{{ lookup('ansible.builtin.vars', 'patching_' + patching_phase + '_hooks') }}"
