@@ -92,6 +92,16 @@ argument_specs:
         description: Seconds to wait for the host to come back after a reboot.
         type: int
         default: 600
+      patching_report_only:
+        description:
+          - >-
+            List pending updates with C(dnf check-update) or C(dnf5 check-upgrade), honouring
+            O(patching_security_only) and the excludes, record them in the summary and stop.
+          - >-
+            Runs the platform checks and preflight but changes nothing on the host. It installs no tools, runs no hooks,
+            and does not clean the package cache, download or install updates, or reboot.
+        type: bool
+        default: false
       patching_security_only:
         description: Install security updates only.
         type: bool
@@ -104,6 +114,16 @@ argument_specs:
         description: Retries for the post-reboot service and URL checks.
         type: int
         default: 3
+      patching_skip:
+        description:
+          - Skip this host. The summary records C(status=skipped) and O(patching_skip_reason), then the host ends without failing.
+          - Nothing else runs on the host.
+        type: bool
+        default: false
+      patching_skip_reason:
+        description: Reason recorded in the summary when O(patching_skip) is true.
+        type: str
+        default: not set
       patching_summary_dir:
         description: Directory on the controller that O(patching_summary_write) writes C(<inventory_hostname>.json) to.
         type: path

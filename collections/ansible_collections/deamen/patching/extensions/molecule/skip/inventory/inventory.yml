@@ -1,0 +1,17 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+molecule:
+  children:
+    containers:
+
+containers:
+  hosts:
+    patching-skip-patched:
+      container_image: quay.io/deamen/fedora-molecule:latest
+    patching-skip-skipped:
+      container_image: quay.io/deamen/fedora-molecule:latest
+      patching_skip: true
+      patching_skip_reason: Change freeze for this host

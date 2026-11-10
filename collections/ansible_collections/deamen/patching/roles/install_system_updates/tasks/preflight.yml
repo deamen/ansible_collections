@@ -30,6 +30,13 @@
   loop_control:
     label: "{{ item.item.key }}"
 
+# Report-only mode does not install procps-ng, so pgrep may be missing; the lock wait is then skipped
+- name: Preflight - Check that pgrep is installed
+  ansible.builtin.stat:
+    path: /usr/bin/pgrep
+  register: patching_preflight_pgrep
+  when: patching_report_only | bool
+
 - name: Preflight - Wait for other package transactions to finish
   ansible.builtin.command:
     argv:
@@ -43,6 +50,7 @@
   until: patching_preflight_lock.rc == 1
   retries: "{{ (patching_preflight_lock_timeout | int / 10) | round(0, 'ceil') | int }}"
   delay: 10
+  when: not (patching_report_only | bool) or patching_preflight_pgrep.stat.exists | bool
 
 - name: Preflight - Assert no package transaction is running
   ansible.builtin.assert:
@@ -52,6 +60,7 @@
       Another package transaction (PID {{ patching_preflight_lock.stdout_lines | join(', ') }})
       was still running after {{ patching_preflight_lock_timeout }} seconds.
     quiet: true
+  when: not (patching_report_only | bool) or patching_preflight_pgrep.stat.exists | bool
 
 - name: Preflight - Check the RPM database for problems
   ansible.builtin.command:

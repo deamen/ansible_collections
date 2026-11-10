@@ -38,11 +38,20 @@ patching_reboot: auto
 
 patching_reboot_timeout: 600
 
+# List pending updates and write the summary without changing the host
+patching_report_only: false
+
 patching_security_only: false
 
 patching_service_check_delay: 10
 
 patching_service_check_retries: 3
+
+# Skip this host: record skip_reason in the summary and end the host without failing it
+patching_skip: false
+
+# Only read when patching_skip is true
+patching_skip_reason: not set
 
 patching_summary_dir: "{{ playbook_dir }}/patching_reports"
 

@@ -1,0 +1,47 @@
+---
+# Report-only mode lists pending updates and stops; nothing on the host is changed
+- name: Report - Set the current step
+  ansible.builtin.set_fact:
+    patching_kernel_before: "{{ ansible_facts.kernel }}"
+    patching_step: report
+
+# check-update (dnf) and check-upgrade (dnf5) return 100 when updates are pending and 0 when none are
+- name: Report - List pending updates
+  ansible.builtin.command:
+    argv: >-
+      {{ [patching_dnf_command, 'check-upgrade' if patching_dnf_command == 'dnf5' else 'check-update', '--quiet', '--refresh']
+      + (['--security'] if patching_security_only | bool else [])
+      + (patching_effective_excludes | map('regex_replace', '^', '--exclude=') | list) }}
+  changed_when: false
+  failed_when: patching_report_check.rc not in [0, 100]
+  register: patching_report_check
+
+# Package lines start with name.arch (a long name wraps the version onto an indented line), so
+# removing everything from the arch onwards leaves the package name
+- name: Report - Record the pending packages
+  ansible.builtin.set_fact:
+    patching_pending_packages: >-
+      {{ patching_report_check.stdout_lines
+      | select('match', '^\S+\.[^.\s]+(\s|$)')
+      | map('regex_replace', '\.[^.\s]+(\s.*)?$', '')
+      | unique
+      | sort }}
+
+- name: Report - Record whether the pending packages need a reboot
+  ansible.builtin.set_fact:
+    patching_reboot_required: "{{ patching_pending_packages | intersect(patching_reboot_packages) | length > 0 }}"
+  vars:
+    patching_reboot_packages:
+      - dbus
+      - glibc
+      - kernel
+      - kernel-core
+      - linux-firmware
+      - systemd
+
+- name: Report - Include summary tasks
+  ansible.builtin.include_tasks: summary.yml
+
+# The summary is complete, so stop before the pre_update phase changes anything
+- name: Report - End the run for this host
+  ansible.builtin.meta: end_host

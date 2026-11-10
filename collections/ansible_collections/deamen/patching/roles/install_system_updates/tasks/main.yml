@@ -18,6 +18,10 @@
     patching_update_failed: false
     patching_updates_installed: false
 
+- name: Include skip tasks
+  ansible.builtin.include_tasks: skip.yml
+  when: patching_skip | bool
+
 - name: Patch the host
   block:
     - name: Include platform tasks
@@ -26,6 +30,11 @@
     - name: Include preflight tasks
       ansible.builtin.include_tasks: preflight.yml
       when: patching_preflight | bool
+
+    # Report-only stops the host here, after preflight and excludes and before anything changes
+    - name: Include report tasks
+      ansible.builtin.include_tasks: report.yml
+      when: patching_report_only | bool
 
     - name: Include pre_update tasks
       ansible.builtin.include_tasks: pre_update.yml

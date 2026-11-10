@@ -1,0 +1,59 @@
+---
+- name: Verify report-only mode changed nothing
+  hosts: containers
+  gather_facts: false
+  tasks:
+    - name: List the installed packages
+      ansible.builtin.command:
+        argv:
+          - rpm
+          - -qa
+      changed_when: false
+      register: rpm_after
+
+    - name: Read the packages installed before the run
+      ansible.builtin.slurp:
+        src: /tmp/rpm_before.txt
+      register: rpm_before
+
+    # Both lists are sorted here, because sort(1) may collate differently from Jinja
+    - name: Assert no package was installed, updated or removed
+      ansible.builtin.assert:
+        that:
+          - ((rpm_before.content | b64decode).splitlines() | sort) == (rpm_after.stdout_lines | sort)
+        fail_msg: >-
+          Packages changed: added {{ (rpm_after.stdout_lines | difference((rpm_before.content | b64decode).splitlines())) }},
+          removed {{ ((rpm_before.content | b64decode).splitlines() | difference(rpm_after.stdout_lines)) }}
+
+    - name: Look for the pre_update hook marker
+      ansible.builtin.stat:
+        path: /tmp/patching_hook_ran
+      register: hook_marker
+
+    - name: Assert the pre_update hook did not run
+      ansible.builtin.assert:
+        that:
+          - not hook_marker.stat.exists
+
+- name: Verify the report-only summary
+  hosts: localhost
+  become: false
+  gather_facts: false
+  tasks:
+    - name: Assert each host wrote a report-only summary
+      ansible.builtin.assert:
+        that:
+          - summary.host == item
+          - summary.mode == 'report_only'
+          - summary.status in ['ok', 'no_updates']
+          - summary.packages is sequence
+          - summary.packages is not string
+          - (summary.status == 'ok') == (summary.packages | length > 0)
+          - summary.failed_step == 'none'
+          - summary.skip_reason == 'none'
+          - not summary.rebooted
+          - not summary.update_failed
+        fail_msg: "Unexpected summary for {{ item }}: {{ summary }}"
+      vars:
+        summary: "{{ lookup('ansible.builtin.file', (lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') or '/tmp/molecule-patching') ~ '/reports/' ~ item ~ '.json') | from_json }}"
+      loop: "{{ groups['containers'] }}"
