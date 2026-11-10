@@ -2,26 +2,20 @@
 # Patch one host, unless an earlier host of this run failed.
 # Included by every patching play in patch_hosts.yml.
 
+# The role records the host as skipped, with the reason, and ends it; the fleet report then lists it
+# as skipped rather than unreachable
 - name: Skip the host after an earlier failure
+  ansible.builtin.include_role:
+    name: deamen.patching.install_system_updates
   vars:
     # Hosts of this run whose summary says failed; hosts not reached yet have no summary
     patch_hosts_failed_hosts: >-
       {{ groups['patch_targets'] | map('extract', hostvars) | selectattr('patching_summary', 'defined')
       | map(attribute='patching_summary') | selectattr('status', 'equalto', 'failed')
       | map(attribute='host') | list }}
+    patching_skip: true
+    patching_skip_reason: "not patched because {{ patch_hosts_failed_hosts | join(', ') }} failed"
   when: patch_hosts_failed_hosts | length > 0
-  block:
-    # The fleet report then lists the host as skipped rather than unreachable
-    - name: Record why the host was not patched
-      ansible.builtin.set_fact:
-        patching_summary:
-          host: "{{ inventory_hostname }}"
-          mode: update
-          skip_reason: "not patched because {{ patch_hosts_failed_hosts | join(', ') }} failed"
-          status: skipped
-
-    - name: Stop before patching the host
-      ansible.builtin.meta: end_host
 
 - name: Install system updates
   block:
