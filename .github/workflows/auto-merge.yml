@@ -22,6 +22,8 @@ jobs:
     timeout-minutes: 10
     permissions:
       pull-requests: write
+      # Enabling auto-merge is a contents-level mutation in the GraphQL API
+      contents: write
     # Only same-repo, non-draft PRs opened by the repo owner
     if: >
       github.event.pull_request.user.login == github.repository_owner &&
