@@ -13,6 +13,8 @@
   changed_when: false
   failed_when: patching_needs_restarting.rc not in [0, 1]
   register: patching_needs_restarting
+  # needs-restarting can refresh repository metadata and hang on a stalled mirror; it normally takes seconds
+  timeout: 300
   when: patching_updates_installed | bool
 
 - name: Reboot - Record whether a reboot is required

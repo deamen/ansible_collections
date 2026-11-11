@@ -90,6 +90,7 @@ Profiles and hooks can read these facts:
 
 - A failure in platform, preflight, excludes or report-only stops the host before anything changed. No `pre_update`, `post_update` or `post_reboot` profiles or hooks run.
 - When the download or install fails, the role sets `patching_update_failed: true`, skips the reboot, runs the `post_update` profiles and hooks and then the `post_reboot` profiles and hooks so they can undo their `pre_update` changes, skips the kernel and health checks, and fails the host. Profiles and hooks must handle `patching_update_failed`, for example by starting a service again instead of leaving it stopped for a reboot that will not happen.
+- The download and the install each fail after `patching_update_timeout` seconds (default `3600`), and `needs-restarting -r` after 300 seconds, so a stalled mirror fails the host instead of holding up the batch. A timed-out download or install is handled like any other update failure. The timeout stops Ansible waiting, but a dnf process still running on the host keeps the dnf lock until it finishes, so check the host before patching it again.
 - When the kernel check fails, the `post_reboot` profiles and hooks still run before the host fails.
 - If the host does not come back within `patching_reboot_timeout`, nothing more can run on it. Check by hand what the `post_reboot` phase of each profile in `patching_profiles` and the `post_reboot` hooks would have done, for example restart services or remove version locks.
 

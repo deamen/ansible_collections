@@ -1,0 +1,3 @@
+minor_changes:
+  - install_system_updates - add ``patching_update_timeout`` (default ``3600`` seconds), which fails the download or install step when it hangs, for example on a stalled mirror.
+    The failure is handled like any other update failure. ``needs-restarting -r`` now fails after 300 seconds.
