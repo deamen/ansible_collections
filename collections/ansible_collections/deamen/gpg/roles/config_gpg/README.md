@@ -3,10 +3,14 @@ config_gpg
 
 Configure GPG for a user: create the `.gnupg` directory, deploy `gpg-agent.conf`, optionally import a public key, or import a private key and set ultimate owner trust for the specified fingerprint.
 
+When the secret key for `config_gpg_fingerprint` has an authentication key, the role can make `gpg-agent` the user's SSH agent (SSH-via-GPG). It adds `enable-ssh-support` to `gpg-agent.conf`, lists the authentication keygrips in `~/.gnupg/sshcontrol`, and deploys `~/.bashrc.d/gpg-ssh.sh`, which points `SSH_AUTH_SOCK` at `gpg-agent`. A key can authenticate when `gpg --list-secret-keys --with-colons <fingerprint>` shows `a` in the capabilities field (field 12) of a `sec` or `ssb` record that is not expired or revoked and whose secret part is present. When SSH support is off, the role leaves `enable-ssh-support` out and removes `~/.bashrc.d/gpg-ssh.sh`.
+
 Requirements
 ------------
 
 `gpg` must be installed on the target host.
+
+For SSH support, `~/.bashrc` must source the files in `~/.bashrc.d`, as Fedora's default `.bashrc` does.
 
 Role Variables
 --------------
@@ -22,6 +26,7 @@ Role Variables
 |config_gpg_import_secret_key|Whether to import the private key and configure owner trust|false|true|
 |config_gpg_max_cache_ttl|The maximum time, in seconds, that a cached passphrase remains available to `gpg-agent`|43200 (12 hours)|3600|
 |config_gpg_public_key|Armored public key content to import when `config_gpg_import_public_key` is `true`|Required when importing|"-----BEGIN PGP PUBLIC KEY BLOCK-----"|
+|config_gpg_ssh_support|`auto` makes `gpg-agent` the SSH agent when the secret key has an authentication key. `true` does the same but fails when there is no authentication key, which needs `config_gpg_fingerprint` and an import option. `false` never makes `gpg-agent` the SSH agent|auto|true|
 |config_gpg_secret_key_path|Path to the private key file to import. The file is removed after a successful import|"/home/{{ config_gpg_user }}/.gnupg/private_gpg.key"|"/tmp/private_gpg.key"|
 |config_gpg_user|The required OS user for whom GPG is being configured|Required|"deploy"|
 

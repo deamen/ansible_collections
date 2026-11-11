@@ -1,0 +1,35 @@
+---
+- name: Create SSH test user {{ _molecule_ssh_user.name }}
+  ansible.builtin.user:
+    create_home: true
+    name: '{{ _molecule_ssh_user.name }}'
+    state: present
+
+- name: Check if the authentication test key is already imported for {{ _molecule_ssh_user.name }}
+  ansible.builtin.command:
+    cmd: 'gpg --list-secret-keys --with-colons {{ _molecule_ssh_fingerprint }}'
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ _molecule_ssh_user.name }}'
+  changed_when: false
+  failed_when: false
+  register: _molecule_ssh_key_check
+
+- name: Copy the authentication test key for {{ _molecule_ssh_user.name }}
+  ansible.builtin.copy:
+    dest: '/tmp/{{ _molecule_ssh_user.name }}_gpg.key'
+    group: '{{ _molecule_ssh_user.name }}'
+    mode: '0600'
+    owner: '{{ _molecule_ssh_user.name }}'
+    src: '{{ playbook_dir }}/test-ed25519-auth-secret.asc'
+  when: _molecule_ssh_key_check.rc != 0
+
+- name: Configure GPG for {{ _molecule_ssh_user.name }}
+  ansible.builtin.include_role:
+    name: deamen.gpg.config_gpg
+  vars:
+    config_gpg_fingerprint: '{{ _molecule_ssh_fingerprint }}'
+    config_gpg_import_secret_key: true
+    config_gpg_secret_key_path: '/tmp/{{ _molecule_ssh_user.name }}_gpg.key'
+    config_gpg_ssh_support: '{{ _molecule_ssh_user.ssh_support }}'
+    config_gpg_user: '{{ _molecule_ssh_user.name }}'

@@ -7,4 +7,8 @@ config_gpg_max_cache_ttl: 43200
 config_gpg_secret_key_path: '/home/{{ config_gpg_user }}/.gnupg/private_gpg.key'
 config_gpg_fingerprint: ''
 config_gpg_public_key: ''
+# auto: use gpg-agent as the SSH agent when the secret key has an authentication key
+# true: always use it, and fail when the secret key has no authentication key
+# false: never use it
+config_gpg_ssh_support: auto
 config_gpg_user: ''

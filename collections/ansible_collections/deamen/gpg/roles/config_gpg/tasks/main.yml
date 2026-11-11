@@ -14,6 +14,9 @@
     - msg: config_gpg_public_key is required when config_gpg_import_public_key is true
       condition: "{{ (config_gpg_import_public_key | bool) and (config_gpg_public_key | length == 0) }}"
 
+    - msg: config_gpg_ssh_support must be auto, true or false
+      condition: "{{ (config_gpg_ssh_support | string | lower) not in ['auto', 'true', 'false', 'yes', 'no', 'on', 'off', '1', '0'] }}"
+
 - name: Ensure GPG directory exists
   ansible.builtin.file:
     group: '{{ config_gpg_user }}'
@@ -21,18 +24,6 @@
     owner: '{{ config_gpg_user }}'
     path: '/home/{{ config_gpg_user }}/.gnupg'
     state: directory
-  become: true
-  become_method: ansible.builtin.sudo
-  become_user: '{{ config_gpg_user }}'
-
-- name: Deploy gpg-agent.conf
-  ansible.builtin.template:
-    dest: '/home/{{ config_gpg_user }}/.gnupg/gpg-agent.conf'
-    group: '{{ config_gpg_user }}'
-    mode: '0600'
-    owner: '{{ config_gpg_user }}'
-    src: gpg-agent.conf.j2
-  notify: Reload gpg-agent
   become: true
   become_method: ansible.builtin.sudo
   become_user: '{{ config_gpg_user }}'
@@ -50,3 +41,34 @@
   when:
     - config_gpg_import_public_key | bool
     - _config_gpg_fingerprint | length > 0
+
+# Runs after the key imports, because gpg-agent.conf depends on whether the secret key can authenticate
+- name: Detect the GPG authentication key for SSH
+  ansible.builtin.include_tasks:
+    file: detect_ssh_auth_key.yml
+
+- name: Deploy gpg-agent.conf
+  ansible.builtin.template:
+    dest: '/home/{{ config_gpg_user }}/.gnupg/gpg-agent.conf'
+    group: '{{ config_gpg_user }}'
+    mode: '0600'
+    owner: '{{ config_gpg_user }}'
+    src: gpg-agent.conf.j2
+  notify: Reload gpg-agent
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+
+- name: Configure gpg-agent as the SSH agent
+  ansible.builtin.include_tasks:
+    file: configure_ssh_support.yml
+  when: _config_gpg_ssh_enabled | bool
+
+- name: Remove the gpg-agent SSH environment
+  ansible.builtin.file:
+    path: '{{ _config_gpg_bashrc_dir }}/gpg-ssh.sh'
+    state: absent
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+  when: not (_config_gpg_ssh_enabled | bool)

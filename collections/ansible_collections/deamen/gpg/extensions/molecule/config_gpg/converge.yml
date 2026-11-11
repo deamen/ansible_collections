@@ -10,6 +10,11 @@
         mode: '0440'
         validate: 'visudo -cf %s'
 
+    - name: Install ssh-add for the SSH agent checks
+      ansible.builtin.package:
+        name: openssh-clients
+        state: present
+
 - name: Configure GPG for test user
   hosts: gpg_source
   become: true
@@ -102,3 +107,51 @@
         config_gpg_fingerprint: '{{ _molecule_test_fingerprint }}'
         config_gpg_public_key: "{{ lookup('ansible.builtin.file', playbook_dir + '/test-ed25519-public.asc') }}"
         config_gpg_user: '{{ _molecule_test_user_public_key }}'
+
+- name: Configure GPG with SSH support
+  hosts: gpg_source
+  become: true
+  vars:
+    _molecule_ssh_fingerprint: '7A7CB73618AB7E3FE82F9B0BDB6BABEB9BE410FA'
+    _molecule_ssh_users:
+      # The key has an authentication subkey, so auto enables SSH support
+      - name: testuser_ssh
+        ssh_support: auto
+      - name: testuser_ssh_off
+        ssh_support: false
+
+  tasks:
+    - name: Configure GPG with SSH support for each test user
+      ansible.builtin.include_tasks:
+        file: tasks/import_auth_key.yml
+      loop: '{{ _molecule_ssh_users }}'
+      loop_control:
+        loop_var: _molecule_ssh_user
+
+- name: Require SSH support for a key that cannot authenticate
+  hosts: gpg_source
+  become: true
+
+  tasks:
+    - name: Configure GPG with required SSH support
+      block:
+        - name: Run config_gpg with config_gpg_ssh_support true
+          ansible.builtin.include_role:
+            name: deamen.gpg.config_gpg
+          vars:
+            config_gpg_fingerprint: '7C694A119306CD575A5E129EF3D29D4FB47F0B00'
+            config_gpg_import_secret_key: true
+            config_gpg_secret_key_path: /tmp/private_gpg.key
+            config_gpg_ssh_support: true
+            config_gpg_user: testuser
+
+        - name: Fail because config_gpg accepted a key without an authentication subkey
+          ansible.builtin.fail:
+            msg: config_gpg_ssh_support true should fail for a key without an authentication subkey
+
+      rescue:
+        - name: Assert config_gpg failed on the missing authentication key
+          ansible.builtin.assert:
+            that:
+              - "'no usable authentication key' in ansible_failed_result.msg"
+            fail_msg: '{{ ansible_failed_result.msg }}'

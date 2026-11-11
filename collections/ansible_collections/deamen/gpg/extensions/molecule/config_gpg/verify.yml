@@ -127,3 +127,120 @@
       ansible.builtin.assert:
         that:
           - not _public_key_temp_file.stat.exists
+
+- name: Verify SSH support is off when the key cannot authenticate or SSH support is disabled
+  hosts: gpg_source
+  gather_facts: false
+  vars:
+    _molecule_no_ssh_users:
+      # auto with a key that has no authentication subkey
+      - testuser
+      # auto without a key
+      - testuser_no_import
+      # false with a key that has an authentication subkey
+      - testuser_ssh_off
+
+  tasks:
+    - name: Read gpg-agent.conf for users without SSH support
+      ansible.builtin.slurp:
+        src: '/home/{{ item }}/.gnupg/gpg-agent.conf'
+      loop: '{{ _molecule_no_ssh_users }}'
+      register: _no_ssh_agent_conf
+
+    - name: Assert gpg-agent.conf does not enable SSH support
+      ansible.builtin.assert:
+        that:
+          - "'enable-ssh-support' not in item.content | b64decode"
+        fail_msg: '{{ item.item }} has enable-ssh-support'
+      loop: '{{ _no_ssh_agent_conf.results }}'
+      loop_control:
+        label: '{{ item.item }}'
+
+    - name: Gather gpg-ssh.sh info for users without SSH support
+      ansible.builtin.stat:
+        path: '/home/{{ item }}/.bashrc.d/gpg-ssh.sh'
+      loop: '{{ _molecule_no_ssh_users }}'
+      register: _no_ssh_script
+
+    - name: Assert gpg-ssh.sh is not deployed
+      ansible.builtin.assert:
+        that:
+          - not item.stat.exists
+        fail_msg: '{{ item.item }} has gpg-ssh.sh'
+      loop: '{{ _no_ssh_script.results }}'
+      loop_control:
+        label: '{{ item.item }}'
+
+- name: Verify SSH support for a key with an authentication subkey
+  hosts: gpg_source
+  gather_facts: false
+  vars:
+    # Keygrip of the authentication subkey in test-ed25519-auth-secret.asc
+    _molecule_ssh_keygrip: C831295692C45E6E8FD9C349884B73753A7B87C0
+    _molecule_ssh_user: testuser_ssh
+
+  tasks:
+    - name: Read gpg-agent.conf with SSH support
+      ansible.builtin.slurp:
+        src: '/home/{{ _molecule_ssh_user }}/.gnupg/gpg-agent.conf'
+      register: _ssh_agent_conf
+
+    - name: Assert gpg-agent.conf enables SSH support
+      ansible.builtin.assert:
+        that:
+          - "'enable-ssh-support' in _ssh_agent_conf.content | b64decode"
+
+    - name: Read sshcontrol
+      ansible.builtin.slurp:
+        src: '/home/{{ _molecule_ssh_user }}/.gnupg/sshcontrol'
+      register: _ssh_control
+
+    - name: Assert sshcontrol lists only the authentication keygrip
+      ansible.builtin.assert:
+        that:
+          - (_ssh_control.content | b64decode).split() == [_molecule_ssh_keygrip]
+
+    - name: Gather gpg-ssh.sh info
+      ansible.builtin.stat:
+        path: '/home/{{ _molecule_ssh_user }}/.bashrc.d/gpg-ssh.sh'
+      register: _ssh_script
+
+    - name: Assert gpg-ssh.sh is deployed with correct permissions
+      ansible.builtin.assert:
+        that:
+          - _ssh_script.stat.exists
+          - _ssh_script.stat.mode == '0644'
+          - _ssh_script.stat.pw_name == _molecule_ssh_user
+
+    - name: Export the authentication key in SSH format
+      ansible.builtin.command:
+        cmd: gpg --export-ssh-key 7A7CB73618AB7E3FE82F9B0BDB6BABEB9BE410FA
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_ssh_user }}'
+      changed_when: false
+      register: _ssh_public_key
+
+    - name: List the SSH agent keys through gpg-ssh.sh
+      ansible.builtin.command:
+        cmd: bash -c '. ~/.bashrc.d/gpg-ssh.sh && ssh-add -L'
+        chdir: '/home/{{ _molecule_ssh_user }}'
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_ssh_user }}'
+      changed_when: false
+      register: _ssh_agent_keys
+
+    - name: Assert gpg-agent offers the authentication key to SSH
+      ansible.builtin.assert:
+        that:
+          - _ssh_public_key.stdout.split()[1] in _ssh_agent_keys.stdout
+        fail_msg: 'ssh-add -L returned: {{ _ssh_agent_keys.stdout }}'
+
+    - name: Stop gpg-agent for the SSH test user
+      ansible.builtin.command:
+        cmd: gpgconf --kill gpg-agent
+      become: true
+      become_method: ansible.builtin.sudo
+      become_user: '{{ _molecule_ssh_user }}'
+      changed_when: false

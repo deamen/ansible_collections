@@ -1,0 +1,47 @@
+---
+# Find the secret key's usable authentication keys, which gpg-agent can offer to SSH
+- name: List the GPG secret key capabilities and keygrips
+  ansible.builtin.command:
+    cmd: 'gpg --list-secret-keys --with-colons --with-keygrip {{ _config_gpg_fingerprint }}'
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+  changed_when: false
+  failed_when: false
+  register: _config_gpg_secret_key_listing
+  when:
+    - _config_gpg_fingerprint | length > 0
+    - _config_gpg_ssh_mode != 'off'
+
+# In --with-colons output, field 12 of a sec or ssb record lists its capabilities ("a" is authenticate),
+# field 2 its validity ("e" expired, "r" revoked) and field 15 "#" when only a secret key stub is present.
+# The grp record after it holds its keygrip.
+- name: Find the GPG authentication keygrips
+  ansible.builtin.set_fact:
+    _config_gpg_ssh_keygrips: >-
+      {%- set ns = namespace(auth=false, keygrips=[]) -%}
+      {#- The listing is skipped when SSH support is off or there is no fingerprint, which leaves no keygrips -#}
+      {%- for line in _config_gpg_secret_key_listing.stdout_lines | default([]) -%}
+      {%- set fields = line.split(':') -%}
+      {%- if fields[0] in ['sec', 'ssb'] -%}
+      {%- set ns.auth = fields | length > 14 and 'a' in fields[11] and fields[1] not in ['e', 'r'] and fields[14] != '#' -%}
+      {%- elif fields[0] == 'grp' and ns.auth -%}
+      {%- set ns.keygrips = ns.keygrips + [fields[9]] -%}
+      {%- set ns.auth = false -%}
+      {%- endif -%}
+      {%- endfor -%}
+      {{ ns.keygrips | join(' ') }}
+
+- name: Fail when SSH support is required but the GPG secret key cannot authenticate
+  ansible.builtin.fail:
+    msg: >-
+      config_gpg_ssh_support is true, but no usable authentication key was found for
+      {{ _config_gpg_fingerprint if _config_gpg_fingerprint | length > 0 else 'any secret key (set config_gpg_fingerprint and an import option)' }}.
+      Add an authentication subkey, or set config_gpg_ssh_support to auto or false.
+  when:
+    - _config_gpg_ssh_mode == 'on'
+    - _config_gpg_ssh_keygrips | length == 0
+
+- name: Decide whether gpg-agent is the SSH agent
+  ansible.builtin.set_fact:
+    _config_gpg_ssh_enabled: "{{ _config_gpg_ssh_mode != 'off' and _config_gpg_ssh_keygrips | length > 0 }}"
