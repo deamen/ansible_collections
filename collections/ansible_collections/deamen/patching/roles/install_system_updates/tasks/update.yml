@@ -13,7 +13,13 @@
         exclude: "{{ patching_effective_excludes }}"
         security: "{{ patching_security_only | bool }}"
         update_cache: true
+      # A stalled mirror can hang dnf indefinitely; the timeout fails the step so the rescue below runs the cleanup
+      timeout: "{{ patching_update_timeout }}"
       when: patching_download_first | bool
+      # Molecule's idempotence run skips this: the test containers use live repositories, and packages published
+      # between converge and idempotence would otherwise show up as changes
+      tags:
+        - molecule-idempotence-notest
 
     - name: Update - Set the current step
       ansible.builtin.set_fact:
@@ -27,6 +33,11 @@
         security: "{{ patching_security_only | bool }}"
         update_cache: true
       register: patching_update_result
+      # Same as the download: fail a hung install into the rescue rather than block the batch
+      timeout: "{{ patching_update_timeout }}"
+      # Skipped in Molecule's idempotence run for the same reason as the download
+      tags:
+        - molecule-idempotence-notest
 
     - name: Update - Record whether updates were installed
       ansible.builtin.set_fact:

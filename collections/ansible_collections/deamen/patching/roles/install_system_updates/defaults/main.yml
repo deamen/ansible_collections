@@ -60,4 +60,7 @@ patching_summary_dir: "{{ playbook_dir }}/patching_reports"
 
 patching_summary_write: false
 
+# Seconds before the download or install step is stopped as hung; high enough for a large update on a slow host
+patching_update_timeout: 3600
+
 patching_verify_kernel: true

@@ -143,6 +143,13 @@ argument_specs:
         description: Write the run summary as JSON on the controller.
         type: bool
         default: false
+      patching_update_timeout:
+        description:
+          - Seconds the download or the install may run before it fails as hung, for example on a stalled mirror.
+          - A timeout is handled like any other update failure, as described under Failure handling in the README.
+          - C(needs-restarting -r) has a fixed timeout of 300 seconds.
+        type: int
+        default: 3600
       patching_verify_kernel:
         description: After a reboot, fail unless the running kernel is both the default boot kernel and the newest installed kernel.
         type: bool

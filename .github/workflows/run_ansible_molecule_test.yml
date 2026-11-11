@@ -6,6 +6,9 @@ jobs:
   run_molecule_test:
     name: Run Molecule Test
     runs-on: ubuntu-latest
+    # The slowest collection (deamen/patching) takes up to about 13 minutes; without this a hung scenario
+    # runs to GitHub's 6-hour default
+    timeout-minutes: 30
     strategy:
       matrix:
         python-version:
