@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+# Sourced by ~/.bashrc; uses gpg-agent as the SSH agent, so SSH authenticates with the GPG authentication key
+export GPG_TTY="$(tty)"
+unset SSH_AGENT_PID
+export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+gpgconf --launch gpg-agent
+# Point pinentry at the current terminal, since gpg-agent may have been started from another one
+gpg-connect-agent updatestartuptty /bye >/dev/null

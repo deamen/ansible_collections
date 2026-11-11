@@ -1,4 +1,8 @@
 ---
 # vars file for config_gpg
+_config_gpg_bashrc_dir: '/home/{{ config_gpg_user }}/.bashrc.d'
 _config_gpg_fingerprint: >-
   {{ config_gpg_fingerprint if (config_gpg_import_secret_key | bool or config_gpg_import_public_key | bool) else '' }}
+# config_gpg_ssh_support normalised to auto, on or off
+_config_gpg_ssh_mode: >-
+  {{ 'auto' if (config_gpg_ssh_support | string | lower) == 'auto' else ('on' if config_gpg_ssh_support | bool else 'off') }}

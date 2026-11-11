@@ -1,0 +1,37 @@
+---
+# gpg-agent offers a key to SSH only when its keygrip is listed in sshcontrol
+- name: Add the GPG authentication keygrips to sshcontrol
+  ansible.builtin.lineinfile:
+    create: true
+    group: '{{ config_gpg_user }}'
+    line: '{{ item }}'
+    mode: '0600'
+    owner: '{{ config_gpg_user }}'
+    path: '/home/{{ config_gpg_user }}/.gnupg/sshcontrol'
+    state: present
+  loop: '{{ _config_gpg_ssh_keygrips.split() }}'
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+
+- name: Create the .bashrc.d directory
+  ansible.builtin.file:
+    group: '{{ config_gpg_user }}'
+    mode: '0755'
+    owner: '{{ config_gpg_user }}'
+    path: '{{ _config_gpg_bashrc_dir }}'
+    state: directory
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'
+
+- name: Deploy the gpg-agent SSH environment
+  ansible.builtin.template:
+    dest: '{{ _config_gpg_bashrc_dir }}/gpg-ssh.sh'
+    group: '{{ config_gpg_user }}'
+    mode: '0644'
+    owner: '{{ config_gpg_user }}'
+    src: gpg-ssh.sh.j2
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: '{{ config_gpg_user }}'

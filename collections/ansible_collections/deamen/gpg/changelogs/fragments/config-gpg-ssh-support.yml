@@ -1,0 +1,6 @@
+minor_changes:
+  - config_gpg - add ``config_gpg_ssh_support`` (``auto``, ``true`` or ``false``, default ``auto``) to use ``gpg-agent`` as the SSH agent (SSH-via-GPG).
+    When the secret key has an authentication key, the role adds ``enable-ssh-support`` to ``gpg-agent.conf``, lists the authentication keygrips in ``~/.gnupg/sshcontrol``
+    and deploys ``~/.bashrc.d/gpg-ssh.sh``, which points ``SSH_AUTH_SOCK`` at ``gpg-agent``.
+  - config_gpg - ``gpg-agent.conf`` now has ``enable-ssh-support`` only when SSH support is on.
+    Previously it was always set, so users without an authentication key, or with ``config_gpg_ssh_support`` set to ``false``, no longer get it.
