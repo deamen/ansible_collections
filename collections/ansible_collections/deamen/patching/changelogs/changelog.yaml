@@ -22,3 +22,13 @@ releases:
           name: patching_profile_example
           namespace: null
     release_date: '2026-11-10'
+  1.1.0:
+    changes:
+      minor_changes:
+        - install_system_updates - add ``patching_update_timeout`` (default ``3600``
+          seconds), which fails the download or install step when it hangs, for example
+          on a stalled mirror. The failure is handled like any other update failure.
+          ``needs-restarting -r`` now fails after 300 seconds.
+    fragments:
+      - update-timeouts.yml
+    release_date: '2026-11-11'
