@@ -86,3 +86,19 @@ releases:
     fragments:
       - MMZ-22-install-linear-cli-bool-when.yml
     release_date: '2026-11-09'
+  3.0.0:
+    changes:
+      breaking_changes:
+        - install_linear_cli - remove the ``linear_cli_claude_code_bin`` and ``linear_cli_skills_installer``
+          options, and remove the ``install-linear-cli-skill`` script that earlier
+          releases deployed, which needed Node.js and ran ``npx skills add``. Copy
+          or link ``~/.claude/skills/linear-cli`` to install the skill for other agents.
+      bugfixes:
+        - install_linear_cli - copy the linear-cli skill from the source archive of
+          ``linear_cli_version`` into ``~/.claude/skills/linear-cli`` instead of installing
+          the ``linear-cli@linear-cli`` Claude Code plugin, which linear-cli removed
+          upstream, so the role failed when adding its marketplace. Claude Code no
+          longer has to be installed first.
+    fragments:
+      - install-linear-cli-copy-skill.yml
+    release_date: '2026-11-18'
