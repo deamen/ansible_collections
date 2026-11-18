@@ -54,59 +54,83 @@
         state: absent
       when: __linear_cli_tmp.path is defined
 
-- name: Deploy the linear-cli skill installer for other agents
-  # Run on demand: other agents need Node.js, which this role does not install
-  ansible.builtin.template:
-    src: install-linear-cli-skill.sh.j2
-    dest: "{{ linear_cli_install_dir }}/{{ __linear_cli_skills_installer_name }}"
-    mode: "0755"
+
+- name: Remove the npx-based linear-cli skill installer
+  # Deployed by earlier releases; the skill is now copied in by this role
+  ansible.builtin.file:
+    path: "{{ linear_cli_install_dir }}/{{ __linear_cli_skills_installer_name }}"
+    state: absent
   become: true
-  when: linear_cli_skills_installer | bool
 
 - name: Install the linear-cli skill into Claude Code
-  # Runs as the connecting user, whose Claude Code configuration holds the plugin
+  # Runs as the connecting user, whose ~/.claude/skills holds personal skills
   when: linear_cli_claude_code_skill | bool
   block:
-    - name: Get the Claude Code binary status
-      ansible.builtin.stat:
-        path: "{{ linear_cli_claude_code_bin }}"
-      register: __linear_cli_claude_code
+    - name: Read the installed linear-cli skill version
+      ansible.builtin.slurp:
+        src: "{{ __linear_cli_skill_version_file }}"
+      register: __linear_cli_skill_installed
+      failed_when: false
 
-    - name: Install the linear-cli Claude Code plugin
-      # Claude Code must be installed first; without it there is nothing to install the skill into
-      when: __linear_cli_claude_code.stat.exists
+    - name: Install linear-cli skill {{ linear_cli_version }}
+      # A missing version file reads as an empty string, which never matches a release tag
+      when: >-
+        (__linear_cli_skill_installed.content | default('') | b64decode | trim)
+        != linear_cli_version
       block:
-        - name: Install packages needed to add the marketplace
-          # claude plugin marketplace add clones the marketplace with git
+        - name: Install packages needed to unpack the source archive
           ansible.builtin.package:
-            name: "{{ __linear_cli_claude_code_skill_packages }}"
+            name: "{{ __linear_cli_skill_packages }}"
             state: present
           become: true
 
-        - name: List the Claude Code marketplaces
-          ansible.builtin.command:
-            argv: ["{{ linear_cli_claude_code_bin }}", plugin, marketplace, list, --json]
-          register: __linear_cli_marketplaces
-          changed_when: false
+        - name: Create a temporary download directory for the skill
+          ansible.builtin.tempfile:
+            state: directory
+            suffix: linear-cli-skill
+          register: __linear_cli_skill_tmp
 
-        - name: Add the linear-cli marketplace
-          ansible.builtin.command:
-            argv: ["{{ linear_cli_claude_code_bin }}", plugin, marketplace, add, "{{ __linear_cli_skill_source }}"]
-          when: >-
-            __linear_cli_claude_code_marketplace not in
-            (__linear_cli_marketplaces.stdout | from_json | map(attribute='name'))
-          changed_when: true
+        - name: Unpack the linear-cli source archive of the release
+          # The skill is taken from the same tag as the binary, so it describes the installed version
+          ansible.builtin.unarchive:
+            src: "{{ __linear_cli_skill_archive_url }}"
+            dest: "{{ __linear_cli_skill_tmp.path }}"
+            remote_src: true
 
-        - name: List the installed Claude Code plugins
-          ansible.builtin.command:
-            argv: ["{{ linear_cli_claude_code_bin }}", plugin, list, --json]
-          register: __linear_cli_plugins
-          changed_when: false
+        - name: Remove the previous linear-cli skill
+          # Files dropped by the new release must not linger
+          ansible.builtin.file:
+            path: "{{ __linear_cli_skill_dir }}"
+            state: absent
 
-        - name: Install the linear-cli plugin
-          ansible.builtin.command:
-            argv: ["{{ linear_cli_claude_code_bin }}", plugin, install, "{{ __linear_cli_claude_code_plugin }}"]
-          when: >-
-            __linear_cli_claude_code_plugin not in
-            (__linear_cli_plugins.stdout | from_json | map(attribute='id'))
-          changed_when: true
+        - name: Create the linear-cli skill directory
+          ansible.builtin.file:
+            path: "{{ __linear_cli_skill_dir }}"
+            state: directory
+            mode: "0755"
+
+        - name: Copy the linear-cli skill
+          ansible.builtin.copy:
+            src: "{{ __linear_cli_skill_tmp.path }}/{{ __linear_cli_skill_archive_path }}/"
+            dest: "{{ __linear_cli_skill_dir }}"
+            mode: u=rwX,g=rX,o=rX
+            remote_src: true
+
+        - name: Remove the skill template
+          # Older releases ship the generator's input next to SKILL.md; agents only need SKILL.md
+          ansible.builtin.file:
+            path: "{{ __linear_cli_skill_dir }}/SKILL.template.md"
+            state: absent
+
+        - name: Record the installed linear-cli skill version
+          ansible.builtin.copy:
+            content: "{{ linear_cli_version }}\n"
+            dest: "{{ __linear_cli_skill_version_file }}"
+            mode: "0644"
+
+      always:
+        - name: Remove the temporary skill download directory
+          ansible.builtin.file:
+            path: "{{ __linear_cli_skill_tmp.path }}"
+            state: absent
+          when: __linear_cli_skill_tmp.path is defined
