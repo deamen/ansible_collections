@@ -2,8 +2,11 @@
 
 **Topics**
 
-- <a href="#v2-3-1">v2\.3\.1</a>
+- <a href="#v3-0-0">v3\.0\.0</a>
+    - <a href="#breaking-changes--porting-guide">Breaking Changes / Porting Guide</a>
     - <a href="#bugfixes">Bugfixes</a>
+- <a href="#v2-3-1">v2\.3\.1</a>
+    - <a href="#bugfixes-1">Bugfixes</a>
 - <a href="#v2-3-0">v2\.3\.0</a>
     - <a href="#minor-changes">Minor Changes</a>
 - <a href="#v2-2-0">v2\.2\.0</a>
@@ -13,7 +16,7 @@
     - <a href="#new-roles">New Roles</a>
 - <a href="#v2-0-0">v2\.0\.0</a>
     - <a href="#minor-changes-3">Minor Changes</a>
-    - <a href="#breaking-changes--porting-guide">Breaking Changes / Porting Guide</a>
+    - <a href="#breaking-changes--porting-guide-1">Breaking Changes / Porting Guide</a>
     - <a href="#new-roles-1">New Roles</a>
 - <a href="#v1-0-1">v1\.0\.1</a>
     - <a href="#new-roles-2">New Roles</a>
@@ -22,10 +25,23 @@
     - <a href="#minor-changes-4">Minor Changes</a>
     - <a href="#new-roles-3">New Roles</a>
 
+<a id="v3-0-0"></a>
+## v3\.0\.0
+
+<a id="breaking-changes--porting-guide"></a>
+### Breaking Changes / Porting Guide
+
+* install\_linear\_cli \- remove the <code>linear\_cli\_claude\_code\_bin</code> and <code>linear\_cli\_skills\_installer</code> options\, and remove the <code>install\-linear\-cli\-skill</code> script that earlier releases deployed\, which needed Node\.js and ran <code>npx skills add</code>\. Copy or link <code>\~/\.claude/skills/linear\-cli</code> to install the skill for other agents\.
+
+<a id="bugfixes"></a>
+### Bugfixes
+
+* install\_linear\_cli \- copy the linear\-cli skill from the source archive of <code>linear\_cli\_version</code> into <code>\~/\.claude/skills/linear\-cli</code> instead of installing the <code>linear\-cli\@linear\-cli</code> Claude Code plugin\, which linear\-cli removed upstream\, so the role failed when adding its marketplace\. Claude Code no longer has to be installed first\.
+
 <a id="v2-3-1"></a>
 ## v2\.3\.1
 
-<a id="bugfixes"></a>
+<a id="bugfixes-1"></a>
 ### Bugfixes
 
 * install\_linear\_cli \- cast <code>linear\_cli\_skills\_installer</code> and <code>linear\_cli\_claude\_code\_skill</code> to a boolean with <code>\| bool</code>\, so <code>\-e linear\_cli\_claude\_code\_skill\=false</code> skips the Claude Code install instead of failing on a string conditional\.
@@ -69,7 +85,7 @@
 * Add <code>buildah\_alpine\_llamacpp\.yml</code> playbook to build statically linked <code>llama\-cli</code> and <code>llama\-server</code> with OpenBLAS on Alpine Linux\.
 * Add <code>install\_linear\_cli\.yml</code> playbook to install linear\-cli with the new <code>install\_linear\_cli</code> role\.
 
-<a id="breaking-changes--porting-guide"></a>
+<a id="breaking-changes--porting-guide-1"></a>
 ### Breaking Changes / Porting Guide
 
 * Rename <code>buildah\_fedora\-llamacpp\.yml</code> playbook to <code>buildah\_fedora\_llamacpp\.yml</code> so it can be run by its FQCN <code>deamen\.ai\.buildah\_fedora\_llamacpp</code>\; it now writes the llama\.cpp executables to <code>build\_outputs/llama\.cpp/fedora</code> under the current directory instead of <code>\.\./out/llama</code> relative to the playbook \(override with <code>llamacpp\_output\_dir</code>\)\.
