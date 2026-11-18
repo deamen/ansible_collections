@@ -1,3 +1,0 @@
----
-bugfixes:
-  - install_himalaya - succeed when the upstream ``install.sh`` exits non-zero but ``himalaya --version`` runs, since upstream v2.2.1's installer fails on its final message after installing the binary.

@@ -2,6 +2,8 @@
 
 **Topics**
 
+- <a href="#v1-3-1">v1\.3\.1</a>
+    - <a href="#bugfixes">Bugfixes</a>
 - <a href="#v1-3-0">v1\.3\.0</a>
     - <a href="#minor-changes">Minor Changes</a>
     - <a href="#new-roles">New Roles</a>
@@ -16,16 +18,24 @@
     - <a href="#minor-changes-4">Minor Changes</a>
 - <a href="#v1-0-3">v1\.0\.3</a>
     - <a href="#minor-changes-5">Minor Changes</a>
-    - <a href="#bugfixes">Bugfixes</a>
+    - <a href="#bugfixes-1">Bugfixes</a>
 - <a href="#v1-0-2">v1\.0\.2</a>
     - <a href="#new-roles-2">New Roles</a>
 - <a href="#v1-0-1">v1\.0\.1</a>
-    - <a href="#bugfixes-1">Bugfixes</a>
+    - <a href="#bugfixes-2">Bugfixes</a>
 - <a href="#v1-0-0">v1\.0\.0</a>
     - <a href="#release-summary">Release Summary</a>
     - <a href="#minor-changes-6">Minor Changes</a>
     - <a href="#new-modules">New Modules</a>
     - <a href="#new-roles-3">New Roles</a>
+
+<a id="v1-3-1"></a>
+## v1\.3\.1
+
+<a id="bugfixes"></a>
+### Bugfixes
+
+* install\_himalaya \- succeed when the upstream <code>install\.sh</code> exits non\-zero but <code>himalaya \-\-version</code> runs\, since upstream v2\.2\.1\'s installer fails on its final message after installing the binary\.
 
 <a id="v1-3-0"></a>
 ## v1\.3\.0
@@ -89,7 +99,7 @@
 * Move molecule scenarios under <code>extensions/</code>\.
 * install\_dev\_packages \- add <code>tmux</code> to <code>essential\_packages</code>\.
 
-<a id="bugfixes"></a>
+<a id="bugfixes-1"></a>
 ### Bugfixes
 
 * Fix playbook relative path in molecule scenarios\.
@@ -108,7 +118,7 @@
 <a id="v1-0-1"></a>
 ## v1\.0\.1
 
-<a id="bugfixes-1"></a>
+<a id="bugfixes-2"></a>
 ### Bugfixes
 
 * config\_dev\_runtime\_env \- fix git prompt formatting\.
