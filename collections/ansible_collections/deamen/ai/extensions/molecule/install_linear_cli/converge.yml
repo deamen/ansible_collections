@@ -9,6 +9,9 @@
         content: "#!/bin/sh\n"
         dest: /usr/local/bin/install-linear-cli-skill
         mode: "0755"
+      # Planting it again would make the idempotence run report a change
+      tags:
+        - molecule-idempotence-notest
 
     - name: Install linear-cli
       # Claude Code is not installed: the skill is copied without it
