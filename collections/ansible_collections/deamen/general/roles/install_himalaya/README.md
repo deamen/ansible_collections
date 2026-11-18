@@ -3,7 +3,7 @@ install_himalaya
 
 Install the [himalaya](https://github.com/pimalaya/himalaya) email CLI for the connecting user and deploy a minimal configuration.
 
-The role deploys `~/.local/bin/install_himalaya.sh`, which runs the upstream `install.sh` with `PREFIX=~/.local`, and runs it unless `~/.local/bin/himalaya` already exists. It then deploys `~/.config/himalaya/config.toml` with one IMAP account. Every task runs as the connecting user without privilege escalation.
+The role deploys `~/.local/bin/install_himalaya.sh`, which runs the upstream `install.sh` with `PREFIX=~/.local`, and runs it unless `~/.local/bin/himalaya` already exists. The script succeeds when `~/.local/bin/himalaya --version` runs afterwards, even if `install.sh` exits non-zero, so a broken message at the end of the upstream installer does not fail the role. It then deploys `~/.config/himalaya/config.toml` with one IMAP account. Every task runs as the connecting user without privilege escalation.
 
 Requirements
 ------------
