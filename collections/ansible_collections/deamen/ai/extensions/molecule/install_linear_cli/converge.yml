@@ -4,12 +4,13 @@
   gather_facts: true
 
   tasks:
-    - name: Install Claude Code, so the role installs the linear-cli skill into it
-      ansible.builtin.import_role:
-        name: deamen.ai.install_claude_code
-      vars:
-        claude_code_user: root
+    - name: Deploy a skill installer left by an earlier release, so the role must remove it
+      ansible.builtin.copy:
+        content: "#!/bin/sh\n"
+        dest: /usr/local/bin/install-linear-cli-skill
+        mode: "0755"
 
     - name: Install linear-cli
+      # Claude Code is not installed: the skill is copied without it
       ansible.builtin.import_role:
         name: deamen.ai.install_linear_cli

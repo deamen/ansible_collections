@@ -11,11 +11,15 @@ __linear_cli_installer_url: "https://github.com/schpet/linear-cli/releases/downl
 __linear_cli_dependency_packages:
   - tar
   - xz
-# GitHub repository that publishes the skill, as a Claude Code marketplace and for skills.sh
-__linear_cli_skill_source: schpet/linear-cli
-__linear_cli_claude_code_marketplace: linear-cli
-__linear_cli_claude_code_plugin: linear-cli@linear-cli
-# claude plugin marketplace add clones the marketplace repository with git
-__linear_cli_claude_code_skill_packages:
-  - git
+# The skill is copied from the source archive of the release tag
+__linear_cli_skill_archive_url: "https://github.com/schpet/linear-cli/archive/refs/tags/{{ linear_cli_version }}.tar.gz"
+# GitHub names the archive's top directory after the tag without its leading "v"
+__linear_cli_skill_archive_path: "linear-cli-{{ linear_cli_version | regex_replace('^v', '') }}/skills/linear-cli"
+__linear_cli_skill_dir: "{{ ansible_facts['user_dir'] }}/.claude/skills/linear-cli"
+# unarchive needs tar and gzip for the .tar.gz source archive
+__linear_cli_skill_packages:
+  - gzip
+  - tar
+__linear_cli_skill_version_file: "{{ __linear_cli_skill_dir }}/.linear-cli-version"
+# Deployed by earlier releases and removed by this one
 __linear_cli_skills_installer_name: install-linear-cli-skill
